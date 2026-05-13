@@ -1,0 +1,78 @@
+# -*- coding: utf-8 -*-
+import os
+from PIL import Image
+from pathlib import Path
+
+# ================= 1. 路径与配置 =================
+# 原始小图存放的根目录
+BASE_DIR = Path(r"output/validation_all_trips")
+# 结果保存路径
+SAVE_PATH = Path(r"output/Full_Line_Trip0_Comparison.png")
+
+# 26个区间列表（按顺序排列，确保大图逻辑正确）
+STATION_PAIRS = [
+    "布政-张家潭", "张家潭-同德路", "同德路-石碶", "石碶-雅渡", "雅渡-庙堰",
+    "庙堰-钟公庙", "钟公庙-鄞州区政府", "鄞州区政府-钱湖南路", "钱湖南路-南高教园区",
+    "南高教园区-下应路", "下应路-大洋江", "大洋江-泗港", "泗港-曹隘", "曹隘-柳隘",
+    "柳隘-海晏北路", "海晏北路-民安东路", "民安东路-会展中心", "会展中心-院士路",
+    "院士路-盎孟港", "盎孟港-三官堂", "三官堂-兴庄路", "兴庄路-兴海南路",
+    "兴海南路-梅堰", "梅堰-永茂路", "永茂路-镇海大道", "镇海大道-骆驼桥"
+]
+
+COLS = 4  # 每行放3张
+TRIP_NAME = "trip_0_validation.png" # 目标文件名
+
+def combine_images():
+    # 1. 收集所有存在的图片路径
+    valid_images = []
+    for sp in STATION_PAIRS:
+        img_path = BASE_DIR / sp / TRIP_NAME
+        if img_path.exists():
+            valid_images.append(img_path)
+        else:
+            print(f"⚠️ 找不到图片: {img_path}")
+
+    if not valid_images:
+        print("❌ 错误：未找到任何可拼接的图片！")
+        return
+
+    # 2. 获取单张图片尺寸
+    sample_img = Image.open(valid_images[0])
+    img_w, img_h = sample_img.size
+    print(f"📊 单图尺寸: {img_w}x{img_h}，共 {len(valid_images)} 张图")
+
+    # 3. 计算大图尺寸
+    num_imgs = len(valid_images)
+    rows = (num_imgs + COLS - 1) // COLS
+    full_w = img_w * COLS
+    full_h = img_h * rows
+
+    # 创建白色画布
+    full_canvas = Image.new('RGB', (full_w, full_h), (255, 255, 255))
+
+    # 4. 依次拼接图片
+    for index, img_path in enumerate(valid_images):
+        row = index // COLS
+        col = index % COLS
+        
+        with Image.open(img_path) as im:
+            # 如果尺寸不一致，自动缩放（保险起见）
+            if im.size != (img_w, img_h):
+                im = im.resize((img_w, img_h), Image.Resampling.LANCZOS)
+            
+            # 计算粘贴坐标
+            x = col * img_w
+            y = row * img_h
+            full_canvas.paste(im, (x, y))
+            print(f"   拼入 [{index+1}/{num_imgs}]: {img_path.parent.name}")
+
+    # 5. 保存结果
+    # 如果图片太大，可以考虑压缩质量
+    full_canvas.save(SAVE_PATH, quality=85)
+    print("\n" + "="*50)
+    print(f"✅ 拼接完成！全线大图已保存至:")
+    print(f"👉 {SAVE_PATH.absolute()}")
+    print("="*50)
+
+if __name__ == "__main__":
+    combine_images()

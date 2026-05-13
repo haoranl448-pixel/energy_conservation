@@ -1,0 +1,141 @@
+================================================================================
+                    scripts/ 目录代码文件说明
+================================================================================
+
+一、核心流水线 (ATO Class Pipeline)
+--------------------------------------------------------------------------------
+  整条流水线按执行顺序：提取模板 → 生成曲线 → 评估能耗 → DP排图
+
+  train_ATO_v5.py        - [旧] 提取 class3 三相位模板（单级）
+  train_ATO_v6.py        - [旧] 同上，批量区间
+  train_ATO_v7.py        - [旧] 同上，适配 D:\energy_conservation 路径
+  train_ATO_v8.py        - [当前] 提取所有可用等级的相位模板，存为 multi_class_phase_artifacts.pkl
+  train_ATO_v9.py        - [验证] 仅提取 class2 模板（+ class3 参考），用于 class2→class3 外推验证
+
+  simulate_ATO_v6.py     - [旧] 从 class3 模板批量生成 class1-5 速度曲线
+  simulate_ATO_v7.py     - [旧] 同上，适配新路径
+  simulate_ATO_v8.py     - [当前] 多级父基因选择 + lam/theta 二维搜索，生成 5 级曲线
+  simulate_ATO_v9.py     - [验证] class2 模板→生成 class3，计算 R² 验证外推能力
+
+  ato_generated_results_energy.py  - 对生成的曲线，用 物理模型+AI残差 算能耗，输出能耗菜单 CSV
+  ato_class_globall.py             - [v1] DP 排图，固定停站 30s，在 slack 窗口内搜最省电等级组合
+  ato_class_globall_v2.py          - [v2] DP 排图，灵活停站（按站配 min/nominal），烧停站换运行时间
+
+
+二、时刻表与排图 (Timetable & Scheduling)
+--------------------------------------------------------------------------------
+  schedule_to_timetable.py         - 将排图结果转为 OpenTrack 可导入的时刻表 CSV
+  make_timetable.py                - 制作时刻表（旧版）
+  onvert_to_opentrack_format.py    - 转换为 OpenTrack 格式
+  run_global_class_schedule.py     - 全线 DP 排图
+  run_global_class_schedual_v2.py  - 全线 DP 排图 v2
+  run_global_final.py              - 全线最终排图
+  run_global_schedule_mlp.py       - 用 MLP 能耗模型的排图
+  run_global_schedule_residual.py  - 用残差模型能耗的排图
+  optimize_line5.py                - 5号线全线优化
+  optimize_meiyan_yongmaolu.py     - 梅堰-永茂路专项优化
+  optimize_sixiang_caoyi.py        - 泗港-曹隘专项优化
+  optim.py                         - MLP 优化排图（Trip6 版）
+  run_optimize_mlp.py              - MLP 能耗模型排图
+  run_optimize_residual.py         - 残差模型排图 [旧]
+  run_optimize_residual_new.py     - 残差模型排图 [新]
+  run_optimize_transformer.py      - Transformer 能耗模型排图
+  run_optimize_special_residual.py - 专项残差排图 [旧]
+  run_optimize_special_residual_new.py - 专项残差排图 [新]
+  run _optimize_special_mlp1.py    - MLP 专项排图
+
+
+三、能耗计算与分析 (Energy Calculation & Analysis)
+--------------------------------------------------------------------------------
+  energy_all_line.py               - 对指定服务号（507系列），计算全线 物理+残差 总能耗
+  plot_energy_es_curves.py         - 生成 26 站 e-s 累积能耗曲线图（实际 vs 物理）
+  plot_energy_validation_final.py  - 能耗验证最终报告图
+  calculate_e.py                   - 单区间能耗计算
+  calculate_e copy.py              - 同上副本
+  calculate_e_new.py               - 新版能耗计算
+  energy.py                        - 能耗相关工具
+  plot_mass_energy_per_class_v1.py - 质量-能耗 关系图（按等级）
+  plot_mass_energy_per_class_v2.py - 同上 v2
+  plot_five_class_et_map.py        - 五等级能耗-时间分布图
+  plot3zongzhou.py                 - 纵轴综合图
+
+
+四、验证与对比 (Validation & Comparison)
+--------------------------------------------------------------------------------
+  full_line_validation_results.py  - 全线验证结果生成（物理+残差 vs 实测）
+  validate_opt_schedule.py         - 验证优化排图结果
+  validate_v2_with_dp_schedule.py  - v2 灵活停站排图验证
+  his6_compareSchedule.py          - 历史 Trip6 与排图对比
+  plot_comparison.py               - 对比绘图
+  compera.py                       - 全线对比分析（两个方案）
+  simulate_ato_with_comparison.py  - 生成曲线并与真实数据对比
+
+
+五、残差模型训练 (Residual Model Training)
+--------------------------------------------------------------------------------
+  train_residual.py                - 训练残差预测模型（Transformer）[旧]
+  train_residual_new.py            - 训练残差预测模型 [新，v2]
+  train_transformer.py             - Transformer 能耗模型训练
+  train_mlp_legacy.py              - MLP 能耗模型训练 [旧]
+  train_mlp_8to5.py                - MLP 8→5 映射训练
+
+
+六、策略学习 (ATO Policy Learning)
+--------------------------------------------------------------------------------
+  train_ato_policy.py              - 学习 ATO 等级选择策略
+  train_ato_policy_v2.py           - 同上 v2
+
+
+七、数据处理 (Data Processing)
+--------------------------------------------------------------------------------
+  data_process.py                  - 原始数据清洗与预处理
+  add_class.py                     - 为数据添加运行等级标签
+  segment_class.py                 - 按 segment 分类
+  build_class_lookup_tables.py     - 构建等级对照表（standard_class_times.csv 等）
+  conbine.py                       - 合并历史回放表与等级规划表
+  conbine_ato.py                   - 同上（ATO 版）
+  get_load.py                      - 提取载重数据
+  analyze_historical_weights.py    - 分析历史载重分布
+  segment_chooose.py               - 区间段选择工具
+  process_line5.py                 - 5号线数据处理
+
+
+八、绘图与可视化 (Plotting & Visualization)
+--------------------------------------------------------------------------------
+  et_vt_04_06.py                   - 能量-时间 / 速度-时间 图
+  plot_v_t_s.py                    - 速度-时间-位移 图
+  plot_load_distribution.py        - 载重分布图
+  plot_track_static.py             - 线路静态参数图（坡度/曲率）
+  output_excle.py                  - 结果导出到 Excel（带图表）
+
+
+九、Trip 专项报告 (Trip Reports)
+--------------------------------------------------------------------------------
+  trip1_final_report.py            - Trip 1 全线最终报告
+  trip5_final_report.py            - Trip 5 全线最终报告
+  trip6_final_report.py            - Trip 6 全线最终报告
+
+
+十、实验与测试 (Experiments & Tests)
+--------------------------------------------------------------------------------
+  537272437.py                     - 历史轨迹叠加对比绘图实验（已融入 ato_class_globall_v2）
+  11.py                            - 测试脚本
+  test.py                          - 测试脚本
+  step_1.py                        - 分步处理第1步
+  step2.py                         - 分步处理第2步
+  analyze_factors.py               - 影响因素分析
+  simulate_ato_run.py              - 单趟 ATO 仿真实验
+
+
+十一、辅助工具 (Utilities)
+--------------------------------------------------------------------------------
+  runall.bat                       - 一键运行全部流程的批处理
+  make_big_picture                 - 生成大图（可能是目录或脚本片段）
+
+================================================================================
+                              版本演进速查
+================================================================================
+
+  主线:  train_ATO_v8 → simulate_ATO_v8 → ato_generated_results_energy → ato_class_globall_v2
+  验证:  train_ATO_v9 → simulate_ATO_v9 （class2→class3 外推 R² 验证）
+  能耗:  energy_all_line.py → plot_energy_es_curves.py （物理模型偏差分析）

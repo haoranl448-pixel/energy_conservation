@@ -1,0 +1,61 @@
+# Python virtual environment
+.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# IDE
+.idea/
+.vscode/
+
+# Large data files
+data/raw_data/
+data/data_processed/
+data/data_processed_new/
+data/data_processed_new_v2/
+data/0308/
+data/*.7z
+
+# Output files (too large, regeneratable)
+output/**/*.png
+output/**/*.jpg
+output/**/*.html
+output/**/*.zip
+output/**/*.7z
+output/models/
+output/ato_*/
+output/ato_generated*/
+output/energy_es_curves/
+output/energy_es_curves_trip10/
+output/figure/
+output/figures/
+output/comparison_*/
+output/trip*/
+output/final_optimized_report/
+output/optimization/
+output/analysis/vst_*/
+output/analysis/service_*/
+output/analysis/track_*/
+output/analysis/load_analysis/
+output/analysis/mass_*/
+output/analysis/*.zip
+output/analysis/*.7z
+output/validation_all_trips/
+
+# Project-specific large files
+python-3.11.9-amd64.exe
+nn.svg
+v_t_plot.png
+
+# Class reference data (large CSVs)
+class1/
+class2/
+class3/
+class4/
+class5/
+
+# Legacy / backup
+backup/
+legacy_backup/
