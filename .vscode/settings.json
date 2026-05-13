@@ -1,9 +1,0 @@
-{
-    "python.defaultInterpreterPath": "E:\\\\energy_conservation\\\\.venv\\\\Scripts\\\\python.exe",
-    "python.analysis.extraPaths": [
-        "E:\\\\energy_conservation\\\\.venv\\\\Lib\\\\site-packages"
-    ],
-    "python-envs.defaultEnvManager": "ms-python.python:system",
-    "claudeCodeChat.permissions.yoloMode": true,
-    "git.ignoreLimitWarning": true
-}

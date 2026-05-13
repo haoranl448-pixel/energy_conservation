@@ -1,0 +1,222 @@
+<?xml version="1.0"?>
+<?xml-stylesheet?>
+<!DOCTYPE timetable SYSTEM "timetable.dtd">
+<timetable title="OpenTrack timetable" application="OpenTrack" date="Tue Mar 17 17:53:48 2026">
+	<course>
+		<courseID>Course_2962</courseID>
+		<timetableEntry stopInformation="no">
+			<stationID>STA_1</stationID>
+			<arrivalTime format="hh:mm:ss" type="planned" valid="yes">HH:MM:SS</arrivalTime>
+			<departureTime format="hh:mm:ss" type="planned" useDepartureTime="yes" valid="yes">08:00:00</departureTime>
+			<waitTime format="s">0</waitTime>
+			<delayTime format="s">0</delayTime>
+		</timetableEntry>
+		<timetableEntry stopInformation="yes">
+			<stationID>STA_2</stationID>
+			<arrivalTime format="hh:mm:ss" type="planned" valid="yes">08:02:01</arrivalTime>
+			<departureTime format="hh:mm:ss" type="planned" useDepartureTime="yes" valid="yes">08:02:31</departureTime>
+			<waitTime format="s">30</waitTime>
+			<delayTime format="s">0</delayTime>
+		</timetableEntry>
+		<timetableEntry stopInformation="yes">
+			<stationID>STA_3</stationID>
+			<arrivalTime format="hh:mm:ss" type="planned" valid="yes">08:04:59</arrivalTime>
+			<departureTime format="hh:mm:ss" type="planned" useDepartureTime="yes" valid="yes">08:05:29</departureTime>
+			<waitTime format="s">30</waitTime>
+			<delayTime format="s">0</delayTime>
+			<deltaLoad>0.070</deltaLoad>
+		</timetableEntry>
+		<timetableEntry stopInformation="yes">
+			<stationID>STA_4</stationID>
+			<arrivalTime format="hh:mm:ss" type="planned" valid="yes">08:07:13</arrivalTime>
+			<departureTime format="hh:mm:ss" type="planned" useDepartureTime="yes" valid="yes">08:07:43</departureTime>
+			<waitTime format="s">30</waitTime>
+			<delayTime format="s">0</delayTime>
+			<deltaLoad>-0.070</deltaLoad>
+		</timetableEntry>
+		<timetableEntry stopInformation="yes">
+			<stationID>STA_5</stationID>
+			<arrivalTime format="hh:mm:ss" type="planned" valid="yes">08:09:03</arrivalTime>
+			<departureTime format="hh:mm:ss" type="planned" useDepartureTime="yes" valid="yes">08:09:33</departureTime>
+			<waitTime format="s">30</waitTime>
+			<delayTime format="s">0</delayTime>
+			<deltaLoad>0.090</deltaLoad>
+		</timetableEntry>
+		<timetableEntry stopInformation="yes">
+			<stationID>STA_6</stationID>
+			<arrivalTime format="hh:mm:ss" type="planned" valid="yes">08:11:52</arrivalTime>
+			<departureTime format="hh:mm:ss" type="planned" useDepartureTime="yes" valid="yes">08:12:22</departureTime>
+			<waitTime format="s">30</waitTime>
+			<delayTime format="s">0</delayTime>
+			<deltaLoad>-0.010</deltaLoad>
+		</timetableEntry>
+		<timetableEntry stopInformation="yes">
+			<stationID>STA_7</stationID>
+			<arrivalTime format="hh:mm:ss" type="planned" valid="yes">08:13:58</arrivalTime>
+			<departureTime format="hh:mm:ss" type="planned" useDepartureTime="yes" valid="yes">08:14:28</departureTime>
+			<waitTime format="s">30</waitTime>
+			<delayTime format="s">0</delayTime>
+			<deltaLoad>0.150</deltaLoad>
+		</timetableEntry>
+		<timetableEntry stopInformation="yes">
+			<stationID>STA_8</stationID>
+			<arrivalTime format="hh:mm:ss" type="planned" valid="yes">08:15:54</arrivalTime>
+			<departureTime format="hh:mm:ss" type="planned" useDepartureTime="yes" valid="yes">08:16:24</departureTime>
+			<waitTime format="s">30</waitTime>
+			<delayTime format="s">0</delayTime>
+			<deltaLoad>-0.110</deltaLoad>
+		</timetableEntry>
+		<timetableEntry stopInformation="yes">
+			<stationID>STA_9</stationID>
+			<arrivalTime format="hh:mm:ss" type="planned" valid="yes">08:18:32</arrivalTime>
+			<departureTime format="hh:mm:ss" type="planned" useDepartureTime="yes" valid="yes">08:19:02</departureTime>
+			<waitTime format="s">30</waitTime>
+			<delayTime format="s">0</delayTime>
+			<deltaLoad>0.078</deltaLoad>
+		</timetableEntry>
+		<timetableEntry stopInformation="yes">
+			<stationID>STA_10</stationID>
+			<arrivalTime format="hh:mm:ss" type="planned" valid="yes">08:20:38</arrivalTime>
+			<departureTime format="hh:mm:ss" type="planned" useDepartureTime="yes" valid="yes">08:21:08</departureTime>
+			<waitTime format="s">30</waitTime>
+			<delayTime format="s">0</delayTime>
+			<deltaLoad>-0.128</deltaLoad>
+		</timetableEntry>
+		<timetableEntry stopInformation="yes">
+			<stationID>STA_11</stationID>
+			<arrivalTime format="hh:mm:ss" type="planned" valid="yes">08:22:58</arrivalTime>
+			<departureTime format="hh:mm:ss" type="planned" useDepartureTime="yes" valid="yes">08:23:28</departureTime>
+			<waitTime format="s">30</waitTime>
+			<delayTime format="s">0</delayTime>
+			<deltaLoad>0.050</deltaLoad>
+		</timetableEntry>
+		<timetableEntry stopInformation="yes">
+			<stationID>STA_12</stationID>
+			<arrivalTime format="hh:mm:ss" type="planned" valid="yes">08:25:09</arrivalTime>
+			<departureTime format="hh:mm:ss" type="planned" useDepartureTime="yes" valid="yes">08:25:39</departureTime>
+			<waitTime format="s">30</waitTime>
+			<delayTime format="s">0</delayTime>
+			<deltaLoad>-0.090</deltaLoad>
+		</timetableEntry>
+		<timetableEntry stopInformation="yes">
+			<stationID>STA_13</stationID>
+			<arrivalTime format="hh:mm:ss" type="planned" valid="yes">08:27:11</arrivalTime>
+			<departureTime format="hh:mm:ss" type="planned" useDepartureTime="yes" valid="yes">08:27:41</departureTime>
+			<waitTime format="s">30</waitTime>
+			<delayTime format="s">0</delayTime>
+			<deltaLoad>0.010</deltaLoad>
+		</timetableEntry>
+		<timetableEntry stopInformation="yes">
+			<stationID>STA_14</stationID>
+			<arrivalTime format="hh:mm:ss" type="planned" valid="yes">08:29:49</arrivalTime>
+			<departureTime format="hh:mm:ss" type="planned" useDepartureTime="yes" valid="yes">08:30:19</departureTime>
+			<waitTime format="s">30</waitTime>
+			<delayTime format="s">0</delayTime>
+			<deltaLoad>0.208</deltaLoad>
+		</timetableEntry>
+		<timetableEntry stopInformation="yes">
+			<stationID>STA_15</stationID>
+			<arrivalTime format="hh:mm:ss" type="planned" valid="yes">08:32:05</arrivalTime>
+			<departureTime format="hh:mm:ss" type="planned" useDepartureTime="yes" valid="yes">08:32:35</departureTime>
+			<waitTime format="s">30</waitTime>
+			<delayTime format="s">0</delayTime>
+			<deltaLoad>-0.188</deltaLoad>
+		</timetableEntry>
+		<timetableEntry stopInformation="yes">
+			<stationID>STA_16</stationID>
+			<arrivalTime format="hh:mm:ss" type="planned" valid="yes">08:34:02</arrivalTime>
+			<departureTime format="hh:mm:ss" type="planned" useDepartureTime="yes" valid="yes">08:34:32</departureTime>
+			<waitTime format="s">30</waitTime>
+			<delayTime format="s">0</delayTime>
+			<deltaLoad>0.128</deltaLoad>
+		</timetableEntry>
+		<timetableEntry stopInformation="yes">
+			<stationID>STA_17</stationID>
+			<arrivalTime format="hh:mm:ss" type="planned" valid="yes">08:35:57</arrivalTime>
+			<departureTime format="hh:mm:ss" type="planned" useDepartureTime="yes" valid="yes">08:36:27</departureTime>
+			<waitTime format="s">30</waitTime>
+			<delayTime format="s">0</delayTime>
+			<deltaLoad>0.220</deltaLoad>
+		</timetableEntry>
+		<timetableEntry stopInformation="yes">
+			<stationID>STA_18</stationID>
+			<arrivalTime format="hh:mm:ss" type="planned" valid="yes">08:37:43</arrivalTime>
+			<departureTime format="hh:mm:ss" type="planned" useDepartureTime="yes" valid="yes">08:38:13</departureTime>
+			<waitTime format="s">30</waitTime>
+			<delayTime format="s">0</delayTime>
+			<deltaLoad>-0.368</deltaLoad>
+		</timetableEntry>
+		<timetableEntry stopInformation="yes">
+			<stationID>STA_19</stationID>
+			<arrivalTime format="hh:mm:ss" type="planned" valid="yes">08:40:14</arrivalTime>
+			<departureTime format="hh:mm:ss" type="planned" useDepartureTime="yes" valid="yes">08:40:44</departureTime>
+			<waitTime format="s">30</waitTime>
+			<delayTime format="s">0</delayTime>
+			<deltaLoad>0.180</deltaLoad>
+		</timetableEntry>
+		<timetableEntry stopInformation="yes">
+			<stationID>STA_20</stationID>
+			<arrivalTime format="hh:mm:ss" type="planned" valid="yes">08:42:12</arrivalTime>
+			<departureTime format="hh:mm:ss" type="planned" useDepartureTime="yes" valid="yes">08:42:42</departureTime>
+			<waitTime format="s">30</waitTime>
+			<delayTime format="s">0</delayTime>
+			<deltaLoad>-0.090</deltaLoad>
+		</timetableEntry>
+		<timetableEntry stopInformation="yes">
+			<stationID>STA_21</stationID>
+			<arrivalTime format="hh:mm:ss" type="planned" valid="yes">08:45:01</arrivalTime>
+			<departureTime format="hh:mm:ss" type="planned" useDepartureTime="yes" valid="yes">08:45:31</departureTime>
+			<waitTime format="s">30</waitTime>
+			<delayTime format="s">0</delayTime>
+			<deltaLoad>1.216</deltaLoad>
+		</timetableEntry>
+		<timetableEntry stopInformation="yes">
+			<stationID>STA_22</stationID>
+			<arrivalTime format="hh:mm:ss" type="planned" valid="yes">08:47:10</arrivalTime>
+			<departureTime format="hh:mm:ss" type="planned" useDepartureTime="yes" valid="yes">08:47:40</departureTime>
+			<waitTime format="s">30</waitTime>
+			<delayTime format="s">0</delayTime>
+			<deltaLoad>-0.590</deltaLoad>
+		</timetableEntry>
+		<timetableEntry stopInformation="yes">
+			<stationID>STA_23</stationID>
+			<arrivalTime format="hh:mm:ss" type="planned" valid="yes">08:49:07</arrivalTime>
+			<departureTime format="hh:mm:ss" type="planned" useDepartureTime="yes" valid="yes">08:49:37</departureTime>
+			<waitTime format="s">30</waitTime>
+			<delayTime format="s">0</delayTime>
+			<deltaLoad>-0.498</deltaLoad>
+		</timetableEntry>
+		<timetableEntry stopInformation="yes">
+			<stationID>STA_24</stationID>
+			<arrivalTime format="hh:mm:ss" type="planned" valid="yes">08:50:55</arrivalTime>
+			<departureTime format="hh:mm:ss" type="planned" useDepartureTime="yes" valid="yes">08:51:25</departureTime>
+			<waitTime format="s">30</waitTime>
+			<delayTime format="s">0</delayTime>
+			<deltaLoad>-0.160</deltaLoad>
+		</timetableEntry>
+		<timetableEntry stopInformation="yes">
+			<stationID>STA_25</stationID>
+			<arrivalTime format="hh:mm:ss" type="planned" valid="yes">08:56:23</arrivalTime>
+			<departureTime format="hh:mm:ss" type="planned" useDepartureTime="yes" valid="yes">08:56:53</departureTime>
+			<waitTime format="s">30</waitTime>
+			<delayTime format="s">0</delayTime>
+			<deltaLoad>0.010</deltaLoad>
+		</timetableEntry>
+		<timetableEntry stopInformation="yes">
+			<stationID>STA_26</stationID>
+			<arrivalTime format="hh:mm:ss" type="planned" valid="yes">08:59:14</arrivalTime>
+			<departureTime format="hh:mm:ss" type="planned" useDepartureTime="yes" valid="yes">08:59:44</departureTime>
+			<waitTime format="s">30</waitTime>
+			<delayTime format="s">0</delayTime>
+			<deltaLoad>-0.078</deltaLoad>
+		</timetableEntry>
+		<timetableEntry stopInformation="yes">
+			<stationID>STA_27</stationID>
+			<arrivalTime format="hh:mm:ss" type="planned" valid="yes">09:01:52</arrivalTime>
+			<departureTime format="hh:mm:ss" type="planned" useDepartureTime="yes" valid="yes">HH:MM:SS</departureTime>
+			<waitTime format="s">0</waitTime>
+			<delayTime format="s">0</delayTime>
+			<deltaLoad>-0.030</deltaLoad>
+		</timetableEntry>
+	</course>
+</timetable>

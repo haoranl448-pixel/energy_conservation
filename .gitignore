@@ -18,15 +18,19 @@ data/data_processed_new_v2/
 data/0308/
 data/*.7z
 
-# Output files (too large, regeneratable)
+# Output images (regeneratable)
 output/**/*.png
 output/**/*.jpg
+output/**/*.jpeg
+output/**/*.gif
 output/**/*.html
-output/**/*.zip
-output/**/*.7z
+
+# Large output (regeneratable)
 output/models/
-output/ato_*/
-output/ato_generated*/
+output/ato_phase_results*/
+output/ato_generated_results*/
+output/ato_v9_validation*/
+output/ato_v9_validation_results*/
 output/energy_es_curves/
 output/energy_es_curves_trip10/
 output/figure/
@@ -42,6 +46,7 @@ output/analysis/load_analysis/
 output/analysis/mass_*/
 output/analysis/*.zip
 output/analysis/*.7z
+output/analysis/*.png
 output/validation_all_trips/
 
 # Project-specific large files

@@ -6,7 +6,14 @@
       "Bash(.venv/Scripts/python.exe scripts/plot_energy_es_curves.py)",
       "Bash(.venv/Scripts/python.exe *)",
       "Bash(.venv/Scripts/pip.exe install *)",
-      "Bash(start *)"
+      "Bash(start *)",
+      "Bash(git rm *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git count-objects *)",
+      "Bash(git reflog *)",
+      "Bash(git gc *)",
+      "Bash(git push *)"
     ]
   }
 }

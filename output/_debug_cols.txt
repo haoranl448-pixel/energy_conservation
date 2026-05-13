@@ -1,0 +1,2 @@
+['区段', '站间距', '时段划分', '日期+服务号', '服务号', '车底号', '列车运行方向', '区间时间', '时刻', 'BCU6_CCU 参考速度km/h', '列车总牵引力kN', '列车总电制动力kN', '列车总空气制动力KN', '1车温度℃', '6车温度℃', '（1车温度+6车温度）/2℃', 'CCU_LCU11 网压V', 'LCU61_CCU 网压V', 'DCU1_CCU 正线电流 1=1AA', 'DCU2_CCU 正线电流 1=1AA', 'DCU3_CCU 正线电流 1=1AA', 'DCU4_CCU 正线电流 1=1AA', '牵引能耗累计量', '牵引能耗相减', '区间能耗累计值', 'dt_overall', 'segment', 'voltage', 'total_effective_current', 'power', 'energy', 'cumulative_energy', 'cumulative_energy_kWh', '速度(m/s)', '加速度(m/s²)', '累计位移(m)', 'curvature', 'gradient', '重量', '运行等级']
+has run_id: False
