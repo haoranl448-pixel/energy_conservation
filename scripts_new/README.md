@@ -29,6 +29,7 @@ python scripts_new/main.py
 ```
 
 默认处理第 1 趟车；如果想固定改成别的趟，可以直接改 `scripts_new/main.py` 顶部的 `DEFAULT_TRIP_NO`。
+默认 DP 目标总时间使用 `scripts/ato_class_globall_v2.py` 里的 `DEFAULT_T_TOTAL_TARGET`；如果想固定成某个数，可以直接改 `scripts_new/main.py` 顶部的 `DEFAULT_TARGET_TIME`。
 
 临时指定趟号：
 
@@ -42,11 +43,30 @@ python scripts_new/main.py --trip-no 6
 python scripts_new/main.py --ask-trip
 ```
 
+临时指定 DP 目标总时间，单位秒：
+
+```powershell
+python scripts_new/main.py --target-time 692.65
+```
+
+运行时询问 DP 目标总时间：
+
+```powershell
+python scripts_new/main.py --ask-target-time
+```
+
+趟号和目标时间可以一起传：
+
+```powershell
+python scripts_new/main.py --trip-no 6 --target-time 692.65 --from-step dp_schedule
+```
+
 趟号会通过环境变量传给子脚本：
 
 - `scripts/ato_generated_results_energy.py` 会输出 `output/analysis/ato_class_energy_menu<趟号>_new_v3.csv`。
 - `scripts/full_line_validation_results.py` 会输出 `full_line<趟号>_validation_results.csv`。
 - `scripts/ato_class_globall_v2.py` 会读取同一趟号的能耗菜单、历史基准和 `section_params_trip<趟号>.csv`。
+- `scripts/ato_class_globall_v2.py` 会读取主程序传入的目标总时间；未传入时使用脚本默认值。
 
 如果当前终端里 `python` 不在 PATH，可以用本机 Python 绝对路径：
 

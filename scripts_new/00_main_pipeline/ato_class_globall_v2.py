@@ -23,9 +23,23 @@ from pathlib import Path
 import os
 
 # ===================== 1. Global config =====================
+DEFAULT_T_TOTAL_TARGET = 692.65
+
+def get_target_time(default_value):
+    """读取主程序传入的 DP 目标总时间；没有传入时使用脚本默认值。"""
+
+    raw = os.environ.get("ENERGY_TARGET_TIME")
+    if not raw:
+        return default_value
+    value = float(raw)
+    if value <= 0:
+        raise ValueError("ENERGY_TARGET_TIME must be > 0.")
+    return value
+
+
 #T_TOTAL_TARGET = 694.7#trip1
-# 全流程总时间目标，单位秒。当前配置对应 trip6/局部实验。
-T_TOTAL_TARGET = 692.65#trip6
+# 全流程总时间目标，单位秒。默认配置对应 trip6/局部实验；主程序可用 --target-time 覆盖。
+T_TOTAL_TARGET = get_target_time(DEFAULT_T_TOTAL_TARGET)#trip6/default
 # nominal 时间附近用于展示对比的搜索窗口。
 SLACK = 10
 # 未单独配置站点的默认计划停站时间。
@@ -183,6 +197,7 @@ def run_optimization():
 
     # A. 读取输入数据。
     print(f"Trip: {TRIP_NO} (segment index {TRIP_INDEX})")
+    print(f"Target total time: {T_TOTAL_TARGET:.2f}s")
     print(f"Menu file: {MENU_FILE}")
     print(f"History file: {HIST_FILE}")
     df_menu = pd.read_csv(MENU_FILE)

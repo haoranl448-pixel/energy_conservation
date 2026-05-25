@@ -18,8 +18,22 @@ from pathlib import Path
 import os
 
 # ===================== 1. Global config =====================
+DEFAULT_T_TOTAL_TARGET = 692.65
+
+def get_target_time(default_value):
+    """Read the DP target total time from the main pipeline, or use the script default."""
+
+    raw = os.environ.get("ENERGY_TARGET_TIME")
+    if not raw:
+        return default_value
+    value = float(raw)
+    if value <= 0:
+        raise ValueError("ENERGY_TARGET_TIME must be > 0.")
+    return value
+
+
 #T_TOTAL_TARGET = 694.7#trip1
-T_TOTAL_TARGET = 692.65#trip6
+T_TOTAL_TARGET = get_target_time(DEFAULT_T_TOTAL_TARGET)#trip6/default
 SLACK = 10
 NOMINAL_DWELL = 30.0          # default dwell for stations not in config
 MIN_DWELL = 23.0              # default min dwell for elastic stations
@@ -147,6 +161,7 @@ def distribute_dwell_delta(run_time_sum, dwell_configs):
 def run_optimization():
     # A. Load data
     print(f"Trip: {TRIP_NO} (segment index {TRIP_INDEX})")
+    print(f"Target total time: {T_TOTAL_TARGET:.2f}s")
     print(f"Menu file: {MENU_FILE}")
     print(f"History file: {HIST_FILE}")
     df_menu = pd.read_csv(MENU_FILE)

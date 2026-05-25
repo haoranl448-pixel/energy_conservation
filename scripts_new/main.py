@@ -33,6 +33,21 @@ from typing import Iterable
 # 默认处理第几趟车。
 # 你平时不想每次输入参数时，可以直接改这里，例如 DEFAULT_TRIP_NO = 6。
 DEFAULT_TRIP_NO = 1
+# 默认 DP 目标总时间，单位秒。
+# None 表示使用 globall_v2.py 里的默认值；也可以改成 692.65 这种数字。
+DEFAULT_TARGET_TIME = None
+
+
+def configure_stdio() -> None:
+    """让 Windows 终端遇到特殊字符时替换输出，避免流程被编码问题打断。"""
+
+    # PowerShell/cmd 在中文 Windows 下常用 GBK 编码，遇到个别无法表示的字符会抛异常。
+    # 这里把 stdout/stderr 的错误策略改成 replace，让业务脚本继续运行。
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(errors="replace")
+        except AttributeError:
+            pass
 
 
 @dataclasses.dataclass(frozen=True)
@@ -216,6 +231,7 @@ def run_step(
     log_dir: Path,
     dry_run: bool,
     trip_no: int,
+    target_time: float | None,
 ) -> int:
     """执行单个流水线步骤。"""
 
@@ -232,6 +248,11 @@ def run_step(
     print("Command:", " ".join(f'"{part}"' if " " in part else part for part in command))
     # 趟号以环境变量传给子脚本；子脚本用它决定读写 trip1/trip6 等文件。
     print(f"Trip:    {trip_no} (segment index {trip_no - 1})")
+    # 目标总时间只在 DP 排图步骤使用；不传时沿用 globall_v2.py 里的默认值。
+    if target_time is None:
+        print("Target:  script default")
+    else:
+        print(f"Target:  {target_time:.2f}s")
 
     # 如果脚本不存在，直接返回 127，表示命令/文件不存在。
     if not script_path.exists():
@@ -246,6 +267,11 @@ def run_step(
     child_env = os.environ.copy()
     child_env["ENERGY_TRIP_NO"] = str(trip_no)
     child_env["ENERGY_TRIP_INDEX"] = str(trip_no - 1)
+    if target_time is not None:
+        child_env["ENERGY_TARGET_TIME"] = str(target_time)
+    # 子脚本里有 emoji/特殊符号输出；强制 UTF-8 容错，避免 Windows GBK 控制台报错。
+    child_env["PYTHONIOENCODING"] = "utf-8:replace"
+    child_env["PYTHONUTF8"] = "1"
 
     # 创建日志目录，例如 output/pipeline_logs/20260525_133110。
     log_dir.mkdir(parents=True, exist_ok=True)
@@ -261,6 +287,8 @@ def run_step(
         log.write(f"# command: {' '.join(command)}\n")
         log.write(f"# ENERGY_TRIP_NO: {trip_no}\n")
         log.write(f"# ENERGY_TRIP_INDEX: {trip_no - 1}\n")
+        log.write(f"# ENERGY_TARGET_TIME: {target_time if target_time is not None else 'script default'}\n")
+        log.write("# PYTHONIOENCODING: utf-8:replace\n")
         log.write(f"# started: {datetime.now().isoformat(timespec='seconds')}\n\n")
         # 启动子脚本。
         process = subprocess.Popen(
@@ -321,6 +349,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--trip-no", type=int, default=DEFAULT_TRIP_NO, help="Trip number to process, using 1-based numbering.")
     # --ask-trip：运行时询问用户第几趟，适合不想记命令参数时使用。
     parser.add_argument("--ask-trip", action="store_true", help="Prompt for the trip number before running.")
+    # --target-time：手动指定 DP 目标总时间，单位秒。
+    parser.add_argument("--target-time", type=float, default=DEFAULT_TARGET_TIME, help="DP target total time in seconds. Defaults to the globall_v2 script value.")
+    # --ask-target-time：运行时询问 DP 目标总时间。
+    parser.add_argument("--ask-target-time", action="store_true", help="Prompt for the DP target total time before running.")
     # --from-step：从某一步开始，例如 --from-step energy_menu。
     parser.add_argument("--from-step", choices=get_step_ids(), help="Start from this step.")
     # --to-step：到某一步结束，例如 --to-step dp_schedule。
@@ -360,8 +392,31 @@ def resolve_trip_no(args: argparse.Namespace) -> int:
     return trip_no
 
 
+def resolve_target_time(args: argparse.Namespace) -> float | None:
+    """得到本次 DP 排图使用的目标总时间。"""
+
+    # 默认使用 --target-time 或 DEFAULT_TARGET_TIME。
+    target_time = args.target_time
+    # 如果用户加了 --ask-target-time，就在终端里交互询问。
+    if args.ask_target_time:
+        default_text = "globall_v2.py 默认值" if target_time is None else f"{target_time:.2f}s"
+        raw = input(f"请输入 DP 目标总时间，单位秒，直接回车使用 {default_text}：").strip()
+        if raw:
+            target_time = float(raw)
+
+    # None 表示不覆盖 globall_v2.py 中写死的默认值。
+    if target_time is None:
+        return None
+    if target_time <= 0:
+        raise ValueError("--target-time must be > 0.")
+    return target_time
+
+
 def main() -> int:
     """主函数：解析参数、选择步骤、按顺序执行。"""
+
+    # 先配置输出流，避免后续打印子脚本日志时被 Windows 编码问题中断。
+    configure_stdio()
 
     # 构造命令行解析器。
     parser = build_parser()
@@ -369,6 +424,8 @@ def main() -> int:
     args = parser.parse_args()
     # 得到本次要处理的趟号。
     trip_no = resolve_trip_no(args)
+    # 得到本次 DP 排图的目标总时间；None 表示使用 globall_v2.py 默认值。
+    target_time = resolve_target_time(args)
 
     # 自动定位项目根目录，避免必须从固定目录运行。
     project_root = find_project_root(Path(__file__).resolve())
@@ -399,6 +456,7 @@ def main() -> int:
     print(f"Log dir:      {log_dir}")
     print(f"Dry run:      {args.dry_run}")
     print(f"Trip no:      {trip_no} (segment index {trip_no - 1})")
+    print(f"Target time:  {f'{target_time:.2f}s' if target_time is not None else 'script default'}")
     # 打印最终选中的步骤列表。
     print("\nSelected steps:")
     print_steps(selected_steps)
@@ -415,6 +473,7 @@ def main() -> int:
             log_dir=log_dir,
             dry_run=args.dry_run,
             trip_no=trip_no,
+            target_time=target_time,
         )
         # 非 0 退出码表示失败。
         if code != 0:
