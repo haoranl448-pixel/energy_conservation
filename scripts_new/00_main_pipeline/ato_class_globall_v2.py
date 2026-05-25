@@ -19,6 +19,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 # Path：统一处理路径。
 from pathlib import Path
+# os：读取主程序传入的趟号环境变量。
+import os
 
 # ===================== 1. Global config =====================
 #T_TOTAL_TARGET = 694.7#trip1
@@ -58,23 +60,35 @@ GLOBAL_ALLOWED_CLASSES = ["class2", "class3","class4", "class5"]
 # ===================== 2. Paths =====================
 # 项目根目录；从 scripts_new 二级目录直接运行时需注意路径层级。
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
+def get_trip_no() -> int:
+    """从主程序传入的环境变量里读取要处理第几趟车。"""
+
+    raw = os.environ.get("ENERGY_TRIP_NO", "1")
+    trip_no = int(raw)
+    if trip_no < 1:
+        raise ValueError("ENERGY_TRIP_NO must be >= 1.")
+    return trip_no
+
+
+TRIP_NO = get_trip_no()
 # 能耗菜单：每个区间每个等级的时间和预测能耗。
-MENU_FILE = PROJECT_ROOT / "output" / "analysis" / "ato_class_energy_menu1_new_v3.csv"
-# 历史运行时间/能耗，用于最终对比节能率。
-HIST_FILE = PROJECT_ROOT / "full_line1_validation_results.csv"
+MENU_FILE = PROJECT_ROOT / "output" / "analysis" / f"ato_class_energy_menu{TRIP_NO}_new_v3.csv"
+# 历史运行时间/模型回放能耗，用于最终对比节能率。
+HIST_FILE = PROJECT_ROOT / f"full_line{TRIP_NO}_validation_results.csv"
 # 生成曲线目录，用于最后画优化方案 v-t / v-s。
 TRAJ_BASE_DIR = PROJECT_ROOT / "output" / "ato_generated_results_new_v3"
 # 输出目录：最终对比表和图会保存到这里。
 OUT_DIR = PROJECT_ROOT / "output" / "schedule" / "final_plan_report_v2"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 # 区间参数表，主要读取 MASS。
-SECTION_PARAMS_FILE = PROJECT_ROOT / "data" / "static" / "section_params_trip1.csv"
+SECTION_PARAMS_FILE = PROJECT_ROOT / "data" / "static" / f"section_params_trip{TRIP_NO}.csv"
 # 处理后的历史数据目录，用于绘制历史速度曲线。
 DATA_DIR = PROJECT_ROOT / "data" / "data_processed"
 # 位移修正比例，当前不做修正。
 SLIP_RATIO = 1.0
 # 选取历史数据中的第几个 segment 做对比。
-TRIP_INDEX = 0
+TRIP_INDEX = TRIP_NO - 1
 
 # 当前参与优化的站间区间列表。
 # 注意：这里目前只启用前 5 个区间，其余区间被注释，适合局部验证。
@@ -168,6 +182,9 @@ def run_optimization():
     """执行 DP 排图优化，并输出对比表和可视化图。"""
 
     # A. 读取输入数据。
+    print(f"Trip: {TRIP_NO} (segment index {TRIP_INDEX})")
+    print(f"Menu file: {MENU_FILE}")
+    print(f"History file: {HIST_FILE}")
     df_menu = pd.read_csv(MENU_FILE)
     df_hist = pd.read_csv(HIST_FILE).set_index('站间区间')
     df_mass = pd.read_csv(SECTION_PARAMS_FILE)
@@ -286,6 +303,7 @@ def run_optimization():
         prev_t, c_name, t_val, e_val = path[i][curr_t]
         sp = STATIONS[i]
         # 历史数据用于最终节能对比。
+        # “历史能耗(Wh)”是历史运行曲线经同一套模型回放得到的能耗，不是原始实测能耗。
         h_time = df_hist.loc[sp, '历史运行时间(s)']
         h_energy = df_hist.loc[sp, '历史能耗(Wh)']
 

@@ -15,12 +15,14 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
+import os
 
 # ===================== 1. Global config =====================
-T_TOTAL_TARGET = 694.7
+#T_TOTAL_TARGET = 694.7#trip1
+T_TOTAL_TARGET = 692.65#trip6
 SLACK = 10
 NOMINAL_DWELL = 30.0          # default dwell for stations not in config
-MIN_DWELL = 25.0              # default min dwell for elastic stations
+MIN_DWELL = 23.0              # default min dwell for elastic stations
 
 # Per-station dwell config. Stations NOT listed here use defaults above.
 # "nominal": target dwell time (s)
@@ -31,11 +33,11 @@ STATION_DWELL_CONFIG = {
     # "海晏北路-民安东路": {"nominal": 30, "min": 30},
 
     # --- Elastic stations (e.g. minor stops): min < nominal ---
-    "布政-张家潭":     {"nominal": 30, "min": 26},
-    "张家潭-同德路":     {"nominal": 30, "min": 27},
-    "同德路-石碶":       {"nominal": 30, "min": 25},
-    "石碶-雅渡":       {"nominal": 30, "min": 27},
-    "雅渡-庙堰":       {"nominal": 30, "min": 26},
+    # "布政-张家潭":     {"nominal": 30, "min": 28},
+    # "张家潭-同德路":     {"nominal": 30, "min": 28},
+    # "同德路-石碶":       {"nominal": 30, "min": 28},
+    # "石碶-雅渡":       {"nominal": 30, "min": 28},
+    # "雅渡-庙堰":       {"nominal": 30, "min": 26},
 
 }
 
@@ -43,19 +45,31 @@ MANUAL_CONSTRAINTS = {
     "泗港-曹隘": "class4"
 }
 
-GLOBAL_ALLOWED_CLASSES = ["class2", "class3","class4", "class3"]
+GLOBAL_ALLOWED_CLASSES = ["class2", "class3","class4", "class5"]
 
 # ===================== 2. Paths =====================
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-MENU_FILE = PROJECT_ROOT / "output" / "analysis" / "ato_class_energy_menu1_new_v3.csv"
-HIST_FILE = PROJECT_ROOT / "full_line1_validation_results.csv"
+
+def get_trip_no() -> int:
+    """从主程序传入的环境变量里读取要处理第几趟车。"""
+
+    raw = os.environ.get("ENERGY_TRIP_NO", "1")
+    trip_no = int(raw)
+    if trip_no < 1:
+        raise ValueError("ENERGY_TRIP_NO must be >= 1.")
+    return trip_no
+
+
+TRIP_NO = get_trip_no()
+MENU_FILE = PROJECT_ROOT / "output" / "analysis" / f"ato_class_energy_menu{TRIP_NO}_new_v3.csv"
+HIST_FILE = PROJECT_ROOT / f"full_line{TRIP_NO}_validation_results.csv"
 TRAJ_BASE_DIR = PROJECT_ROOT / "output" / "ato_generated_results_new_v3"
 OUT_DIR = PROJECT_ROOT / "output" / "schedule" / "final_plan_report_v2"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
-SECTION_PARAMS_FILE = PROJECT_ROOT / "data" / "static" / "section_params_trip1.csv"
+SECTION_PARAMS_FILE = PROJECT_ROOT / "data" / "static" / f"section_params_trip{TRIP_NO}.csv"
 DATA_DIR = PROJECT_ROOT / "data" / "data_processed"
 SLIP_RATIO = 1.0
-TRIP_INDEX = 0
+TRIP_INDEX = TRIP_NO - 1
 
 STATIONS = [
     "布政-张家潭", "张家潭-同德路", "同德路-石碶", "石碶-雅渡", "雅渡-庙堰",
@@ -132,6 +146,9 @@ def distribute_dwell_delta(run_time_sum, dwell_configs):
 
 def run_optimization():
     # A. Load data
+    print(f"Trip: {TRIP_NO} (segment index {TRIP_INDEX})")
+    print(f"Menu file: {MENU_FILE}")
+    print(f"History file: {HIST_FILE}")
     df_menu = pd.read_csv(MENU_FILE)
     df_hist = pd.read_csv(HIST_FILE).set_index('站间区间')
     df_mass = pd.read_csv(SECTION_PARAMS_FILE)
@@ -227,6 +244,7 @@ def run_optimization():
         prev_t, c_name, t_val, e_val = path[i][curr_t]
         sp = STATIONS[i]
         h_time = df_hist.loc[sp, '历史运行时间(s)']
+        # “历史能耗(Wh)”是历史运行曲线经同一套模型回放得到的能耗，不是原始实测能耗。
         h_energy = df_hist.loc[sp, '历史能耗(Wh)']
 
         # Dwell after this station (except last)

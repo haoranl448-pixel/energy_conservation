@@ -8,7 +8,19 @@ import math
 PROJECT_ROOT = Path(r"D:\energy_conservation")
 DATA_DIR = PROJECT_ROOT / "data" / "data_processed"
 RES_MODEL_BASE = PROJECT_ROOT / "output" / "models" / "nn_results_residual_v2"
-TRIP_INDEX = 0  # 第1趟车
+
+def get_trip_no() -> int:
+    """从主程序传入的环境变量里读取要处理第几趟车。"""
+
+    raw = os.environ.get("ENERGY_TRIP_NO", "1")
+    trip_no = int(raw)
+    if trip_no < 1:
+        raise ValueError("ENERGY_TRIP_NO must be >= 1.")
+    return trip_no
+
+
+TRIP_NO = get_trip_no()
+TRIP_INDEX = TRIP_NO - 1
 
 # 引入你的物理引擎
 sys.path.append(str(PROJECT_ROOT))
@@ -50,8 +62,10 @@ def evaluate_historical_trip(sp):
     cols = ['速度(m/s)', '加速度(m/s²)', '累计位移(m)', 'energy', '时刻', '重量', 'gradient', 'curvature']
     for c in cols: df_all[c] = pd.to_numeric(df_all[c], errors='coerce')
     
-    # 2. 提取第6趟 (Trip 6)
+    # 2. 提取用户选择的第 TRIP_NO 趟车；TRIP_INDEX 是从 0 开始的 segment 索引。
     segs = sorted(df_all['segment'].unique())
+    if TRIP_INDEX >= len(segs):
+        raise IndexError(f"{sp} 只有 {len(segs)} 个 segment，无法提取第 {TRIP_NO} 趟车。")
     target_seg = segs[TRIP_INDEX]
     df = df_all[df_all['segment'] == target_seg].copy().dropna(subset=['速度(m/s)'])
     
@@ -94,14 +108,15 @@ def evaluate_historical_trip(sp):
         res_sum = np.sum(sy.inverse_transform(p_out))
 
     # 6. 计算结果
+    # 历史实测能耗只用于误差诊断；globall_v2 对比时使用的是历史曲线经模型回放后的能耗。
     e_real_total = (df['energy'].sum() / 3.6e6) * 1000 # 历史实测 Wh
-    e_model_total = np.sum(e_phy_steps[29:]) + res_sum # 模型预测 Wh
+    e_model_total = np.sum(e_phy_steps[29:]) + res_sum # 历史曲线模型回放 Wh
     
     return {
-        "区间": sp,
-        "历史耗时(s)": round(t_seq[-1], 2),
+        "站间区间": sp,
+        "历史运行时间(s)": round(t_seq[-1], 2),
         "历史实测能耗(Wh)": round(e_real_total, 2),
-        "模型预测能耗(Wh)": round(e_model_total, 2),
+        "历史能耗(Wh)": round(e_model_total, 2),
         "物理占比": round(np.sum(e_phy_steps[29:]), 2),
         "残差占比": round(res_sum, 2),
         "误差(%)": round((e_model_total - e_real_total)/e_real_total*100, 2)
@@ -119,7 +134,7 @@ if __name__ == "__main__":
     ]
 
     results = []
-    print(f"🚀 开始全线 {len(line5_stations)} 个区间的历史数据验证...")
+    print(f"🚀 开始全线 {len(line5_stations)} 个区间的历史数据验证：第 {TRIP_NO} 趟车...")
 
     # 2. 循环处理每一个区间
     for i, sp in enumerate(line5_stations, 1):
@@ -147,7 +162,8 @@ if __name__ == "__main__":
         print(df_final.to_string(index=False))
         
         # 建议：顺便保存一份 CSV 结果，方便你填 PPT 或者写报告
-        df_final.to_csv("full_line1_validation_results.csv", index=False, encoding='utf-8-sig')
-        print(f"\n✅ 结果已保存至: full_line1_validation_results.csv")
+        output_file = f"full_line{TRIP_NO}_validation_results.csv"
+        df_final.to_csv(output_file, index=False, encoding='utf-8-sig')
+        print(f"\n✅ 结果已保存至: {output_file}")
     else:
         print("⚠️ 未提取到任何有效数据，请检查 data_processed 目录下的文件。")

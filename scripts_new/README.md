@@ -10,11 +10,43 @@
 
 主程序是 `main.py`，作用是把完整流程拆成多个步骤模块，然后按顺序调用原 `scripts/` 里的脚本。
 
+当前默认主流程到 `ato_class_globall_v2.py` 动态规划排图结束。这个脚本内部已经会输出最终方案表 `Final_Planning_Comparison.csv` 和对比图 `Optimized_Full_Line_Report.png`，所以默认流程不再继续调用 OpenTrack 导出或旧版 validation 脚本。
+
+`ato_class_globall_v2.py` 运行前必须已经有这些输入：
+
+- `output/analysis/ato_class_energy_menu<趟号>_new_v3.csv`：由 `scripts/ato_generated_results_energy.py` 生成。
+- `full_line<趟号>_validation_results.csv`：由 `scripts/full_line_validation_results.py` 生成，其中 `历史能耗(Wh)` 是历史曲线经模型回放得到的能耗，`历史实测能耗(Wh)` 只用于误差诊断。
+- `data/static/section_params_trip<趟号>.csv`：区间参数和载重表。
+- `output/ato_generated_results_new_v3/<区间>/<class>_generated_curve.csv`：用于最终拼接优化速度曲线。
+- `data/data_processed/results_<区间>.xlsx`：用于最终拼接历史速度曲线。
+
+注意当前脚本版本里有一个路径版本需要核对：`scripts/simulate_ATO_v8.py` 输出目录是 `output/ato_generated_results_new_v4`，但 `scripts/ato_generated_results_energy.py` 和 `scripts/ato_class_globall_v2.py` 读取的是 `output/ato_generated_results_new_v3`。如果要从头重新生成曲线，需要先统一这几个脚本的目录版本。
+
 默认完整流程：
 
 ```powershell
 python scripts_new/main.py
 ```
+
+默认处理第 1 趟车；如果想固定改成别的趟，可以直接改 `scripts_new/main.py` 顶部的 `DEFAULT_TRIP_NO`。
+
+临时指定趟号：
+
+```powershell
+python scripts_new/main.py --trip-no 6
+```
+
+运行时询问趟号：
+
+```powershell
+python scripts_new/main.py --ask-trip
+```
+
+趟号会通过环境变量传给子脚本：
+
+- `scripts/ato_generated_results_energy.py` 会输出 `output/analysis/ato_class_energy_menu<趟号>_new_v3.csv`。
+- `scripts/full_line_validation_results.py` 会输出 `full_line<趟号>_validation_results.csv`。
+- `scripts/ato_class_globall_v2.py` 会读取同一趟号的能耗菜单、历史基准和 `section_params_trip<趟号>.csv`。
 
 如果当前终端里 `python` 不在 PATH，可以用本机 Python 绝对路径：
 
@@ -55,24 +87,23 @@ python scripts_new/main.py --only energy_menu,dp_schedule
 | `ato_template` | `scripts/train_ATO_v8.py` | 提取 ATO 多等级相位模板 |
 | `ato_simulation` | `scripts/simulate_ATO_v8.py` | 生成各区间各等级速度曲线 |
 | `energy_menu` | `scripts/ato_generated_results_energy.py` | 计算能耗菜单 |
-| `dp_schedule` | `scripts/ato_class_globall_v2.py` | DP 排图优化 |
-| `timetable_export` | `scripts/schedule_to_timetable.py` | 导出时刻表 |
-| `validation` | `scripts/validate_opt_schedule.py` | 验证优化结果 |
+| `historical_baseline` | `scripts/full_line_validation_results.py` | 生成历史用时/历史模型能耗基准 |
+| `dp_schedule` | `scripts/ato_class_globall_v2.py` | DP 排图优化，并输出最终方案表和对比图 |
 
 日志默认输出到 `output/pipeline_logs/时间戳/`，每个步骤一个 `.log` 文件。
 
 ## 00_main_pipeline
 
-用途：当前项目最重要的端到端主线，从数据处理到 ATO 模板、速度曲线、能耗菜单、DP 排图和验证。
+用途：当前项目最重要的端到端主线，从数据处理到 ATO 模板、速度曲线、能耗菜单、DP 排图。
 
 - `data_process.py`：原始运行数据清洗，生成按区间整理后的数据文件。
 - `build_class_lookup_tables.py`：构建运行等级/服务号/区间等对照表。
 - `train_ATO_v8.py`：主线 ATO 相位模板提取脚本，按 Class1-5 学习加速、巡航、制动三段模板。
 - `simulate_ATO_v8.py`：主线速度曲线生成脚本，基于模板和目标时间生成各区间各等级曲线。
 - `ato_generated_results_energy.py`：读取生成曲线，计算物理模型 + AI 残差后的能耗菜单。
-- `ato_class_globall_v2.py`：主线 DP 排图优化，支持运行等级选择和弹性停站时间。
-- `schedule_to_timetable.py`：把优化结果转换成时刻表/导出格式。
-- `validate_opt_schedule.py`：验证优化排图结果，重新仿真并对比能耗和速度约束。
+- `ato_class_globall_v2.py`：主线 DP 排图优化，支持运行等级选择和弹性停站时间，并输出最终方案表和对比图。
+- `schedule_to_timetable.py`：OpenTrack/时刻表导出辅助脚本，当前不属于默认主流程。
+- `validate_opt_schedule.py`：旧版验证辅助脚本，当前不属于默认主流程；当前主线以 `ato_class_globall_v2.py` 的输出作为 DP 后收尾结果。
 
 ## 01_data_processing
 

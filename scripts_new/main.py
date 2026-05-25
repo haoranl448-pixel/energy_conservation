@@ -14,6 +14,8 @@ from __future__ import annotations
 import argparse
 # dataclasses：用来定义轻量级的数据结构 PipelineStep。
 import dataclasses
+# os：复制当前环境变量，并把选择的趟号传给子脚本。
+import os
 # subprocess：用来从主程序里调用子脚本。
 import subprocess
 # sys：读取当前 Python 解释器路径，默认用它来运行子脚本。
@@ -26,6 +28,11 @@ from datetime import datetime
 from pathlib import Path
 # Iterable：给函数参数做类型标注，表示可迭代对象。
 from typing import Iterable
+
+
+# 默认处理第几趟车。
+# 你平时不想每次输入参数时，可以直接改这里，例如 DEFAULT_TRIP_NO = 6。
+DEFAULT_TRIP_NO = 1
 
 
 @dataclasses.dataclass(frozen=True)
@@ -44,7 +51,9 @@ class PipelineStep:
 
 # 主流程定义。
 # 这里的顺序就是完整流程的执行顺序：
-# 数据清洗 -> 等级表 -> 模板提取 -> 曲线生成 -> 能耗菜单 -> DP 排图 -> 导出 -> 验证。
+# 数据清洗 -> 等级表 -> 模板提取 -> 曲线生成 -> 能耗菜单 -> 历史基准 -> DP 排图。
+# 注意：ato_class_globall_v2.py 里已经会输出最终方案表和对比图，
+# 因此默认主流程到 DP 排图就结束，不再接 OpenTrack 导出或旧版 validation。
 PIPELINE_STEPS: tuple[PipelineStep, ...] = (
     # 第 1 步：清洗原始运行数据。
     PipelineStep(
@@ -81,26 +90,19 @@ PIPELINE_STEPS: tuple[PipelineStep, ...] = (
         script="scripts/ato_generated_results_energy.py",
         description="Calculate physical + residual-AI energy for generated curves.",
     ),
-    # 第 6 步：用动态规划选择全局最优运行等级组合。
+    # 第 6 步：生成历史基准结果，供 DP 最终表对比历史用时和历史能耗。
+    PipelineStep(
+        id="historical_baseline",
+        title="Historical baseline calculation",
+        script="scripts/full_line_validation_results.py",
+        description="Generate historical time/energy baseline used by the DP comparison report.",
+    ),
+    # 第 7 步：用动态规划选择全局最优运行等级组合。
     PipelineStep(
         id="dp_schedule",
         title="DP schedule optimization",
         script="scripts/ato_class_globall_v2.py",
-        description="Select the lowest-energy class combination under timing constraints.",
-    ),
-    # 第 7 步：把优化后的方案导出成时刻表或 OpenTrack 可用格式。
-    PipelineStep(
-        id="timetable_export",
-        title="Timetable export",
-        script="scripts/schedule_to_timetable.py",
-        description="Export optimized schedule to timetable/OpenTrack-friendly files.",
-    ),
-    # 第 8 步：对最终排图结果做验证和对比。
-    PipelineStep(
-        id="validation",
-        title="Validation report",
-        script="scripts/validate_opt_schedule.py",
-        description="Validate the optimized schedule and generate comparison outputs.",
+        description="Select the lowest-energy class combination and write final comparison outputs.",
     ),
 )
 
@@ -154,7 +156,7 @@ def select_steps(args: argparse.Namespace) -> list[PipelineStep]:
 
     # --only energy_menu,dp_schedule 这种参数会先被拆成列表。
     only_ids = split_csv(args.only)
-    # --skip validation 这种参数也拆成列表。
+    # --skip class_lookup 这种参数也拆成列表。
     skip_ids = split_csv(args.skip)
     # 校验 --only 里写的步骤是否存在。
     validate_step_ids(only_ids, "--only")
@@ -213,6 +215,7 @@ def run_step(
     python_exe: str,
     log_dir: Path,
     dry_run: bool,
+    trip_no: int,
 ) -> int:
     """执行单个流水线步骤。"""
 
@@ -227,6 +230,8 @@ def run_step(
     print(step.description)
     # 打印实际命令；带空格的路径会加引号，方便复制排查。
     print("Command:", " ".join(f'"{part}"' if " " in part else part for part in command))
+    # 趟号以环境变量传给子脚本；子脚本用它决定读写 trip1/trip6 等文件。
+    print(f"Trip:    {trip_no} (segment index {trip_no - 1})")
 
     # 如果脚本不存在，直接返回 127，表示命令/文件不存在。
     if not script_path.exists():
@@ -236,6 +241,11 @@ def run_step(
     # dry-run 模式只打印命令，不真正执行脚本。
     if dry_run:
         return 0
+
+    # 子进程继承当前环境，并额外得到本次选择的趟号。
+    child_env = os.environ.copy()
+    child_env["ENERGY_TRIP_NO"] = str(trip_no)
+    child_env["ENERGY_TRIP_INDEX"] = str(trip_no - 1)
 
     # 创建日志目录，例如 output/pipeline_logs/20260525_133110。
     log_dir.mkdir(parents=True, exist_ok=True)
@@ -249,6 +259,8 @@ def run_step(
         # 写入日志头，方便之后追溯。
         log.write(f"# step: {step.id}\n")
         log.write(f"# command: {' '.join(command)}\n")
+        log.write(f"# ENERGY_TRIP_NO: {trip_no}\n")
+        log.write(f"# ENERGY_TRIP_INDEX: {trip_no - 1}\n")
         log.write(f"# started: {datetime.now().isoformat(timespec='seconds')}\n\n")
         # 启动子脚本。
         process = subprocess.Popen(
@@ -256,6 +268,8 @@ def run_step(
             command,
             # cwd 设为项目根目录，保证原 scripts/ 里的相对路径尽量保持原行为。
             cwd=project_root,
+            # env 里带上 ENERGY_TRIP_NO，供 full_line/globall 等脚本读取。
+            env=child_env,
             # 捕获标准输出。
             stdout=subprocess.PIPE,
             # 把错误输出合并到标准输出，日志里能看到完整信息。
@@ -303,6 +317,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--list", action="store_true", help="List pipeline steps and exit.")
     # --dry-run：打印命令但不执行，适合开会演示或检查流程。
     parser.add_argument("--dry-run", action="store_true", help="Print commands without executing scripts.")
+    # --trip-no：选择第几趟车；例如 --trip-no 6 会处理第 6 趟，对应 segment index=5。
+    parser.add_argument("--trip-no", type=int, default=DEFAULT_TRIP_NO, help="Trip number to process, using 1-based numbering.")
+    # --ask-trip：运行时询问用户第几趟，适合不想记命令参数时使用。
+    parser.add_argument("--ask-trip", action="store_true", help="Prompt for the trip number before running.")
     # --from-step：从某一步开始，例如 --from-step energy_menu。
     parser.add_argument("--from-step", choices=get_step_ids(), help="Start from this step.")
     # --to-step：到某一步结束，例如 --to-step dp_schedule。
@@ -325,6 +343,23 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def resolve_trip_no(args: argparse.Namespace) -> int:
+    """得到本次要处理的趟号。"""
+
+    # 默认使用 --trip-no 或 DEFAULT_TRIP_NO。
+    trip_no = args.trip_no
+    # 如果用户加了 --ask-trip，就在终端里交互询问。
+    if args.ask_trip:
+        raw = input(f"请输入要处理第几趟车，直接回车使用默认第 {trip_no} 趟：").strip()
+        if raw:
+            trip_no = int(raw)
+
+    # 趟号使用给人看的 1-based 编号，至少为 1。
+    if trip_no < 1:
+        raise ValueError("--trip-no must be >= 1.")
+    return trip_no
+
+
 def main() -> int:
     """主函数：解析参数、选择步骤、按顺序执行。"""
 
@@ -332,6 +367,8 @@ def main() -> int:
     parser = build_parser()
     # 读取用户传入的命令行参数。
     args = parser.parse_args()
+    # 得到本次要处理的趟号。
+    trip_no = resolve_trip_no(args)
 
     # 自动定位项目根目录，避免必须从固定目录运行。
     project_root = find_project_root(Path(__file__).resolve())
@@ -361,6 +398,7 @@ def main() -> int:
     print(f"Python:       {args.python}")
     print(f"Log dir:      {log_dir}")
     print(f"Dry run:      {args.dry_run}")
+    print(f"Trip no:      {trip_no} (segment index {trip_no - 1})")
     # 打印最终选中的步骤列表。
     print("\nSelected steps:")
     print_steps(selected_steps)
@@ -376,6 +414,7 @@ def main() -> int:
             python_exe=args.python,
             log_dir=log_dir,
             dry_run=args.dry_run,
+            trip_no=trip_no,
         )
         # 非 0 退出码表示失败。
         if code != 0:
