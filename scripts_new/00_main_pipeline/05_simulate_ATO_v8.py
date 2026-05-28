@@ -67,7 +67,7 @@ plt.rcParams['axes.unicode_minus'] = False
 # =========================
 # 路径配置（基于脚本位置自动推导项目根目录）
 # =========================
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 def get_data_dir_candidates(defaults: List[Path]) -> List[Path]:
     """Use ENERGY_DATA_DIR when the main pipeline points this run at a test dataset."""
@@ -552,7 +552,7 @@ def build_output_dataframe(curve_obj: Dict, target_l: float) -> pd.DataFrame:
     t = np.array(curve_obj["t"], dtype=float)
     v = np.array(curve_obj["v"], dtype=float)
     s = np.array(curve_obj["s"], dtype=float)
-    
+
     # 🌟 核心逻辑：如果位移没跑满，补一个点到终点
     # if s[-1] < target_l - 0.01:
     #     # 在末尾加 0.05s，速度设为0，位移设为 target_l
@@ -717,18 +717,18 @@ def extract_real_runs_for_class(df: pd.DataFrame, class_name: str, art: Dict):
 
 #     s_grid = np.linspace(0.0, float(art["target_l"]), 500)
 #     v_gen_dist = np.interp(s_grid, generated_df["dist_m"], generated_df["velocity_mps"])
-    
+
 #     # 🌟 2. 核心缝合逻辑：将蓝线的“尾巴”拼给红线 🌟
 #     # 找到红线实际跑到的最大位移
 #     max_generated_s = generated_df["dist_m"].max()
-    
+
 #     # 找到在标准网格 s_grid 中，超过红线最大位移的所有点
 #     stitch_mask = s_grid > max_generated_s
-    
+
 #     # 将这些点对应的红线速度，强行替换为蓝线（真实中位数）的速度
 #     # 这样红线就会顺着蓝线的轨迹一直画到终点
 #     v_gen_dist[stitch_mask] = real_med[stitch_mask]
-    
+
 #     # 3. 再次强制确保最后一个点是 0 (物理闭合)
 #     v_gen_dist[-1] = 0.0
 #     t_gen = generated_df["time_s"].values
@@ -853,26 +853,26 @@ def compare_generated_with_real_class(class_name: str, generated_df: pd.DataFram
         v_real_dist = resample_real_run_to_distance_grid(item["raw_t"], item["raw_v"], s_grid)
         if v_real_dist is not None:
             real_resampled.append(v_real_dist)
-    
+
     if not real_resampled:
         return {"compare_status": "error", "compare_message": "样本对齐失败", "real_sample_count": 0}
-        
+
     all_real_v = np.vstack(real_resampled)
     real_med = np.median(all_real_v, axis=0) # 这里的 real_med 是标准的蓝线
 
     # 3. 🌟 核心：手动构建红线，并强制补全尾部 🌟
     # 先按照红线自己的数据插值
     v_gen_dist = np.interp(s_grid, generated_df["dist_m"], generated_df["velocity_mps"], right=-1.0)
-    
+
     # 找到红线在哪个点之后“没数了”（即我们设定的标记值 -1.0）
     # 或者是在红线最大位移之后的点
     max_gen_s = generated_df["dist_m"].max()
-    
+
     for i in range(len(s_grid)):
         # 如果当前网格点超过了红线能跑到的最大位置，直接把蓝线的值“借”给红线
         if s_grid[i] > max_gen_s or v_gen_dist[i] < 0:
             v_gen_dist[i] = real_med[i]
-            
+
     # 再次强制确保最后一个点死死钉在 0 上
     v_gen_dist[-1] = 0.0
 
@@ -887,13 +887,13 @@ def compare_generated_with_real_class(class_name: str, generated_df: pd.DataFram
     plt.plot(s_grid, v_gen_dist, color="#d62728", linewidth=2.8, label=f"Generated {class_name}")
     # 画阴影
     plt.fill_between(s_grid, np.quantile(all_real_v, 0.15, axis=0), np.quantile(all_real_v, 0.85, axis=0), alpha=0.1, color="#5dade2")
-    
+
     plt.title(f"{class_name}: generated vs real (speed-distance)(R² = {r2_val:.4f})")
     plt.xlabel("Distance (m)")
     plt.ylabel("Velocity (m/s)")
     plt.legend()
     plt.grid(True, linestyle="--", alpha=0.35)
-    
+
     dist_fig_path = output_dir / f"{class_name}_generated_vs_real_speed_distance.png"
     plt.savefig(dist_fig_path, dpi=280, bbox_inches="tight")
     plt.close()
@@ -1023,7 +1023,7 @@ def generate_for_station_pair(station_pair: str, level_target_times: Dict[str, f
         if target_name in ["class1", "class2"]:
             if "class2" in available_keys: return "class2"
             return "class3" if "class3" in available_keys else None
-        
+
         # 如果是 class3/4/5：优先找历史 class3 基因，没有则找 class2
         if target_name in ["class3", "class4", "class5"]:
             if "class3" in available_keys: return "class3"
@@ -1036,17 +1036,17 @@ def generate_for_station_pair(station_pair: str, level_target_times: Dict[str, f
     # 2. 遍历 5 个等级生成
     for class_name in sorted(level_target_times.keys(), key=class_sort_key):
         T_target = float(level_target_times[class_name])
-        
+
         # 寻找该等级的最佳父母基因
         parent_name = select_parent(class_name, multi_art.keys())
-        
+
         if not parent_name:
             print(f"   ⚠️ {station_pair} {class_name}: 找不到基准基因，跳过")
             continue
-            
+
         active_art = multi_art[parent_name]
         dt = active_art.get("dt_sample", DT_SAMPLE_FALLBACK)
-        
+
         # 🌟 优化：如果是镜像逻辑（目标就是基准，且时间几乎一样）
         time_diff = abs(T_target - active_art["time_ref_raw"])
         if parent_name == class_name and time_diff < 0.6:
@@ -1075,12 +1075,12 @@ def generate_for_station_pair(station_pair: str, level_target_times: Dict[str, f
             curve_obj = solve_result["curve"]
             # 增加平滑防止锯齿
             curve_obj["v"] = safe_savgol(curve_obj["v"], window=15, poly=3)
-            
+
             df_out = build_output_dataframe(curve_obj, active_art["target_l"])
             curve_csv_path = output_dir / f"{class_name}_generated_curve.csv"
             df_out.to_csv(curve_csv_path, index=False, encoding="utf-8-sig")
 
-            result = {"class_name": class_name, "target_time": T_target, "status": status, 
+            result = {"class_name": class_name, "target_time": T_target, "status": status,
                       "reason": reason, "curve_obj": curve_obj, "df": df_out}
             all_results[class_name] = result
             plot_single_class_detail(class_name, result, output_dir, station_pair)
@@ -1132,8 +1132,8 @@ def generate_for_station_pair(station_pair: str, level_target_times: Dict[str, f
         "class2_compare_message": class2_compare_info.get("compare_message", "none")
     }
 
-    
-    
+
+
 
 
 # =========================

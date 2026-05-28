@@ -15,6 +15,8 @@ data/raw_data/
 data/data_processed/
 data/data_processed_new/
 data/data_processed_new_v2/
+data/data_processed_step2_v3*/
+data/data_processed_with_class/
 data/0308/
 data/*.7z
 
@@ -48,6 +50,13 @@ output/analysis/*.zip
 output/analysis/*.7z
 output/analysis/*.png
 output/validation_all_trips/
+output/pipeline_logs/
+
+# Local exported/reference artifacts
+ppt/*.png
+ppt/*.json
+*.zip
+*.7z
 
 # Project-specific large files
 python-3.11.9-amd64.exe

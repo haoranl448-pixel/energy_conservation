@@ -62,7 +62,7 @@ MANUAL_CONSTRAINTS = {
 GLOBAL_ALLOWED_CLASSES = ["class2", "class3","class4", "class5"]
 
 # ===================== 2. Paths =====================
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 def get_trip_no() -> int:
     """从主程序传入的环境变量里读取要处理第几趟车。"""
@@ -98,19 +98,37 @@ DATA_DIR = get_data_dir(PROJECT_ROOT / "data" / "data_processed")
 SLIP_RATIO = 1.0
 TRIP_INDEX = TRIP_NO - 1
 
-STATIONS = [
+FULL_LINE_STATIONS = [
     "布政-张家潭", "张家潭-同德路", "同德路-石碶", "石碶-雅渡", "雅渡-庙堰",
-    # "庙堰-钟公庙", "钟公庙-鄞州区政府", "鄞州区政府-钱湖南路", "钱湖南路-南高教园区",
-    # "南高教园区-下应路", "下应路-大洋江", "大洋江-泗港", "泗港-曹隘", 
-    # "曹隘-柳隘",
-    # "柳隘-海晏北路",
-    # "海晏北路-民安东路", 
-    # "民安东路-会展中心", "会展中心-院士路",
-    # "院士路-盎孟港", "盎孟港-三官堂", 
-    #"三官堂-兴庄路",
-    #  "兴庄路-兴海南路",
-    # "兴海南路-梅堰", "梅堰-永茂路", "永茂路-镇海大道", "镇海大道-骆驼桥"
+    "庙堰-钟公庙", "钟公庙-鄞州区政府", "鄞州区政府-钱湖南路", "钱湖南路-南高教园区",
+    "南高教园区-下应路", "下应路-大洋江", "大洋江-泗港", "泗港-曹隘", "曹隘-柳隘",
+    "柳隘-海晏北路", "海晏北路-民安东路", "民安东路-会展中心", "会展中心-院士路",
+    "院士路-盎孟港", "盎孟港-三官堂", "三官堂-兴庄路", "兴庄路-兴海南路",
+    "兴海南路-梅堰", "梅堰-永茂路", "永茂路-镇海大道", "镇海大道-骆驼桥",
 ]
+
+
+def get_line_scope(default_value: str = "full") -> str:
+    """Read the station range from the main pipeline."""
+
+    raw = os.environ.get("ENERGY_LINE_SCOPE", default_value).strip().lower()
+    if raw in {"full", "all"}:
+        return "full"
+    if raw == "first5":
+        return "5"
+    try:
+        section_count = int(raw)
+    except ValueError as exc:
+        raise ValueError("ENERGY_LINE_SCOPE must be 'full' or a positive integer section count.") from exc
+    if section_count < 1:
+        raise ValueError("ENERGY_LINE_SCOPE section count must be >= 1.")
+    if section_count > len(FULL_LINE_STATIONS):
+        raise ValueError(f"ENERGY_LINE_SCOPE section count must be <= {len(FULL_LINE_STATIONS)}.")
+    return raw
+
+
+LINE_SCOPE = get_line_scope()
+STATIONS = FULL_LINE_STATIONS if LINE_SCOPE == "full" else FULL_LINE_STATIONS[:int(LINE_SCOPE)]
 
 # ===================== 3. Dwell helper =====================
 
@@ -175,6 +193,7 @@ def run_optimization():
     # A. Load data
     print(f"Trip: {TRIP_NO} (segment index {TRIP_INDEX})")
     print(f"Target total time: {T_TOTAL_TARGET:.2f}s")
+    print(f"Line scope: {LINE_SCOPE} ({len(STATIONS)} sections)")
     print(f"Menu file: {MENU_FILE}")
     print(f"History file: {HIST_FILE}")
     print(f"Historical curve data dir: {DATA_DIR}")

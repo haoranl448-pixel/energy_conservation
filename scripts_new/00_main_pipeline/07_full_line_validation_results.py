@@ -5,7 +5,7 @@ from pathlib import Path
 import sys
 import math
 # ===================== 1. 路径与配置 =====================
-PROJECT_ROOT = Path(r"D:\energy_conservation")
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 RES_MODEL_BASE = PROJECT_ROOT / "output" / "models" / "nn_results_residual_v2"
 
 def get_data_dir(default_value: Path) -> Path:
@@ -69,19 +69,19 @@ def evaluate_historical_trip(sp):
     # 1. 读取该区间的历史 results 文件
     file_path = DATA_DIR / f"results_{sp}.xlsx"
     if not file_path.exists(): return None
-    
+
     df_all = pd.read_excel(file_path)
     # 确保数值化
     cols = ['速度(m/s)', '加速度(m/s²)', '累计位移(m)', 'energy', '时刻', '重量', 'gradient', 'curvature']
     for c in cols: df_all[c] = pd.to_numeric(df_all[c], errors='coerce')
-    
+
     # 2. 提取用户选择的第 TRIP_NO 趟车；TRIP_INDEX 是从 0 开始的 segment 索引。
     segs = sorted(df_all['segment'].unique())
     if TRIP_INDEX >= len(segs):
         raise IndexError(f"{sp} 只有 {len(segs)} 个 segment，无法提取第 {TRIP_NO} 趟车。")
     target_seg = segs[TRIP_INDEX]
     df = df_all[df_all['segment'] == target_seg].copy().dropna(subset=['速度(m/s)'])
-    
+
     t_seq = df['时刻'].values - df['时刻'].iloc[0]
     v_seq = df['速度(m/s)'].values
     a_seq = df['加速度(m/s²)'].values
@@ -103,17 +103,17 @@ def evaluate_historical_trip(sp):
     # 5. 构建特征矩阵 [v, a, e_phy, grad, mass, curv]
     # 严格匹配你截图里的特征顺序
     raw_X = np.stack([
-        v_seq, 
-        a_seq, 
-        e_phy_steps[:len(df)], 
-        df['gradient'].values, 
-        df['重量'].values, 
+        v_seq,
+        a_seq,
+        e_phy_steps[:len(df)],
+        df['gradient'].values,
+        df['重量'].values,
         df['curvature'].values
     ], axis=1)
-    
+
     scaled_X = sx.transform(raw_X)
     windows = [scaled_X[i-29:i+1] for i in range(29, len(scaled_X))]
-    
+
     res_sum = 0.0
     if windows:
         with torch.no_grad():
@@ -124,7 +124,7 @@ def evaluate_historical_trip(sp):
     # 历史实测能耗只用于误差诊断；globall_v2 对比时使用的是历史曲线经模型回放后的能耗。
     e_real_total = (df['energy'].sum() / 3.6e6) * 1000 # 历史实测 Wh
     e_model_total = np.sum(e_phy_steps[29:]) + res_sum # 历史曲线模型回放 Wh
-    
+
     return {
         "站间区间": sp,
         "历史运行时间(s)": round(t_seq[-1], 2),
@@ -154,7 +154,7 @@ if __name__ == "__main__":
     for i, sp in enumerate(line5_stations, 1):
         # 打印进度，让控制台有反馈
         print(f"[{i:02d}/{len(line5_stations)}] 正在处理: {sp} ...", end='\r')
-        
+
         try:
             # 执行你定义的评估函数
             res = evaluate_historical_trip(sp)
@@ -172,9 +172,9 @@ if __name__ == "__main__":
     if results:
         df_final = pd.DataFrame(results)
         # 强制显示所有行，防止中间被省略号遮盖
-        pd.set_option('display.max_rows', None) 
+        pd.set_option('display.max_rows', None)
         print(df_final.to_string(index=False))
-        
+
         # 建议：顺便保存一份 CSV 结果，方便你填 PPT 或者写报告
         output_file = f"full_line{TRIP_NO}_validation_results.csv"
         df_final.to_csv(output_file, index=False, encoding='utf-8-sig')

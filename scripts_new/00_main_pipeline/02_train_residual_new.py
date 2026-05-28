@@ -12,12 +12,13 @@ from torch.utils.data import DataLoader, TensorDataset
 from sklearn.preprocessing import StandardScaler
 import sys
 import warnings
+from pathlib import Path
 
 warnings.filterwarnings("ignore")
 
 # ================= 1. 路径与配置 =================
-current_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.dirname(current_dir)
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+project_root = str(PROJECT_ROOT)
 sys.path.append(project_root)
 
 from src.physics.train_simu import TrainTheoreticalEnergyModel
@@ -35,7 +36,7 @@ def get_data_dir(default_dir):
 DATA_DIR = get_data_dir(os.path.join(project_root, "data", "data_processed"))
 
 # --- 🚀 提速参数配置 ---
-FEATURE_COLS = ['v', 'a', 'e_phy', 'grad', 'mass', 'curv'] 
+FEATURE_COLS = ['v', 'a', 'e_phy', 'grad', 'mass', 'curv']
 SEQ_LEN = 30
 BATCH_SIZE = 512  # 🚀 提速点 1：大幅增加 Batch Size
 MAX_EPOCHS = 150  # 最大轮数
@@ -89,7 +90,7 @@ def read_data(station_pair):
     pattern_old = os.path.join(project_root, "data_processed", f"results_{station_pair}*.xlsx")
     files = sorted(glob.glob(pattern_new))
     if not files: files = sorted(glob.glob(pattern_old))
-    if not files: 
+    if not files:
         print(f"   ⚠️ 未找到数据: {station_pair}")
         return None
     return pd.concat([pd.read_excel(f) for f in files], ignore_index=True)
@@ -126,9 +127,9 @@ def train_station(sp):
     # for seg_id, group in df.groupby('segment'):
     #     e_phy_wh = sim_model.run_batch_simulation(group['时刻'].values, group['速度(m/s)'].values, group['重量'].iloc[0])
     #     df.loc[group.index, 'energy_phy'] = e_phy_wh
-        
+
     # df['energy_res'] = (df['energy'] / 3.6e6 * 1000) - df['energy_phy']
-    
+
     # raw_X = df[['速度(m/s)', '加速度(m/s²)', 'energy_phy', 'gradient', '重量', 'curvature']].values
     # raw_y = df['energy_res'].values
     # segments = df['segment'].values
@@ -140,15 +141,15 @@ def train_station(sp):
         trip_data = df[mask]
         t_seq = trip_data['时刻'].values
         v_seq = trip_data['速度(m/s)'].values
-        mass_val = trip_data['重量'].iloc[0] 
+        mass_val = trip_data['重量'].iloc[0]
         e_seq_wh = sim_model.run_batch_simulation(t_seq, v_seq, mass_val)
         L = min(len(trip_data), len(e_seq_wh))
         df.loc[trip_data.index[:L], 'energy_phy'] = e_seq_wh[:L]
-    
+
     # 3. 计算残差
     df['energy_real'] = (pd.to_numeric(df['energy'], errors='coerce').fillna(0) / 3.6e6) * 1000
     df['energy_res'] = df['energy_real'] - df['energy_phy']
-    
+
     # 4. 特征
     v = df['速度(m/s)'].values
     a = df['加速度(m/s²)'].values
@@ -186,10 +187,10 @@ def train_station(sp):
     # X_train_seq, y_train_seq = [], []
     # for seg in train_segs:
     #     mask = (segments == seg)
-    #     sx, sy = create_sequences(scaler_x.transform(raw_X[mask]), 
+    #     sx, sy = create_sequences(scaler_x.transform(raw_X[mask]),
     #                               scaler_y.transform(raw_y[mask].reshape(-1,1)).flatten(), SEQ_LEN)
     #     if len(xs := sx) > 0: X_train_seq.append(sx); y_train_seq.append(sy)
-    
+
     # X_train_seq = np.concatenate(X_train_seq)
     # y_train_seq = np.concatenate(y_train_seq)
 
@@ -198,10 +199,10 @@ def train_station(sp):
     scaler_y = StandardScaler()
     X_train = scaler_x.fit_transform(raw_X[train_mask])
     y_train = scaler_y.fit_transform(raw_y[train_mask].reshape(-1,1)).flatten()
-    
+
     with open(os.path.join(out_dir, "scaler_x.pkl"), "wb") as f: pickle.dump(scaler_x, f)
     with open(os.path.join(out_dir, "scaler_y.pkl"), "wb") as f: pickle.dump(scaler_y, f)
-    
+
     if np.sum(test_mask) == 0: return
     X_test = scaler_x.transform(raw_X[test_mask])
     y_test = scaler_y.transform(raw_y[test_mask].reshape(-1,1)).flatten()
@@ -213,7 +214,7 @@ def train_station(sp):
         if len(idx) <= SEQ_LEN: continue
         sx, sy = create_sequences(scaler_x.transform(raw_X[idx]), scaler_y.transform(raw_y[idx].reshape(-1,1)).flatten(), SEQ_LEN)
         if len(sx)>0: X_train_seq.append(sx); y_train_seq.append(sy)
-    
+
     X_test_seq, y_test_seq = [], []
     for seg in test_segs:
         idx = np.where(segments == seg)[0]
@@ -233,10 +234,10 @@ def train_station(sp):
 
     # # 🚀 提速点 3：设置 pin_memory 加快数据搬运
     # train_loader = DataLoader(
-    #     TensorDataset(torch.FloatTensor(X_train_seq), torch.FloatTensor(y_train_seq).unsqueeze(1)), 
+    #     TensorDataset(torch.FloatTensor(X_train_seq), torch.FloatTensor(y_train_seq).unsqueeze(1)),
     #     batch_size=BATCH_SIZE, shuffle=True, pin_memory=True
     # )
-    
+
     # model = ResidualTransformerV2(input_dim=6).to(DEVICE)
     # optimizer = optim.Adam(model.parameters(), lr=LR)
     # criterion = nn.SmoothL1Loss()
@@ -255,9 +256,9 @@ def train_station(sp):
 
     # --- 🚀 核心早停逻辑 ---
 
-    
+
     print(f"▶️ 开始训练: {sp} (样本数: {len(X_train_seq)})")
-    
+
     for ep in range(MAX_EPOCHS):
         model.train()
         epoch_losses = []
@@ -268,9 +269,9 @@ def train_station(sp):
             loss.backward()
             optimizer.step()
             epoch_losses.append(loss.item())
-        
+
         avg_loss = np.mean(epoch_losses)
-        
+
         # 打印进度 (每 10 轮一次)
         if (ep + 1) % 10 == 0:
             print(f"      Epoch {ep+1:3d} | Loss: {avg_loss:.6f}")
@@ -279,10 +280,10 @@ def train_station(sp):
         if avg_loss < best_loss:
             best_loss = avg_loss
             torch.save(model.state_dict(), f"{out_dir}/best_res_model.pth")
-    
+
     print(f"   ✅ 训练结束 (Best Loss: {best_loss:.5f})")
 
-    
+
     # ================= 9. 绘图 (三纵轴版: v, s, E) =================
     model.load_state_dict(torch.load(f"{out_dir}/best_res_model.pth", map_location=device))
     model.eval()

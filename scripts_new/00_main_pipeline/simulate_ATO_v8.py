@@ -78,6 +78,17 @@ plt.rcParams['axes.unicode_minus'] = False
 # 项目根目录；在 scripts_new 二级目录直接运行时需要留意路径层级。
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
+def get_data_dir_candidates(defaults: List[Path]) -> List[Path]:
+    """如果主程序指定了测试数据目录，就优先使用该目录。"""
+
+    raw = os.environ.get("ENERGY_DATA_DIR")
+    if not raw:
+        return defaults
+    data_dir = Path(raw)
+    if not data_dir.is_absolute():
+        data_dir = PROJECT_ROOT / data_dir
+    return [data_dir, *defaults]
+
 # 1. 目标时间表：每个区间 Class1-Class5 的目标运行时间。
 STANDARD_TIMES_CANDIDATES = [
     PROJECT_ROOT / "output" / "analysis" / "class_tables_strict" / "standard_class_times.csv"
@@ -95,6 +106,7 @@ OUTPUT_ROOT = PROJECT_ROOT / "output" / "ato_generated_results_new_v4"
 DATA_DIR_CANDIDATES = [
     PROJECT_ROOT / "data"/  "data_processed_new_v2"
 ]
+DATA_DIR_CANDIDATES = get_data_dir_candidates(DATA_DIR_CANDIDATES)
 
 
 
@@ -254,14 +266,43 @@ def build_order_key(series):
 
 
 def resolve_input_files(data_dir: Path, station_pair: str) -> List[Path]:
-    """定位某个区间的 cleaned Excel 文件。"""
+    """定位某个区间的 cleaned/results Excel 文件。"""
 
-    exact = data_dir / f"cleaned_{station_pair}.xlsx"
-    if exact.exists():
-        return [exact]
+    for prefix in ("cleaned", "results"):
+        exact = data_dir / f"{prefix}_{station_pair}.xlsx"
+        if exact.exists():
+            return [exact]
 
-    pattern = str(data_dir / f"cleaned_{station_pair}*.xlsx")
-    return [Path(x) for x in sorted(glob.glob(pattern))]
+    matches: List[Path] = []
+    for prefix in ("cleaned", "results"):
+        pattern = str(data_dir / f"{prefix}_{station_pair}*.xlsx")
+        matches.extend(Path(x) for x in sorted(glob.glob(pattern)))
+    return matches
+
+
+def station_pairs_available_in_data_dir(data_dir: Path) -> set[str]:
+    """读取数据目录中实际存在的站间区间。"""
+
+    pairs: set[str] = set()
+    for fp in data_dir.glob("*.xlsx"):
+        for prefix in ("cleaned_", "results_"):
+            if fp.stem.startswith(prefix):
+                pairs.add(fp.stem[len(prefix):])
+    return pairs
+
+
+def filter_table_by_available_data(table: pd.DataFrame, data_dir: Path) -> pd.DataFrame:
+    """指定测试数据目录时，只处理该目录中存在的区间。"""
+
+    if not os.environ.get("ENERGY_DATA_DIR"):
+        return table
+    available = station_pairs_available_in_data_dir(data_dir)
+    filtered = table[table["区段"].isin(available)].copy()
+    if filtered.empty:
+        raise FileNotFoundError(f"数据目录 {data_dir} 中没有和标准时间表匹配的 cleaned_/results_ 文件。")
+    skipped = len(table) - len(filtered)
+    print(f"按测试数据目录筛选区间: {len(filtered)} 个，跳过标准时间表中未提供数据的 {skipped} 个区间。")
+    return filtered
 
 
 def build_run_id(df: pd.DataFrame):
@@ -1213,14 +1254,17 @@ def main():
     # 定位输入时间表和模板目录。
     standard_times_path = resolve_existing_file(STANDARD_TIMES_CANDIDATES, "standard_class_times.csv")
     model_root = resolve_existing_dir(MODEL_ROOT_CANDIDATES, "class3 模板工件")
+    data_dir = locate_source_data_dir()
 
-    # 读取标准时间表，每行对应一个站间区间。
+    # 读取标准时间表，每行对应一个站间区间；指定测试数据目录时只保留实际存在的区间。
     table = load_standard_times(standard_times_path)
+    table = filter_table_by_available_data(table, data_dir)
     batch_rows = []
 
     print("=" * 72)
     print("批量生成 class1-class5 速度曲线")
     print(f"时间表: {standard_times_path}")
+    print(f"数据目录: {data_dir}")
     print(f"模板目录: {model_root}")
     print(f"输出目录: {OUTPUT_ROOT}")
     print(f"硬限速: {VMAX_KMH:.1f} km/h")

@@ -56,7 +56,7 @@ from scipy.signal import savgol_filter
 # =========================
 # 路径配置（已适配 D:\energy_conservation）
 # =========================
-PROJECT_ROOT = Path(r"D:\energy_conservation")
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 def get_data_dir_candidates(defaults: List[Path]) -> List[Path]:
     """Use ENERGY_DATA_DIR when the main pipeline points this run at a test dataset."""
@@ -429,11 +429,11 @@ def train_one_station_pair(station_pair: str, level_target_times: Dict[str, floa
         return {"station_pair": station_pair, "status": "missing_columns", "message": f"缺少必要列: {missing_cols}"}
 
     df[CLASS_COL] = df[CLASS_COL].apply(normalize_class_label)
-    
+
     # 3. 识别当前区间包含的所有历史等级
-    available_classes = [c for c in ["class1", "class2", "class3", "class4", "class5"] 
+    available_classes = [c for c in ["class1", "class2", "class3", "class4", "class5"]
                          if c in df[CLASS_COL].unique()]
-    
+
     if not available_classes:
         return {"station_pair": station_pair, "status": "no_class_data", "message": "未识别到任何 class 数据"}
 
@@ -446,7 +446,7 @@ def train_one_station_pair(station_pair: str, level_target_times: Dict[str, floa
     # 4. 循环处理每一个等级
     for current_cls in available_classes:
         df_ref = df[df[CLASS_COL] == current_cls].copy()
-        
+
         run_id, _ = build_run_id(df_ref)
         df_ref["run_id"] = run_id.astype(str)
 
@@ -456,7 +456,7 @@ def train_one_station_pair(station_pair: str, level_target_times: Dict[str, floa
             if item is not None:
                 item["run_id"] = rid
                 # 记录标签方便后续画图
-                item["class_label"] = current_cls 
+                item["class_label"] = current_cls
                 clean_runs.append(item)
 
         if len(clean_runs) == 0:
@@ -466,7 +466,7 @@ def train_one_station_pair(station_pair: str, level_target_times: Dict[str, floa
         end_dists = np.array([x["end_dist"] for x in clean_runs], dtype=float)
         target_l = float(np.median(end_dists))
         valid_runs = [x for x in clean_runs if abs(x["end_dist"] - target_l) <= END_DIST_TOL]
-        
+
         if len(valid_runs) == 0:
             continue
 
@@ -480,18 +480,18 @@ def train_one_station_pair(station_pair: str, level_target_times: Dict[str, floa
         for item in valid_runs:
             v_norm = resample_to_normalized_time(item["raw_v"], n_ref)
             if v_norm is not None: v_norm_curves.append(v_norm)
-        
+
         if len(v_norm_curves) == 0: continue
         v_norm_curves = np.vstack(v_norm_curves)
 
         # ======= 🚀 B-Spline “中间线”重构 =======
         raw_median = np.median(v_norm_curves, axis=0)
         tau = np.linspace(0.0, 1.0, len(raw_median))
-        
+
         from scipy.interpolate import make_interp_spline
         spline = make_interp_spline(tau, raw_median, k=3)
         v_ref_t = spline(tau)
-        
+
         v_ref_t = np.clip(v_ref_t, 0.0, None)
         v_ref_t[0], v_ref_t[-1] = 0.0, 0.0
         v_ref_t = safe_savgol(v_ref_t, window=31, poly=3)
@@ -521,7 +521,7 @@ def train_one_station_pair(station_pair: str, level_target_times: Dict[str, floa
             "mass_median": mass_median,
             "valid_runs_samples": valid_runs  # 👈 修正：把样本存进去供下方绘图使用
         }
-        
+
         multi_artifacts[current_cls] = current_art
         summary_stats.append({
             "class": current_cls,
@@ -544,22 +544,22 @@ def train_one_station_pair(station_pair: str, level_target_times: Dict[str, floa
     # ======= 🌟 绘图逻辑：遍历 multi_artifacts 里的每一个等级 🌟 =======
     for cls_name, art_data in multi_artifacts.items():
         plt.figure(figsize=(10, 6))
-        
+
         # 1. 绘制历史样本背景 (灰色线)
         # 注意：这里直接从刚才存入的字典里拿样本数据
         for run in art_data["valid_runs_samples"]:
             plt.plot(run["raw_t"], run["raw_v"] * 3.6, color="#95a5a6", alpha=0.15, linewidth=1)
-        
+
         # 2. 绘制 Spline 重构后的参考线 (红线)
-        plt.plot(art_data["t_ref"], art_data["v_ref_t"] * 3.6, 
+        plt.plot(art_data["t_ref"], art_data["v_ref_t"] * 3.6,
                  label=f"Ref {cls_name} (Spline Refined)", color='red', linewidth=2.5)
-        
+
         plt.title(f"{station_pair} - {cls_name} Reference Curve")
         plt.xlabel("Time (s)")
         plt.ylabel("Velocity (km/h)")
         plt.legend()
         plt.grid(True, alpha=0.3)
-        
+
         # 保存图片
         plt.savefig(output_dir / f"{cls_name}_reference_vt.png", dpi=150)
         plt.close()
@@ -568,7 +568,7 @@ def train_one_station_pair(station_pair: str, level_target_times: Dict[str, floa
         "station_pair": station_pair,
         "status": "success",
         "message": f"完成等级提取: {list(multi_artifacts.keys())}",
-        "output_dir": str(output_dir)   
+        "output_dir": str(output_dir)
     }
 # =========================
 # 主流程
@@ -600,7 +600,7 @@ def main():
         batch_rows.append(result)
 
         if result["status"] == "success":
-            
+
             #print(f"  ✅ 成功 | class3参考时间 = {result['class3_time_median_s']} s | 样本数 = {result['n_runs_class3']}")
             found_clss = list(pickle.load(open(result["output_dir"] + "/multi_class_phase_artifacts.pkl", "rb")).keys())
             print(f"  ✅ 成功 | 提取等级: {found_clss}")

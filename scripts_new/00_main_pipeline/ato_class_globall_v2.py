@@ -91,14 +91,27 @@ MENU_FILE = PROJECT_ROOT / "output" / "analysis" / f"ato_class_energy_menu{TRIP_
 # 历史运行时间/模型回放能耗，用于最终对比节能率。
 HIST_FILE = PROJECT_ROOT / f"full_line{TRIP_NO}_validation_results.csv"
 # 生成曲线目录，用于最后画优化方案 v-t / v-s。
-TRAJ_BASE_DIR = PROJECT_ROOT / "output" / "ato_generated_results_new_v3"
+TRAJ_BASE_DIR = PROJECT_ROOT / "output" / "ato_generated_results_new_v4"
 # 输出目录：最终对比表和图会保存到这里。
 OUT_DIR = PROJECT_ROOT / "output" / "schedule" / "final_plan_report_v2"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 # 区间参数表，主要读取 MASS。
 SECTION_PARAMS_FILE = PROJECT_ROOT / "data" / "static" / f"section_params_trip{TRIP_NO}.csv"
 # 处理后的历史数据目录，用于绘制历史速度曲线。
-DATA_DIR = PROJECT_ROOT / "data" / "data_processed"
+
+def get_data_dir(default_value: Path) -> Path:
+    """主程序指定测试数据目录时，从该目录读取历史 results_*.xlsx。"""
+
+    raw = os.environ.get("ENERGY_DATA_DIR")
+    if not raw:
+        return default_value
+    data_dir = Path(raw)
+    if not data_dir.is_absolute():
+        data_dir = PROJECT_ROOT / data_dir
+    return data_dir
+
+
+DATA_DIR = get_data_dir(PROJECT_ROOT / "data" / "data_processed")
 # 位移修正比例，当前不做修正。
 SLIP_RATIO = 1.0
 # 选取历史数据中的第几个 segment 做对比。
@@ -200,6 +213,7 @@ def run_optimization():
     print(f"Target total time: {T_TOTAL_TARGET:.2f}s")
     print(f"Menu file: {MENU_FILE}")
     print(f"History file: {HIST_FILE}")
+    print(f"Historical curve data dir: {DATA_DIR}")
     df_menu = pd.read_csv(MENU_FILE)
     df_hist = pd.read_csv(HIST_FILE).set_index('站间区间')
     df_mass = pd.read_csv(SECTION_PARAMS_FILE)

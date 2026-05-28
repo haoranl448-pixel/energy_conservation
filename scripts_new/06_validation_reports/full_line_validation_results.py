@@ -6,8 +6,21 @@ import sys
 import math
 # ===================== 1. 路径与配置 =====================
 PROJECT_ROOT = Path(r"D:\energy_conservation")
-DATA_DIR = PROJECT_ROOT / "data" / "data_processed"
 RES_MODEL_BASE = PROJECT_ROOT / "output" / "models" / "nn_results_residual_v2"
+
+def get_data_dir(default_value: Path) -> Path:
+    """从主程序传入的数据目录读取 results_*.xlsx；未传入时使用默认目录。"""
+
+    raw = os.environ.get("ENERGY_DATA_DIR")
+    if not raw:
+        return default_value
+    data_dir = Path(raw)
+    if not data_dir.is_absolute():
+        data_dir = PROJECT_ROOT / data_dir
+    return data_dir
+
+
+DATA_DIR = get_data_dir(PROJECT_ROOT / "data" / "data_processed")
 
 def get_trip_no() -> int:
     """从主程序传入的环境变量里读取要处理第几趟车。"""
@@ -135,6 +148,7 @@ if __name__ == "__main__":
 
     results = []
     print(f"🚀 开始全线 {len(line5_stations)} 个区间的历史数据验证：第 {TRIP_NO} 趟车...")
+    print(f"历史数据目录: {DATA_DIR}")
 
     # 2. 循环处理每一个区间
     for i, sp in enumerate(line5_stations, 1):

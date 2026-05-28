@@ -6,9 +6,9 @@
 
 从原 `scripts/` 复制过来的脚本清单见 `_manifest.csv`。
 
-## 主程序入口
+## main.py 使用方法
 
-主程序是 `main.py`，作用是把完整流程拆成多个步骤模块，然后按顺序调用原 `scripts/` 里的脚本。
+主程序是 `scripts_new/main.py`，作用是把完整流程拆成多个步骤模块，然后按顺序调用 `scripts_new/00_main_pipeline/` 里的编号脚本。
 
 当前默认主流程到 `ato_class_globall_v2.py` 动态规划排图结束。这个脚本内部已经会输出最终方案表 `Final_Planning_Comparison.csv` 和对比图 `Optimized_Full_Line_Report.png`，所以默认流程不再继续调用 OpenTrack 导出或旧版 validation 脚本。
 
@@ -17,10 +17,10 @@
 - `output/analysis/ato_class_energy_menu<趟号>_new_v3.csv`：由 `scripts/ato_generated_results_energy.py` 生成。
 - `full_line<趟号>_validation_results.csv`：由 `scripts/full_line_validation_results.py` 生成，其中 `历史能耗(Wh)` 是历史曲线经模型回放得到的能耗，`历史实测能耗(Wh)` 只用于误差诊断。
 - `data/static/section_params_trip<趟号>.csv`：区间参数和载重表。
-- `output/ato_generated_results_new_v3/<区间>/<class>_generated_curve.csv`：用于最终拼接优化速度曲线。
+- `output/ato_generated_results_new_v4/<区间>/<class>_generated_curve.csv`：用于最终拼接优化速度曲线。
 - `data/data_processed/results_<区间>.xlsx`：用于最终拼接历史速度曲线。
 
-注意当前脚本版本里有一个路径版本需要核对：`scripts/simulate_ATO_v8.py` 输出目录是 `output/ato_generated_results_new_v4`，但 `scripts/ato_generated_results_energy.py` 和 `scripts/ato_class_globall_v2.py` 读取的是 `output/ato_generated_results_new_v3`。如果要从头重新生成曲线，需要先统一这几个脚本的目录版本。
+当前主流程的 ATO 曲线目录已统一为 `output/ato_generated_results_new_v4`：`scripts/simulate_ATO_v8.py` 写入这里，`scripts/ato_generated_results_energy.py` 和 `scripts/ato_class_globall_v2.py` 也从这里读取。
 
 默认完整流程：
 
@@ -29,7 +29,23 @@ python scripts_new/main.py
 ```
 
 默认处理第 1 趟车；如果想固定改成别的趟，可以直接改 `scripts_new/main.py` 顶部的 `DEFAULT_TRIP_NO`。
-默认 DP 目标总时间使用 `scripts/ato_class_globall_v2.py` 里的 `DEFAULT_T_TOTAL_TARGET`；如果想固定成某个数，可以直接改 `scripts_new/main.py` 顶部的 `DEFAULT_TARGET_TIME`。
+默认 DP 目标总时间使用 `scripts_new/00_main_pipeline/08_ato_class_globall_v2.py` 里的 `DEFAULT_T_TOTAL_TARGET`；如果想固定成某个数，可以直接改 `scripts_new/main.py` 顶部的 `DEFAULT_TARGET_TIME`。
+默认数据目录使用各脚本自己的配置；测试时可以通过 `--data-dir` 直接指定一个含 `results_*.xlsx` 的外部目录。
+默认 DP 排图范围是全正向区间；测试时可以通过 `--line-scope n` 只取前 `n` 个区间。
+
+
+默认的参数：
+从第 1 步跑到最后一步
+trip-no = 1
+target-time = 不传，DP 用 08_ato_class_globall_v2.py 里的默认值
+data-dir = 不传，各个子脚本用自己的默认数据目录；
+        目前大概是这样：train_ATO_v8.py / simulate_ATO_v8.py，默认优先找：D:\energy_conservation\data\data_processed_new_v2
+        ato_generated_results_energy.py / full_line_validation_results.py / ato_class_globall_v2.py，默认用的是：D:\energy_conservation\data\data_processed
+line-scope = full，DP 默认跑全正向区间；传数字时跑前 N 个正向区间
+dry-run = False，真的执行
+遇到报错 = 停止
+log-dir = 自动生成 output/pipeline_logs/时间戳
+python = 当前这个 python
 
 临时指定趟号：
 
@@ -61,12 +77,35 @@ python scripts_new/main.py --ask-target-time
 python scripts_new/main.py --trip-no 6 --target-time 692.65 --from-step dp_schedule
 ```
 
+临时指定测试数据目录：
+
+```powershell
+python scripts_new/main.py --data-dir "C:\Users\bit11\Desktop\数据测试代码\data_processed_step2_v3_first5" --from-step ato_template
+```
+
+指定 DP 区间范围：
+
+```powershell
+# 默认全区间，不写 --line-scope 也可以
+python scripts_new/main.py --from-step dp_schedule --data-dir data\data_processed_step2_v3_all_with_class
+
+# 只跑前 5 个正向区间
+python scripts_new/main.py --from-step dp_schedule --line-scope 5 --data-dir data\data_processed_step2_v3_first5_with_class
+```
+
+运行时询问数据目录：
+
+```powershell
+python scripts_new/main.py --ask-data-dir --from-step ato_template
+```
+
 趟号会通过环境变量传给子脚本：
 
 - `scripts/ato_generated_results_energy.py` 会输出 `output/analysis/ato_class_energy_menu<趟号>_new_v3.csv`。
 - `scripts/full_line_validation_results.py` 会输出 `full_line<趟号>_validation_results.csv`。
 - `scripts/ato_class_globall_v2.py` 会读取同一趟号的能耗菜单、历史基准和 `section_params_trip<趟号>.csv`。
 - `scripts/ato_class_globall_v2.py` 会读取主程序传入的目标总时间；未传入时使用脚本默认值。
+- `--data-dir` 指定后，`train_ATO_v8.py` 和 `simulate_ATO_v8.py` 会直接识别 `results_区间.xlsx`，不需要另存为 `cleaned_区间.xlsx`；同时只处理该目录里实际存在的区间，避免和旧的 26 区间结果混跑。
 
 如果当前终端里 `python` 不在 PATH，可以用本机 Python 绝对路径：
 
@@ -102,13 +141,14 @@ python scripts_new/main.py --only energy_menu,dp_schedule
 
 | 步骤 ID | 调用脚本 | 作用 |
 | --- | --- | --- |
-| `data_process` | `scripts/data_process.py` | 原始数据清洗 |
-| `class_lookup` | `scripts/build_class_lookup_tables.py` | 构建等级对照表 |
-| `ato_template` | `scripts/train_ATO_v8.py` | 提取 ATO 多等级相位模板 |
-| `ato_simulation` | `scripts/simulate_ATO_v8.py` | 生成各区间各等级速度曲线 |
-| `energy_menu` | `scripts/ato_generated_results_energy.py` | 计算能耗菜单 |
-| `historical_baseline` | `scripts/full_line_validation_results.py` | 生成历史用时/历史模型能耗基准 |
-| `dp_schedule` | `scripts/ato_class_globall_v2.py` | DP 排图优化，并输出最终方案表和对比图 |
+| `data_process` | `scripts_new/00_main_pipeline/01_data_process.py` | 原始数据清洗 |
+| `residual_training` | `scripts_new/00_main_pipeline/02_train_residual_new.py` | 训练残差能耗模型 |
+| `class_lookup` | `scripts_new/00_main_pipeline/03_build_class_lookup_tables.py` | 构建等级/标准时间对照表 |
+| `ato_template` | `scripts_new/00_main_pipeline/04_train_ATO_v8.py` | 提取 ATO 多等级相位模板 |
+| `ato_simulation` | `scripts_new/00_main_pipeline/05_simulate_ATO_v8.py` | 生成各区间各等级速度曲线 |
+| `energy_menu` | `scripts_new/00_main_pipeline/06_ato_generated_results_energy.py` | 计算能耗菜单 |
+| `historical_baseline` | `scripts_new/00_main_pipeline/07_full_line_validation_results.py` | 生成历史用时/历史模型能耗基准 |
+| `dp_schedule` | `scripts_new/00_main_pipeline/08_ato_class_globall_v2.py` | DP 排图优化，并输出最终方案表和对比图 |
 
 日志默认输出到 `output/pipeline_logs/时间戳/`，每个步骤一个 `.log` 文件。
 

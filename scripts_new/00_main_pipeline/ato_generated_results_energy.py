@@ -36,11 +36,23 @@ def get_trip_no() -> int:
     return trip_no
 
 
+def get_data_dir(default_value: Path) -> Path:
+    """从主程序传入的数据目录读取 results_*.xlsx；未传入时使用默认目录。"""
+
+    raw = os.environ.get("ENERGY_DATA_DIR")
+    if not raw:
+        return default_value
+    data_dir = Path(raw)
+    if not data_dir.is_absolute():
+        data_dir = PROJECT_ROOT / data_dir
+    return data_dir
+
+
 TRIP_NO = get_trip_no()
 # 生成速度曲线的主目录，每个站间区间一个子文件夹。
-SENIOR_BASE_DIR = PROJECT_ROOT / "output" / "ato_generated_results_new_v3"
+SENIOR_BASE_DIR = PROJECT_ROOT / "output" / "ato_generated_results_new_v4"
 # 物理地图数据目录，用于读取坡度 gradient 和曲率 curvature。
-MAP_DATA_DIR = PROJECT_ROOT  / "data" / "data_processed"
+MAP_DATA_DIR = get_data_dir(PROJECT_ROOT  / "data" / "data_processed")
 # 残差模型权重目录，内部按站间区间分子文件夹。
 RES_MODEL_BASE = PROJECT_ROOT / "output" / "models" / "nn_results_residual_v2"
 # 载重参数表，提供每个区间的 MASS。
@@ -175,6 +187,7 @@ def main():
     station_folders = [d for d in os.listdir(SENIOR_BASE_DIR) if os.path.isdir(SENIOR_BASE_DIR / d)]
 
     print(f"🚀 开始批量评估 {len(station_folders)} 个区间的 ATO 轨迹能耗：第 {TRIP_NO} 趟车...")
+    print(f"地图/历史数据目录: {MAP_DATA_DIR}")
 
     for sp in station_folders:
         # all_classes_summary.csv 记录该区间各等级曲线是否生成成功。

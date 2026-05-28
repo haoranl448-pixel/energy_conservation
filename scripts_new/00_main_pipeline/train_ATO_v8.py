@@ -67,6 +67,17 @@ from scipy.signal import savgol_filter
 # 当前脚本使用硬编码项目根目录，便于在本机固定工程目录下运行。
 PROJECT_ROOT = Path(r"D:\energy_conservation")
 
+def get_data_dir_candidates(defaults: List[Path]) -> List[Path]:
+    """如果主程序指定了测试数据目录，就优先使用该目录。"""
+
+    raw = os.environ.get("ENERGY_DATA_DIR")
+    if not raw:
+        return defaults
+    data_dir = Path(raw)
+    if not data_dir.is_absolute():
+        data_dir = PROJECT_ROOT / data_dir
+    return [data_dir, *defaults]
+
 # 标准等级时间表位置：每个区间 Class1-Class5 的目标时间。
 STANDARD_TIMES_CANDIDATES = [
     PROJECT_ROOT / "output" / "analysis" / "class_tables_strict" / "standard_class_times.csv"
@@ -76,6 +87,7 @@ STANDARD_TIMES_CANDIDATES = [
 DATA_DIR_CANDIDATES = [
     PROJECT_ROOT / "data" / "data_processed_new_v2"
 ]
+DATA_DIR_CANDIDATES = get_data_dir_candidates(DATA_DIR_CANDIDATES)
 
 # 模板工件保存位置，每个区间一个子目录。
 OUTPUT_ROOT = PROJECT_ROOT / "output" / "ato_phase_results_v3"
@@ -216,16 +228,45 @@ def resolve_existing_dir(candidates: List[Path], desc: str) -> Path:
 
 
 def resolve_input_files(data_dir: Path, station_pair: str) -> List[Path]:
-    """定位某个站间区间对应的 cleaned Excel 文件。"""
+    """定位某个站间区间对应的 cleaned/results Excel 文件。"""
 
-    # 优先匹配精确文件名。
-    exact = data_dir / f"cleaned_{station_pair}.xlsx"
-    if exact.exists():
-        return [exact]
+    # 优先匹配精确文件名；测试数据可直接使用 results_ 前缀。
+    for prefix in ("cleaned", "results"):
+        exact = data_dir / f"{prefix}_{station_pair}.xlsx"
+        if exact.exists():
+            return [exact]
 
     # 如果精确文件不存在，则用通配符兼容后缀版本。
-    pattern = str(data_dir / f"cleaned_{station_pair}*.xlsx")
-    return [Path(x) for x in sorted(glob.glob(pattern))]
+    matches: List[Path] = []
+    for prefix in ("cleaned", "results"):
+        pattern = str(data_dir / f"{prefix}_{station_pair}*.xlsx")
+        matches.extend(Path(x) for x in sorted(glob.glob(pattern)))
+    return matches
+
+
+def station_pairs_available_in_data_dir(data_dir: Path) -> set[str]:
+    """读取数据目录中实际存在的站间区间。"""
+
+    pairs: set[str] = set()
+    for fp in data_dir.glob("*.xlsx"):
+        for prefix in ("cleaned_", "results_"):
+            if fp.stem.startswith(prefix):
+                pairs.add(fp.stem[len(prefix):])
+    return pairs
+
+
+def filter_table_by_available_data(table: pd.DataFrame, data_dir: Path) -> pd.DataFrame:
+    """指定测试数据目录时，只处理该目录中存在的区间。"""
+
+    if not os.environ.get("ENERGY_DATA_DIR"):
+        return table
+    available = station_pairs_available_in_data_dir(data_dir)
+    filtered = table[table["区段"].isin(available)].copy()
+    if filtered.empty:
+        raise FileNotFoundError(f"数据目录 {data_dir} 中没有和标准时间表匹配的 cleaned_/results_ 文件。")
+    skipped = len(table) - len(filtered)
+    print(f"按测试数据目录筛选区间: {len(filtered)} 个，跳过标准时间表中未提供数据的 {skipped} 个区间。")
+    return filtered
 
 
 
@@ -615,8 +656,9 @@ def main():
     standard_times_path = resolve_existing_file(STANDARD_TIMES_CANDIDATES, "standard_class_times.csv")
     data_dir = resolve_existing_dir(DATA_DIR_CANDIDATES, "数据")
 
-    # 读取时间表，每一行对应一个站间区间。
+    # 读取时间表，每一行对应一个站间区间；指定测试数据目录时只保留实际存在的区间。
     table = load_standard_times(standard_times_path)
+    table = filter_table_by_available_data(table, data_dir)
     batch_rows = []
 
     print("=" * 72)

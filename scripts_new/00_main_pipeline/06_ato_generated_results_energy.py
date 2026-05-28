@@ -8,7 +8,7 @@ from scipy.signal import savgol_filter
 warnings.filterwarnings("ignore")
 
 # ===================== 1. 路径与配置 =====================
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 def get_trip_no() -> int:
     """从主程序传入的环境变量里读取要处理第几趟车。"""
@@ -95,7 +95,7 @@ def get_energy(sp, class_csv_path, mass_val):
     df_traj = pd.read_csv(class_csv_path)
     t_arr = df_traj['time_s'].values
     v_arr = df_traj['velocity_mps'].values
-    
+
     s_arr = df_traj['dist_m'].values
     a_arr = np.zeros_like(v_arr)
     if len(v_arr) > 1: a_arr[1:] = np.diff(v_arr) / DT
@@ -105,7 +105,7 @@ def get_energy(sp, class_csv_path, mass_val):
     # 2. 物理仿真
     engine = TrainTheoreticalEnergyModel()
     e_phy_steps = engine.run_batch_simulation(t_arr, v_arr, mass_val)
-    
+
     # 3. 加载模型与地图插值
     res_dir = RES_MODEL_BASE / sp
     with open(res_dir/"scaler_x.pkl", "rb") as f: sx = pickle.load(f)
@@ -129,7 +129,7 @@ def get_energy(sp, class_csv_path, mass_val):
         with torch.no_grad():
             p_out = model(torch.tensor(np.array(windows), dtype=torch.float32)).numpy()
         res_sum = np.sum(sy.inverse_transform(p_out))
-    
+
     return np.sum(e_phy_steps[29:]) + res_sum, np.sum(e_phy_steps[29:]), res_sum,a_arr
 
 # ===================== 4. 主流程 =====================
@@ -152,22 +152,22 @@ def main():
         summary_path = SENIOR_BASE_DIR / sp / "all_classes_summary.csv"
         if not summary_path.exists():
             continue
-            
+
         df_summary = pd.read_csv(summary_path)
         # 🌟 过滤：只处理 generated 的，跳过 overspeed
         df_valid = df_summary[df_summary['status'] == 'generated']
-        
+
         if sp not in df_params.index:
             print(f"   ⚠️ 参数表中缺少 {sp}，跳过")
             continue
-        
+
         mass_val = df_params.loc[sp, 'MASS']
 
         for _, row in df_valid.iterrows():
             c_name = row['class_name']
             # 拼接详细轨迹文件名
             class_csv_path = SENIOR_BASE_DIR / sp / f"{c_name}_generated_curve.csv"
-            
+
             if not class_csv_path.exists():
                 continue
 

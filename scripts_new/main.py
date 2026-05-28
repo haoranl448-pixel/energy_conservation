@@ -36,6 +36,10 @@ DEFAULT_TRIP_NO = 1
 # 默认 DP 目标总时间，单位秒。
 # None 表示使用 globall_v2.py 里的默认值；也可以改成 692.65 这种数字。
 DEFAULT_TARGET_TIME = None
+# 默认测试数据目录。
+# None 表示各脚本使用自己的默认数据目录；也可以改成一个目录路径字符串。
+DEFAULT_DATA_DIR = None
+DEFAULT_LINE_SCOPE = "full"
 
 
 def configure_stdio() -> None:
@@ -66,7 +70,7 @@ class PipelineStep:
 
 # 主流程定义。
 # 这里的顺序就是完整流程的执行顺序：
-# 数据清洗 -> 等级表 -> 模板提取 -> 曲线生成 -> 能耗菜单 -> 历史基准 -> DP 排图。
+# 数据清洗 -> 残差模型训练 -> 等级表 -> 模板提取 -> 曲线生成 -> 能耗菜单 -> 历史基准 -> DP 排图。
 # 注意：ato_class_globall_v2.py 里已经会输出最终方案表和对比图，
 # 因此默认主流程到 DP 排图就结束，不再接 OpenTrack 导出或旧版 validation。
 PIPELINE_STEPS: tuple[PipelineStep, ...] = (
@@ -74,49 +78,56 @@ PIPELINE_STEPS: tuple[PipelineStep, ...] = (
     PipelineStep(
         id="data_process",
         title="Data cleaning",
-        script="scripts/data_process.py",
+        script="scripts_new/00_main_pipeline/01_data_process.py",
         description="Clean raw operation data and generate section-level processed files.",
     ),
-    # 第 2 步：构建运行等级对照表。
+    # 第 2 步：训练物理模型之外的残差修正模型。
+    PipelineStep(
+        id="residual_training",
+        title="Residual model training",
+        script="scripts_new/00_main_pipeline/02_train_residual_new.py",
+        description="Train per-section residual energy models used by energy menu calculation.",
+    ),
+    # 第 3 步：构建运行等级对照表。
     PipelineStep(
         id="class_lookup",
         title="Class lookup table",
-        script="scripts/build_class_lookup_tables.py",
+        script="scripts_new/00_main_pipeline/03_build_class_lookup_tables.py",
         description="Build service/class lookup tables used by later ATO steps.",
     ),
-    # 第 3 步：从历史数据里提取 ATO 分等级相位模板。
+    # 第 4 步：从历史数据里提取 ATO 分等级相位模板。
     PipelineStep(
         id="ato_template",
         title="ATO phase template extraction",
-        script="scripts/train_ATO_v8.py",
+        script="scripts_new/00_main_pipeline/04_train_ATO_v8.py",
         description="Extract Class1-Class5 phase templates from historical runs.",
     ),
-    # 第 4 步：基于模板生成各区间各等级速度曲线。
+    # 第 5 步：基于模板生成各区间各等级速度曲线。
     PipelineStep(
         id="ato_simulation",
         title="ATO curve generation",
-        script="scripts/simulate_ATO_v8.py",
+        script="scripts_new/00_main_pipeline/05_simulate_ATO_v8.py",
         description="Generate feasible speed curves for each section and ATO class.",
     ),
-    # 第 5 步：对生成曲线计算能耗菜单。
+    # 第 6 步：对生成曲线计算能耗菜单。
     PipelineStep(
         id="energy_menu",
         title="Energy menu calculation",
-        script="scripts/ato_generated_results_energy.py",
+        script="scripts_new/00_main_pipeline/06_ato_generated_results_energy.py",
         description="Calculate physical + residual-AI energy for generated curves.",
     ),
-    # 第 6 步：生成历史基准结果，供 DP 最终表对比历史用时和历史能耗。
+    # 第 7 步：生成历史基准结果，供 DP 最终表对比历史用时和历史能耗。
     PipelineStep(
         id="historical_baseline",
         title="Historical baseline calculation",
-        script="scripts/full_line_validation_results.py",
+        script="scripts_new/00_main_pipeline/07_full_line_validation_results.py",
         description="Generate historical time/energy baseline used by the DP comparison report.",
     ),
-    # 第 7 步：用动态规划选择全局最优运行等级组合。
+    # 第 8 步：用动态规划选择全局最优运行等级组合。
     PipelineStep(
         id="dp_schedule",
         title="DP schedule optimization",
-        script="scripts/ato_class_globall_v2.py",
+        script="scripts_new/00_main_pipeline/08_ato_class_globall_v2.py",
         description="Select the lowest-energy class combination and write final comparison outputs.",
     ),
 )
@@ -232,6 +243,8 @@ def run_step(
     dry_run: bool,
     trip_no: int,
     target_time: float | None,
+    data_dir: Path | None,
+    line_scope: str,
 ) -> int:
     """执行单个流水线步骤。"""
 
@@ -253,6 +266,9 @@ def run_step(
         print("Target:  script default")
     else:
         print(f"Target:  {target_time:.2f}s")
+    # 数据目录为空时，各子脚本沿用自己的默认目录。
+    print(f"Data:    {data_dir if data_dir is not None else 'script default'}")
+    print(f"Scope:   {line_scope}")
 
     # 如果脚本不存在，直接返回 127，表示命令/文件不存在。
     if not script_path.exists():
@@ -269,6 +285,9 @@ def run_step(
     child_env["ENERGY_TRIP_INDEX"] = str(trip_no - 1)
     if target_time is not None:
         child_env["ENERGY_TARGET_TIME"] = str(target_time)
+    if data_dir is not None:
+        child_env["ENERGY_DATA_DIR"] = str(data_dir)
+    child_env["ENERGY_LINE_SCOPE"] = line_scope
     # 子脚本里有 emoji/特殊符号输出；强制 UTF-8 容错，避免 Windows GBK 控制台报错。
     child_env["PYTHONIOENCODING"] = "utf-8:replace"
     child_env["PYTHONUTF8"] = "1"
@@ -288,6 +307,8 @@ def run_step(
         log.write(f"# ENERGY_TRIP_NO: {trip_no}\n")
         log.write(f"# ENERGY_TRIP_INDEX: {trip_no - 1}\n")
         log.write(f"# ENERGY_TARGET_TIME: {target_time if target_time is not None else 'script default'}\n")
+        log.write(f"# ENERGY_DATA_DIR: {data_dir if data_dir is not None else 'script default'}\n")
+        log.write(f"# ENERGY_LINE_SCOPE: {line_scope}\n")
         log.write("# PYTHONIOENCODING: utf-8:replace\n")
         log.write(f"# started: {datetime.now().isoformat(timespec='seconds')}\n\n")
         # 启动子脚本。
@@ -353,6 +374,15 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--target-time", type=float, default=DEFAULT_TARGET_TIME, help="DP target total time in seconds. Defaults to the globall_v2 script value.")
     # --ask-target-time：运行时询问 DP 目标总时间。
     parser.add_argument("--ask-target-time", action="store_true", help="Prompt for the DP target total time before running.")
+    # --data-dir：指定本次运行使用的数据目录，可直接指向外部 results_*.xlsx 测试目录。
+    parser.add_argument("--data-dir", default=DEFAULT_DATA_DIR, help="Data directory for this run. Supports results_*.xlsx and cleaned_*.xlsx.")
+    parser.add_argument(
+        "--line-scope",
+        default=DEFAULT_LINE_SCOPE,
+        help="Station range used by DP schedule optimization: full/all or a positive section count, e.g. 5.",
+    )
+    # --ask-data-dir：运行时询问数据目录。
+    parser.add_argument("--ask-data-dir", action="store_true", help="Prompt for the data directory before running.")
     # --from-step：从某一步开始，例如 --from-step energy_menu。
     parser.add_argument("--from-step", choices=get_step_ids(), help="Start from this step.")
     # --to-step：到某一步结束，例如 --to-step dp_schedule。
@@ -412,6 +442,49 @@ def resolve_target_time(args: argparse.Namespace) -> float | None:
     return target_time
 
 
+def resolve_data_dir(args: argparse.Namespace, project_root: Path) -> Path | None:
+    """得到本次运行使用的数据目录。"""
+
+    # 默认不覆盖子脚本自己的数据目录。
+    data_dir_value = args.data_dir
+    # 如果用户加了 --ask-data-dir，就在终端里交互询问。
+    if args.ask_data_dir:
+        default_text = "各脚本默认目录" if not data_dir_value else str(data_dir_value)
+        raw = input(f"请输入数据目录，直接回车使用 {default_text}：").strip()
+        if raw:
+            data_dir_value = raw
+
+    # None 或空字符串都表示不传 ENERGY_DATA_DIR。
+    if not data_dir_value:
+        return None
+
+    data_dir = Path(data_dir_value)
+    # 相对路径按项目根目录解析，方便写 data/data_processed 这种形式。
+    if not data_dir.is_absolute():
+        data_dir = project_root / data_dir
+    if not data_dir.exists() or not data_dir.is_dir():
+        raise FileNotFoundError(f"Data directory not found: {data_dir}")
+    return data_dir
+
+
+def resolve_line_scope(args: argparse.Namespace) -> str:
+    """得到 DP 排图使用的区间范围；full 表示全正向区间，数字表示前 N 个区间。"""
+
+    raw = str(args.line_scope).strip().lower()
+    if raw in {"full", "all"}:
+        return "full"
+    if raw == "first5":
+        return "5"
+
+    try:
+        section_count = int(raw)
+    except ValueError as exc:
+        raise ValueError("--line-scope must be 'full' or a positive integer, for example --line-scope 5.") from exc
+    if section_count < 1:
+        raise ValueError("--line-scope section count must be >= 1.")
+    return str(section_count)
+
+
 def main() -> int:
     """主函数：解析参数、选择步骤、按顺序执行。"""
 
@@ -422,13 +495,15 @@ def main() -> int:
     parser = build_parser()
     # 读取用户传入的命令行参数。
     args = parser.parse_args()
+    # 自动定位项目根目录，避免必须从固定目录运行。
+    project_root = find_project_root(Path(__file__).resolve())
     # 得到本次要处理的趟号。
     trip_no = resolve_trip_no(args)
     # 得到本次 DP 排图的目标总时间；None 表示使用 globall_v2.py 默认值。
     target_time = resolve_target_time(args)
-
-    # 自动定位项目根目录，避免必须从固定目录运行。
-    project_root = find_project_root(Path(__file__).resolve())
+    # 得到本次运行的数据目录；None 表示使用各脚本默认目录。
+    data_dir = resolve_data_dir(args, project_root)
+    line_scope = resolve_line_scope(args)
     # 根据 --only/--skip/--from-step/--to-step 等参数选出要跑的步骤。
     selected_steps = select_steps(args)
 
@@ -457,6 +532,8 @@ def main() -> int:
     print(f"Dry run:      {args.dry_run}")
     print(f"Trip no:      {trip_no} (segment index {trip_no - 1})")
     print(f"Target time:  {f'{target_time:.2f}s' if target_time is not None else 'script default'}")
+    print(f"Data dir:     {data_dir if data_dir is not None else 'script default'}")
+    print(f"Line scope:   {line_scope}")
     # 打印最终选中的步骤列表。
     print("\nSelected steps:")
     print_steps(selected_steps)
@@ -474,6 +551,8 @@ def main() -> int:
             dry_run=args.dry_run,
             trip_no=trip_no,
             target_time=target_time,
+            data_dir=data_dir,
+            line_scope=line_scope,
         )
         # 非 0 退出码表示失败。
         if code != 0:
