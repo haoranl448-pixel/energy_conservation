@@ -60,6 +60,21 @@ MANUAL_CONSTRAINTS = {
 }
 
 GLOBAL_ALLOWED_CLASSES = ["class2", "class3","class4", "class5"]
+CURVE_SOURCE_COL = "曲线来源"
+PARENT_REF_COL = "父等级"
+SUPPORTING_REFS_COL = "支持等级"
+REAL_SAMPLE_COUNT_COL = "真实样本数"
+PARENT_REAL_SAMPLE_COUNT_COL = "父等级真实样本数"
+SAMPLE_RELIABILITY_COL = "样本可靠性"
+DP_CANDIDATE_STAGE_COL = "DP候选阶段"
+HIST_RAW_ENERGY_COL = "历史实测能耗(Wh)"
+HIST_MODEL_ENERGY_COL = "历史能耗(Wh)"
+
+DP_SOURCE_STAGES = [
+    ("real_only", {"real"}),
+    ("allow_interpolated", {"real", "interpolated"}),
+    ("allow_extrapolated", {"real", "interpolated", "extrapolated_adjacent"}),
+]
 
 # ===================== 2. Paths =====================
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -83,9 +98,9 @@ OUT_DIR.mkdir(parents=True, exist_ok=True)
 SECTION_PARAMS_FILE = PROJECT_ROOT / "data" / "static" / f"section_params_trip{TRIP_NO}.csv"
 
 def get_data_dir(default_value: Path) -> Path:
-    """Read historical results_*.xlsx from ENERGY_DATA_DIR when the main pipeline sets it."""
+    """Read historical results_*.xlsx from the results data directory selected by main."""
 
-    raw = os.environ.get("ENERGY_DATA_DIR")
+    raw = os.environ.get("ENERGY_RESULTS_DATA_DIR") or os.environ.get("ENERGY_DATA_DIR")
     if not raw:
         return default_value
     data_dir = Path(raw)
@@ -187,7 +202,49 @@ def distribute_dwell_delta(run_time_sum, dwell_configs):
     return True, np.round(dwell, 1).tolist()
 
 
-# ===================== 4. Core DP (unchanged from v1) =====================
+def ensure_menu_source_columns(df_menu: pd.DataFrame) -> pd.DataFrame:
+    """Keep old energy menus usable by treating missing source fields as real."""
+
+    df_menu = df_menu.copy()
+    defaults = {
+        CURVE_SOURCE_COL: "real",
+        PARENT_REF_COL: "",
+        SUPPORTING_REFS_COL: "",
+        REAL_SAMPLE_COUNT_COL: 0,
+        PARENT_REAL_SAMPLE_COUNT_COL: 0,
+        SAMPLE_RELIABILITY_COL: "",
+        DP_CANDIDATE_STAGE_COL: "real_only",
+    }
+    for col, value in defaults.items():
+        if col not in df_menu.columns:
+            df_menu[col] = value
+    df_menu[CURVE_SOURCE_COL] = df_menu[CURVE_SOURCE_COL].fillna("real").astype(str)
+    return df_menu
+
+
+def source_count_delta(curve_source: str) -> tuple[int, int]:
+    """Return (extrapolated_count, interpolated_count) for DP lexicographic scoring."""
+
+    if curve_source == "extrapolated_adjacent":
+        return 1, 0
+    if curve_source == "interpolated":
+        return 0, 1
+    return 0, 0
+
+
+def row_source_meta(row: pd.Series) -> dict:
+    return {
+        "curve_source": row.get(CURVE_SOURCE_COL, "real"),
+        "parent_ref": row.get(PARENT_REF_COL, ""),
+        "supporting_refs": row.get(SUPPORTING_REFS_COL, ""),
+        "real_sample_count": row.get(REAL_SAMPLE_COUNT_COL, 0),
+        "parent_real_sample_count": row.get(PARENT_REAL_SAMPLE_COUNT_COL, 0),
+        "sample_reliability": row.get(SAMPLE_RELIABILITY_COL, ""),
+        "dp_candidate_stage": row.get(DP_CANDIDATE_STAGE_COL, ""),
+    }
+
+
+# ===================== 4. Core staged DP =====================
 
 def run_optimization():
     # A. Load data
@@ -197,8 +254,10 @@ def run_optimization():
     print(f"Menu file: {MENU_FILE}")
     print(f"History file: {HIST_FILE}")
     print(f"Historical curve data dir: {DATA_DIR}")
-    df_menu = pd.read_csv(MENU_FILE)
+    df_menu = ensure_menu_source_columns(pd.read_csv(MENU_FILE))
     df_hist = pd.read_csv(HIST_FILE).set_index('站间区间')
+    if HIST_RAW_ENERGY_COL not in df_hist.columns:
+        raise ValueError(f"{HIST_FILE} 缺少 {HIST_RAW_ENERGY_COL}，请先运行 historical_baseline 生成带原始实测能耗的历史基准。")
     df_mass = pd.read_csv(SECTION_PARAMS_FILE)
     mass_map = dict(zip(df_mass['station_pair'], df_mass['MASS']))
 
@@ -211,12 +270,9 @@ def run_optimization():
     max_run_time = T_TOTAL_TARGET - min_total_dwell  # longest running we can afford
     nom_run_time = T_TOTAL_TARGET - nominal_total_dwell  # nominal for display
 
-    # C. DP — search ALL combinations up to max_run_time
+    # C. Staged DP. Prefer real curves first; only open generated candidates if needed.
     def to_int(t): return int(round(t * 10))
     max_run_int = to_int(max_run_time)
-
-    dp = {0: 0.0}
-    path = []
 
     print(f"Max run (at min dwell): {max_run_time:.1f}s")
     print(f"Nom run (at nominal):   {nom_run_time:.1f}s")
@@ -227,73 +283,123 @@ def run_optimization():
         tag = "LOCKED" if n == m else f"elastic ({m:.0f}-{n:.0f}s)"
         print(f"  {sp}: nominal={n:.0f}s, min={m:.0f}s [{tag}]")
 
-    for i, sp in enumerate(STATIONS):
-        new_dp, new_path = {}, {}
+    def options_for_stage(sp: str, allowed_sources: set[str]) -> pd.DataFrame:
         all_opts = df_menu[df_menu['站间区间'] == sp]
-
         if sp in MANUAL_CONSTRAINTS:
             options = all_opts[all_opts['运行等级'] == MANUAL_CONSTRAINTS[sp]]
         else:
             options = all_opts[all_opts['运行等级'].isin(GLOBAL_ALLOWED_CLASSES)]
+        return options[options[CURVE_SOURCE_COL].isin(allowed_sources)].copy()
 
-        for t_prev, e_prev in dp.items():
-            for _, row in options.iterrows():
-                t_curr = round(row['运行时长(s)'], 1)
-                t_sum = t_prev + to_int(t_curr)
-                if t_sum > max_run_int + 200:
-                    continue
-                e_sum = e_prev + row['预测能耗(Wh)']
-                if t_sum not in new_dp or e_sum < new_dp[t_sum]:
-                    new_dp[t_sum] = e_sum
-                    new_path[t_sum] = (t_prev, row['运行等级'], t_curr, row['预测能耗(Wh)'])
+    def run_dp_stage(stage_name: str, allowed_sources: set[str]):
+        # score tuple: (extrapolated_count, interpolated_count, energy_wh)
+        dp = {0: (0, 0, 0.0)}
+        path = []
 
-        dp, path = new_dp, path + [new_path]
-        print(f"  [{i+1}/{len(STATIONS)}] {sp} -> {len(dp)} states")
+        print(f"\nDP stage: {stage_name} | sources={sorted(allowed_sources)}")
+        for i, sp in enumerate(STATIONS):
+            new_dp, new_path = {}, {}
+            options = options_for_stage(sp, allowed_sources)
+            if options.empty:
+                print(f"  [{i+1}/{len(STATIONS)}] {sp} -> no options in this stage")
+                return None
 
-    # D. Select best: among ALL feasible states, pick minimum energy
-    #    Feasible: run_time + min_dwell_sum <= T_TOTAL_TARGET
-    feasible = [(t, dp[t]) for t in dp.keys() if t <= max_run_int]
-    if not feasible:
-        print("ERROR: No combination fits even with min dwell.")
-        min_r = min(dp.keys()) / 10.0
-        max_r = max(dp.keys()) / 10.0
-        print(f"Reachable run time: [{min_r:.1f}s, {max_r:.1f}s], max allowed: {max_run_time:.1f}s")
+            for t_prev, score_prev in dp.items():
+                ext_prev, int_prev, e_prev = score_prev
+                for _, row in options.iterrows():
+                    t_curr = round(row['运行时长(s)'], 1)
+                    t_sum = t_prev + to_int(t_curr)
+                    if t_sum > max_run_int + 200:
+                        continue
+
+                    e_curr = float(row['预测能耗(Wh)'])
+                    ext_add, int_add = source_count_delta(str(row.get(CURVE_SOURCE_COL, "real")))
+                    score = (ext_prev + ext_add, int_prev + int_add, e_prev + e_curr)
+                    if t_sum not in new_dp or score < new_dp[t_sum]:
+                        new_dp[t_sum] = score
+                        new_path[t_sum] = (
+                            t_prev,
+                            row['运行等级'],
+                            t_curr,
+                            e_curr,
+                            row_source_meta(row),
+                        )
+
+            dp, path = new_dp, path + [new_path]
+            print(f"  [{i+1}/{len(STATIONS)}] {sp} -> {len(dp)} states")
+            if not dp:
+                return None
+
+        feasible = [(t, dp[t]) for t in dp.keys() if t <= max_run_int]
+        if not feasible:
+            min_r = min(dp.keys()) / 10.0
+            max_r = max(dp.keys()) / 10.0
+            print(f"  no feasible state. Reachable run time: [{min_r:.1f}s, {max_r:.1f}s], max allowed: {max_run_time:.1f}s")
+            return None
+
+        feasible.sort(key=lambda x: x[1])
+        best_t_int, best_score = feasible[0]
+        return {
+            "stage_name": stage_name,
+            "dp": dp,
+            "path": path,
+            "feasible": feasible,
+            "best_t_int": best_t_int,
+            "final_energy": float(best_score[2]),
+            "extrapolated_count": int(best_score[0]),
+            "interpolated_count": int(best_score[1]),
+        }
+
+    solution = None
+    for stage_name, allowed_sources in DP_SOURCE_STAGES:
+        solution = run_dp_stage(stage_name, allowed_sources)
+        if solution is not None:
+            break
+
+    if solution is None:
+        print("ERROR: No DP stage can fit even with min dwell.")
         return
 
-    feasible.sort(key=lambda x: x[1])  # sort by energy ascending
-    best_t_int, final_energy = feasible[0]
+    stage_name = solution["stage_name"]
+    dp = solution["dp"]
+    path = solution["path"]
+    feasible = solution["feasible"]
+    best_t_int = solution["best_t_int"]
+    final_energy = solution["final_energy"]
 
     # Distribute remaining time as dwell (run_sum <= max_run_time guaranteed)
     best_dwells = distribute_dwell_delta(best_t_int / 10.0, dwell_configs[:-1])[1]
 
-    # Show the energy-vs-time tradeoff
-    print(f"\nFeasible states: {len(feasible)}")
-    print(f"Best:  run={best_t_int/10.0:.1f}s, energy={final_energy:.1f} Wh")
+    print(f"\nSelected DP stage: {stage_name}")
+    print(f"Feasible states: {len(feasible)}")
+    print(
+        f"Best:  run={best_t_int/10.0:.1f}s, energy={final_energy:.1f} Wh, "
+        f"extrapolated={solution['extrapolated_count']}, interpolated={solution['interpolated_count']}"
+    )
 
-    # Find the closest-to-nominal state for comparison
     nom_int = to_int(nom_run_time)
-    # Search for nearest feasible state near nominal
     nearby = [(t, dp[t]) for t in dp.keys() if nom_int - to_int(SLACK) <= t <= nom_int + to_int(SLACK)]
     if nearby:
-        nearby.sort(key=lambda x: x[1])  # min energy near nominal
-        nom_best_t, nom_best_e = nearby[0]
+        nearby.sort(key=lambda x: x[1])
+        nom_best_t, nom_best_score = nearby[0]
+        nom_best_e = float(nom_best_score[2])
         print(f"Nominal-dwell best nearby: run={nom_best_t/10.0:.1f}s, energy={nom_best_e:.1f} Wh")
         saving = nom_best_e - final_energy
         extra_run = (best_t_int - nom_best_t) / 10.0
-        print(f"Dwell trade: +{extra_run:.1f}s run time -> saves {saving:.1f} Wh ({saving/nom_best_e*100:.1f}%)")
+        if nom_best_e:
+            print(f"Dwell trade: +{extra_run:.1f}s run time -> saves {saving:.1f} Wh ({saving/nom_best_e*100:.1f}%)")
 
-    final_energy = dp[best_t_int]
     run_sum = best_t_int / 10.0
 
     # E. Backtrack
     final_rows = []
     curr_t = best_t_int
     for i in range(len(STATIONS) - 1, -1, -1):
-        prev_t, c_name, t_val, e_val = path[i][curr_t]
+        prev_t, c_name, t_val, e_val, source_meta = path[i][curr_t]
         sp = STATIONS[i]
         h_time = df_hist.loc[sp, '历史运行时间(s)']
-        # “历史能耗(Wh)”是历史运行曲线经同一套模型回放得到的能耗，不是原始实测能耗。
-        h_energy = df_hist.loc[sp, '历史能耗(Wh)']
+        h_raw_energy = df_hist.loc[sp, HIST_RAW_ENERGY_COL]
+        h_model_energy = df_hist.loc[sp, HIST_MODEL_ENERGY_COL] if HIST_MODEL_ENERGY_COL in df_hist.columns else np.nan
 
         # Dwell after this station (except last)
         if i < len(STATIONS) - 1:
@@ -308,8 +414,17 @@ def run_optimization():
             "停站时间(s)": round(dwell, 1) if i < len(STATIONS) - 1 else 0,
             "历史用时(s)": round(h_time, 2),
             "规划能耗(Wh)": round(e_val, 2),
-            "历史能耗(Wh)": round(h_energy, 2),
-            "节能量(Wh)": round(h_energy - e_val, 2),
+            "历史能耗(Wh)": round(h_raw_energy, 2),
+            "历史模型回放能耗(Wh)": round(h_model_energy, 2) if pd.notna(h_model_energy) else np.nan,
+            "能耗对比基准": "历史原始实测能耗",
+            "节能量(Wh)": round(h_raw_energy - e_val, 2),
+            "曲线来源": source_meta.get("curve_source", "real"),
+            "父等级": source_meta.get("parent_ref", ""),
+            "支持等级": source_meta.get("supporting_refs", ""),
+            "真实样本数": source_meta.get("real_sample_count", 0),
+            "父等级真实样本数": source_meta.get("parent_real_sample_count", 0),
+            "样本可靠性": source_meta.get("sample_reliability", ""),
+            "规划阶段": stage_name,
             "MASS": round(mass_map.get(sp, np.nan), 2),
         })
         curr_t = prev_t
@@ -333,6 +448,7 @@ def run_optimization():
 
     # F. Summary
     total_h_e = df_res['历史能耗(Wh)'].sum()
+    total_h_model_e = df_res['历史模型回放能耗(Wh)'].sum(skipna=True) if '历史模型回放能耗(Wh)' in df_res.columns else np.nan
     total_p_e = df_res['规划能耗(Wh)'].sum()
     total_p_run = df_res['规划用时(s)'].sum()
     total_p_dwell = df_res['停站时间(s)'].sum()
@@ -348,7 +464,16 @@ def run_optimization():
         "历史用时(s)": total_h_t,
         "规划能耗(Wh)": round(total_p_e, 2),
         "历史能耗(Wh)": round(total_h_e, 2),
+        "历史模型回放能耗(Wh)": round(total_h_model_e, 2) if pd.notna(total_h_model_e) else np.nan,
+        "能耗对比基准": "历史原始实测能耗",
         "节能量(Wh)": round(total_h_e - total_p_e, 2),
+        "曲线来源": "",
+        "父等级": "",
+        "支持等级": "",
+        "真实样本数": "",
+        "父等级真实样本数": "",
+        "样本可靠性": "",
+        "规划阶段": stage_name,
         "MASS": round(df_res['MASS'].sum(), 2),
     }
     df_res = pd.concat([df_res, pd.DataFrame([summary_row])], ignore_index=True)

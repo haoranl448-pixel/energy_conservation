@@ -1,0 +1,11 @@
+﻿来源文件,区段,列车运行方向,总趟次,全部等级列表,正常标签,正常趟次,正常等级列表,质量标签分布,20点以后趟次,全部_class1_趟数,全部_class2_趟数,全部_class3_趟数,全部_class4_趟数,全部_class5_趟数,正常_class1_趟数,正常_class2_趟数,正常_class3_趟数,正常_class4_趟数,正常_class5_趟数
+results_同德路-张家潭.xlsx,同德路-张家潭,DOWN,33,"class3,class4,class5",0,28,"class3,class4,class5",0:28; 1:5,5,0,0,1,12,20,0,0,1,12,15
+results_同德路-石碶.xlsx,同德路-石碶,UP,34,"class2,class3,class4",0,28,"class2,class3,class4",0:28; 1:5; 7:1,5,0,10,20,4,0,0,7,17,4,0
+results_布政-张家潭.xlsx,布政-张家潭,UP,34,"class3,class4",0,28,"class3,class4",0:28; 1:5; 6:1,5,0,0,25,9,0,0,0,20,8,0
+results_庙堰-雅渡.xlsx,庙堰-雅渡,DOWN,33,"class3,class4",0,28,"class3,class4",0:28; 1:5,5,0,0,2,31,0,0,0,2,26,0
+results_张家潭-同德路.xlsx,张家潭-同德路,UP,34,"class2,class3,class4",0,29,"class2,class3",0:29; 1:5,5,0,2,31,1,0,0,1,28,0,0
+results_张家潭-布政.xlsx,张家潭-布政,DOWN,33,"class3,class4,class5",0,28,"class3,class4,class5",0:28; 1:5,5,0,0,7,15,11,0,0,7,13,8
+results_石碶-同德路.xlsx,石碶-同德路,DOWN,33,"class3,class4,class5",0,28,"class3,class4,class5",0:28; 1:5,5,0,0,2,10,21,0,0,2,10,16
+results_石碶-雅渡.xlsx,石碶-雅渡,UP,34,"class1,class2,class3,class4",0,29,"class2,class3,class4",0:29; 1:5,5,2,13,16,3,0,0,12,15,2,0
+results_雅渡-庙堰.xlsx,雅渡-庙堰,UP,34,"class2,class3,class4",0,29,"class2,class3,class4",0:29; 1:5,5,0,6,23,5,0,0,4,21,4,0
+results_雅渡-石碶.xlsx,雅渡-石碶,DOWN,33,class3,0,28,class3,0:28; 1:5,5,0,0,33,0,0,0,0,28,0,0

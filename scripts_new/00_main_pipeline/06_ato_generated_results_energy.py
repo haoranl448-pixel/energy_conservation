@@ -21,9 +21,9 @@ def get_trip_no() -> int:
 
 
 def get_data_dir(default_value: Path) -> Path:
-    """从主程序传入的数据目录读取 results_*.xlsx；未传入时使用默认目录。"""
+    """从主程序传入的 results 数据目录读取 results_*.xlsx；未传入时使用默认目录。"""
 
-    raw = os.environ.get("ENERGY_DATA_DIR")
+    raw = os.environ.get("ENERGY_RESULTS_DATA_DIR") or os.environ.get("ENERGY_DATA_DIR")
     if not raw:
         return default_value
     data_dir = Path(raw)
@@ -140,7 +140,7 @@ def main():
 
     # 获取所有站间区间的子文件夹名
     station_folders = [d for d in os.listdir(SENIOR_BASE_DIR) if os.path.isdir(SENIOR_BASE_DIR / d)]
-    if os.environ.get("ENERGY_DATA_DIR"):
+    if os.environ.get("ENERGY_RESULTS_DATA_DIR") or os.environ.get("ENERGY_DATA_DIR"):
         available = station_pairs_available_in_data_dir(MAP_DATA_DIR)
         station_folders = [sp for sp in station_folders if sp in available]
         print(f"按测试数据目录筛选能耗菜单区间: {len(station_folders)} 个。")
@@ -173,12 +173,20 @@ def main():
 
             try:
                 e_pred ,e_phy,res_sum,a_arr= get_energy(sp, class_csv_path, mass_val)
+                curve_source = row.get('curve_source', 'real')
                 energy_menu.append({
                     '站间区间': sp,
                     '运行等级': c_name,
                     '运行时长(s)': round(row['sim_time_s'],1),
                     '预测能耗(Wh)': round(e_pred, 2),
-                    '峰值速度(kmh)': row['peak_speed_kmh']
+                    '峰值速度(kmh)': row['peak_speed_kmh'],
+                    '曲线来源': curve_source,
+                    '父等级': row.get('parent_ref', c_name),
+                    '支持等级': row.get('supporting_refs', c_name),
+                    '真实样本数': int(row.get('real_sample_count', 0)),
+                    '父等级真实样本数': int(row.get('parent_real_sample_count', row.get('real_sample_count', 0))),
+                    '样本可靠性': row.get('sample_reliability', ''),
+                    'DP候选阶段': row.get('dp_candidate_stage', 'real_only' if curve_source == 'real' else 'allow_extrapolated')
                 })
                 print(f"   ✅ {sp} | {c_name} | {row['sim_time_s']}s -> 总:{e_pred:.1f}Wh (物理:{e_phy:.1f}Wh + 残差:{res_sum:.1f}Wh)")
             except Exception as e:

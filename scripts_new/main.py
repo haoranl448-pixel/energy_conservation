@@ -36,9 +36,12 @@ DEFAULT_TRIP_NO = 1
 # 默认 DP 目标总时间，单位秒。
 # None 表示使用 globall_v2.py 里的默认值；也可以改成 692.65 这种数字。
 DEFAULT_TARGET_TIME = None
-# 默认测试数据目录。
-# None 表示各脚本使用自己的默认数据目录；也可以改成一个目录路径字符串。
-DEFAULT_DATA_DIR = None
+# 默认 results 数据目录，供残差模型训练、能耗菜单、历史回放和 DP 绘图使用。
+# None 表示各脚本使用自己的默认 results 目录；也可以改成一个目录路径字符串。
+DEFAULT_RESULTS_DATA_DIR = None
+# 默认 ATO 数据目录，供 ATO 模板训练和 ATO 曲线生成使用。
+# None 表示复用 results 数据目录；如果 results 也为空，则 ATO 脚本使用自己的默认目录。
+DEFAULT_ATO_DATA_DIR = None
 DEFAULT_LINE_SCOPE = "full"
 
 
@@ -243,7 +246,8 @@ def run_step(
     dry_run: bool,
     trip_no: int,
     target_time: float | None,
-    data_dir: Path | None,
+    results_data_dir: Path | None,
+    ato_data_dir: Path | None,
     line_scope: str,
 ) -> int:
     """执行单个流水线步骤。"""
@@ -266,8 +270,10 @@ def run_step(
         print("Target:  script default")
     else:
         print(f"Target:  {target_time:.2f}s")
-    # 数据目录为空时，各子脚本沿用自己的默认目录。
-    print(f"Data:    {data_dir if data_dir is not None else 'script default'}")
+    # results 数据目录供残差/能耗/历史/DP 使用。
+    print(f"Results: {results_data_dir if results_data_dir is not None else 'script default'}")
+    # ATO 数据目录供 ATO 模板训练/曲线生成使用；未单独指定时复用 results 数据目录。
+    print(f"ATO:     {ato_data_dir if ato_data_dir is not None else 'script default'}")
     print(f"Scope:   {line_scope}")
 
     # 如果脚本不存在，直接返回 127，表示命令/文件不存在。
@@ -285,8 +291,13 @@ def run_step(
     child_env["ENERGY_TRIP_INDEX"] = str(trip_no - 1)
     if target_time is not None:
         child_env["ENERGY_TARGET_TIME"] = str(target_time)
-    if data_dir is not None:
-        child_env["ENERGY_DATA_DIR"] = str(data_dir)
+    if results_data_dir is not None:
+        child_env["ENERGY_RESULTS_DATA_DIR"] = str(results_data_dir)
+        # 兼容旧脚本里还在读取 ENERGY_DATA_DIR 的 results 口径步骤。
+        if step.id not in {"ato_template", "ato_simulation"}:
+            child_env["ENERGY_DATA_DIR"] = str(results_data_dir)
+    if ato_data_dir is not None and step.id in {"ato_template", "ato_simulation"}:
+        child_env["ENERGY_ATO_DATA_DIR"] = str(ato_data_dir)
     child_env["ENERGY_LINE_SCOPE"] = line_scope
     # 子脚本里有 emoji/特殊符号输出；强制 UTF-8 容错，避免 Windows GBK 控制台报错。
     child_env["PYTHONIOENCODING"] = "utf-8:replace"
@@ -307,7 +318,8 @@ def run_step(
         log.write(f"# ENERGY_TRIP_NO: {trip_no}\n")
         log.write(f"# ENERGY_TRIP_INDEX: {trip_no - 1}\n")
         log.write(f"# ENERGY_TARGET_TIME: {target_time if target_time is not None else 'script default'}\n")
-        log.write(f"# ENERGY_DATA_DIR: {data_dir if data_dir is not None else 'script default'}\n")
+        log.write(f"# ENERGY_RESULTS_DATA_DIR: {results_data_dir if results_data_dir is not None else 'script default'}\n")
+        log.write(f"# ENERGY_ATO_DATA_DIR: {ato_data_dir if ato_data_dir is not None else 'script default'}\n")
         log.write(f"# ENERGY_LINE_SCOPE: {line_scope}\n")
         log.write("# PYTHONIOENCODING: utf-8:replace\n")
         log.write(f"# started: {datetime.now().isoformat(timespec='seconds')}\n\n")
@@ -374,15 +386,29 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--target-time", type=float, default=DEFAULT_TARGET_TIME, help="DP target total time in seconds. Defaults to the globall_v2 script value.")
     # --ask-target-time：运行时询问 DP 目标总时间。
     parser.add_argument("--ask-target-time", action="store_true", help="Prompt for the DP target total time before running.")
-    # --data-dir：指定本次运行使用的数据目录，可直接指向外部 results_*.xlsx 测试目录。
-    parser.add_argument("--data-dir", default=DEFAULT_DATA_DIR, help="Data directory for this run. Supports results_*.xlsx and cleaned_*.xlsx.")
+    # --data-dir/--results-data-dir：指定 results_*.xlsx 数据目录，供残差/能耗/历史/DP 使用。
+    parser.add_argument(
+        "--data-dir",
+        "--results-data-dir",
+        dest="results_data_dir",
+        default=DEFAULT_RESULTS_DATA_DIR,
+        help="Directory containing results_*.xlsx for residual training, energy calculation, baseline, and DP plotting.",
+    )
+    # --ato-data-dir：单独指定 ATO 数据目录；不传时默认复用 --data-dir。
+    parser.add_argument(
+        "--ato-data-dir",
+        default=DEFAULT_ATO_DATA_DIR,
+        help="Optional ATO data directory. Supports results_*.xlsx with 曲线质量标签 or cleaned_*.xlsx; defaults to --data-dir.",
+    )
     parser.add_argument(
         "--line-scope",
         default=DEFAULT_LINE_SCOPE,
         help="Station range used by DP schedule optimization: full/all or a positive section count, e.g. 5.",
     )
-    # --ask-data-dir：运行时询问数据目录。
-    parser.add_argument("--ask-data-dir", action="store_true", help="Prompt for the data directory before running.")
+    # --ask-data-dir：运行时询问 results 数据目录。
+    parser.add_argument("--ask-data-dir", "--ask-results-data-dir", dest="ask_results_data_dir", action="store_true", help="Prompt for the results_*.xlsx data directory before running.")
+    # --ask-ato-data-dir：运行时询问 ATO 数据目录。
+    parser.add_argument("--ask-ato-data-dir", action="store_true", help="Prompt for the optional ATO data directory before running.")
     # --from-step：从某一步开始，例如 --from-step energy_menu。
     parser.add_argument("--from-step", choices=get_step_ids(), help="Start from this step.")
     # --to-step：到某一步结束，例如 --to-step dp_schedule。
@@ -442,29 +468,44 @@ def resolve_target_time(args: argparse.Namespace) -> float | None:
     return target_time
 
 
-def resolve_data_dir(args: argparse.Namespace, project_root: Path) -> Path | None:
-    """得到本次运行使用的数据目录。"""
+def resolve_optional_dir(value: str | None, project_root: Path, label: str) -> Path | None:
+    """把可选目录参数解析成绝对路径。"""
 
-    # 默认不覆盖子脚本自己的数据目录。
-    data_dir_value = args.data_dir
-    # 如果用户加了 --ask-data-dir，就在终端里交互询问。
-    if args.ask_data_dir:
-        default_text = "各脚本默认目录" if not data_dir_value else str(data_dir_value)
-        raw = input(f"请输入数据目录，直接回车使用 {default_text}：").strip()
-        if raw:
-            data_dir_value = raw
-
-    # None 或空字符串都表示不传 ENERGY_DATA_DIR。
-    if not data_dir_value:
+    # None 或空字符串都表示不覆盖脚本默认目录。
+    if not value:
         return None
 
-    data_dir = Path(data_dir_value)
+    data_dir = Path(value)
     # 相对路径按项目根目录解析，方便写 data/data_processed 这种形式。
     if not data_dir.is_absolute():
         data_dir = project_root / data_dir
     if not data_dir.exists() or not data_dir.is_dir():
-        raise FileNotFoundError(f"Data directory not found: {data_dir}")
+        raise FileNotFoundError(f"{label} not found: {data_dir}")
     return data_dir
+
+
+def resolve_results_data_dir(args: argparse.Namespace, project_root: Path) -> Path | None:
+    """得到 results_*.xlsx 数据目录。"""
+
+    data_dir_value = args.results_data_dir
+    if args.ask_results_data_dir:
+        default_text = "脚本默认 results 目录" if not data_dir_value else str(data_dir_value)
+        raw = input(f"请输入 results_*.xlsx 数据目录，直接回车使用 {default_text}：").strip()
+        if raw:
+            data_dir_value = raw
+    return resolve_optional_dir(data_dir_value, project_root, "Results data directory")
+
+
+def resolve_ato_data_dir(args: argparse.Namespace, project_root: Path) -> Path | None:
+    """得到可选 ATO 数据目录；未传时由 main 复用 results 数据目录。"""
+
+    data_dir_value = args.ato_data_dir
+    if args.ask_ato_data_dir:
+        default_text = "复用 results 数据目录" if not data_dir_value else str(data_dir_value)
+        raw = input(f"请输入 ATO 数据目录，直接回车使用 {default_text}：").strip()
+        if raw:
+            data_dir_value = raw
+    return resolve_optional_dir(data_dir_value, project_root, "ATO data directory")
 
 
 def resolve_line_scope(args: argparse.Namespace) -> str:
@@ -501,8 +542,11 @@ def main() -> int:
     trip_no = resolve_trip_no(args)
     # 得到本次 DP 排图的目标总时间；None 表示使用 globall_v2.py 默认值。
     target_time = resolve_target_time(args)
-    # 得到本次运行的数据目录；None 表示使用各脚本默认目录。
-    data_dir = resolve_data_dir(args, project_root)
+    # 得到 results 数据目录；None 表示残差/能耗/历史/DP 使用脚本默认目录。
+    results_data_dir = resolve_results_data_dir(args, project_root)
+    # 得到 ATO 数据目录；未单独指定时复用 results 目录，ATO 脚本内部会只取曲线质量标签=0。
+    ato_data_dir = resolve_ato_data_dir(args, project_root)
+    effective_ato_data_dir = ato_data_dir if ato_data_dir is not None else results_data_dir
     line_scope = resolve_line_scope(args)
     # 根据 --only/--skip/--from-step/--to-step 等参数选出要跑的步骤。
     selected_steps = select_steps(args)
@@ -532,7 +576,8 @@ def main() -> int:
     print(f"Dry run:      {args.dry_run}")
     print(f"Trip no:      {trip_no} (segment index {trip_no - 1})")
     print(f"Target time:  {f'{target_time:.2f}s' if target_time is not None else 'script default'}")
-    print(f"Data dir:     {data_dir if data_dir is not None else 'script default'}")
+    print(f"Results dir:  {results_data_dir if results_data_dir is not None else 'script default'}")
+    print(f"ATO dir:      {effective_ato_data_dir if effective_ato_data_dir is not None else 'script default'}")
     print(f"Line scope:   {line_scope}")
     # 打印最终选中的步骤列表。
     print("\nSelected steps:")
@@ -551,7 +596,8 @@ def main() -> int:
             dry_run=args.dry_run,
             trip_no=trip_no,
             target_time=target_time,
-            data_dir=data_dir,
+            results_data_dir=results_data_dir,
+            ato_data_dir=effective_ato_data_dir,
             line_scope=line_scope,
         )
         # 非 0 退出码表示失败。

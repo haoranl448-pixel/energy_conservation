@@ -15,7 +15,7 @@
 `ato_class_globall_v2.py` 运行前必须已经有这些输入：
 
 - `output/analysis/ato_class_energy_menu<趟号>_new_v3.csv`：由 `scripts/ato_generated_results_energy.py` 生成。
-- `full_line<趟号>_validation_results.csv`：由 `scripts/full_line_validation_results.py` 生成，其中 `历史能耗(Wh)` 是历史曲线经模型回放得到的能耗，`历史实测能耗(Wh)` 只用于误差诊断。
+- `full_line<趟号>_validation_results.csv`：由 `scripts/full_line_validation_results.py` 生成；最终规划表现在用 `历史实测能耗(Wh)` 作为节能量/节能率对比基准，`历史能耗(Wh)` 保留为历史曲线模型回放能耗用于诊断。
 - `data/static/section_params_trip<趟号>.csv`：区间参数和载重表。
 - `output/ato_generated_results_new_v4/<区间>/<class>_generated_curve.csv`：用于最终拼接优化速度曲线。
 - `data/data_processed/results_<区间>.xlsx`：用于最终拼接历史速度曲线。
@@ -30,7 +30,9 @@ python scripts_new/main.py
 
 默认处理第 1 趟车；如果想固定改成别的趟，可以直接改 `scripts_new/main.py` 顶部的 `DEFAULT_TRIP_NO`。
 默认 DP 目标总时间使用 `scripts_new/00_main_pipeline/08_ato_class_globall_v2.py` 里的 `DEFAULT_T_TOTAL_TARGET`；如果想固定成某个数，可以直接改 `scripts_new/main.py` 顶部的 `DEFAULT_TARGET_TIME`。
-默认数据目录使用各脚本自己的配置；测试时可以通过 `--data-dir` 直接指定一个含 `results_*.xlsx` 的外部目录。
+默认数据目录使用各脚本自己的配置；测试时 `--data-dir` 指定带 `results_*.xlsx` 的主数据目录。
+如果 `results_*.xlsx` 里有 `曲线质量标签`，残差模型训练会使用全部趟次，ATO 模板训练/对比只使用 `曲线质量标签 = 0` 的正常白天趟次。正常曲线里真实存在的等级都会学习模板；缺失等级只作为后续 DP 候选由相邻真实等级生成，不反过来参与学习。
+`--ato-data-dir` 只是可选覆盖项；不传时 ATO 默认复用 `--data-dir`。
 默认 DP 排图范围是全正向区间；测试时可以通过 `--line-scope n` 只取前 `n` 个区间。
 
 
@@ -38,9 +40,10 @@ python scripts_new/main.py
 从第 1 步跑到最后一步
 trip-no = 1
 target-time = 不传，DP 用 08_ato_class_globall_v2.py 里的默认值
-data-dir = 不传，各个子脚本用自己的默认数据目录；
-        目前大概是这样：train_ATO_v8.py / simulate_ATO_v8.py，默认优先找：D:\energy_conservation\data\data_processed_new_v2
-        ato_generated_results_energy.py / full_line_validation_results.py / ato_class_globall_v2.py，默认用的是：D:\energy_conservation\data\data_processed
+data-dir = 不传，残差/能耗/历史/DP 用自己的默认 results 目录；
+        默认是：D:\energy_conservation\data\data_processed
+ato-data-dir = 不传，ATO 模板训练/曲线生成默认复用 data-dir；
+        如果 data-dir 也不传，ATO 脚本才使用自己的默认目录
 line-scope = full，DP 默认跑全正向区间；传数字时跑前 N 个正向区间
 dry-run = False，真的执行
 遇到报错 = 停止
@@ -77,10 +80,22 @@ python scripts_new/main.py --ask-target-time
 python scripts_new/main.py --trip-no 6 --target-time 692.65 --from-step dp_schedule
 ```
 
-临时指定测试数据目录：
+临时指定带曲线质量标签的 results 数据目录：
 
 ```powershell
-python scripts_new/main.py --data-dir "C:\Users\bit11\Desktop\数据测试代码\data_processed_step2_v3_first5" --from-step ato_template
+python scripts_new/main.py --data-dir data\data_processed_step2_v3_first5_curve_quality --from-step residual_training
+```
+
+单独指定 ATO 数据目录：
+
+```powershell
+python scripts_new/main.py --ato-data-dir "D:\energy_conservation\data\data_processed_new_v2" --from-step ato_template
+```
+
+两套数据目录一起指定，只有确实想让 ATO 使用另一套数据时才需要：
+
+```powershell
+python scripts_new/main.py --data-dir "C:\Users\bit11\Desktop\数据测试代码\data_processed_step2_v3_first5" --ato-data-dir "D:\energy_conservation\data\data_processed_new_v2" --from-step residual_training --line-scope 5
 ```
 
 指定 DP 区间范围：
@@ -93,10 +108,16 @@ python scripts_new/main.py --from-step dp_schedule --data-dir data\data_processe
 python scripts_new/main.py --from-step dp_schedule --line-scope 5 --data-dir data\data_processed_step2_v3_first5_with_class
 ```
 
-运行时询问数据目录：
+运行时询问 results 数据目录：
 
 ```powershell
-python scripts_new/main.py --ask-data-dir --from-step ato_template
+python scripts_new/main.py --ask-data-dir --from-step residual_training
+```
+
+运行时询问 ATO 数据目录：
+
+```powershell
+python scripts_new/main.py --ask-ato-data-dir --from-step ato_template
 ```
 
 趟号会通过环境变量传给子脚本：
@@ -105,7 +126,13 @@ python scripts_new/main.py --ask-data-dir --from-step ato_template
 - `scripts/full_line_validation_results.py` 会输出 `full_line<趟号>_validation_results.csv`。
 - `scripts/ato_class_globall_v2.py` 会读取同一趟号的能耗菜单、历史基准和 `section_params_trip<趟号>.csv`。
 - `scripts/ato_class_globall_v2.py` 会读取主程序传入的目标总时间；未传入时使用脚本默认值。
-- `--data-dir` 指定后，`train_ATO_v8.py` 和 `simulate_ATO_v8.py` 会直接识别 `results_区间.xlsx`，不需要另存为 `cleaned_区间.xlsx`；同时只处理该目录里实际存在的区间，避免和旧的 26 区间结果混跑。
+- `--data-dir` 指定的是 `results_区间.xlsx` 目录，供 `02_train_residual_new.py`、`06_ato_generated_results_energy.py`、`07_full_line_validation_results.py`、`08_ato_class_globall_v2.py` 使用；如果未单独传 `--ato-data-dir`，也会供 `04_train_ATO_v8.py` 和 `05_simulate_ATO_v8.py` 使用。
+- 残差模型训练不筛 `曲线质量标签`，使用全部趟次。
+- ATO 模板训练/真实曲线对比如果读到 `曲线质量标签`，只保留 `曲线质量标签 = 0`；正常曲线中出现过的等级都作为 `real` 模板学习。
+- 缺失等级只在曲线生成阶段用相邻真实等级补候选，并标记 `曲线来源`：`real`、`interpolated` 或 `extrapolated_adjacent`。远距离外推默认不启用。
+- 每次重新执行 `ato_template` 会先清空 `output/ato_phase_results_v3`；每次重新执行 `ato_simulation` 会先清空 `output/ato_generated_results_new_v4`，避免旧等级文件混在新结果里。
+- DP 排图按三轮尝试：先 `real_only`，不可行再 `allow_interpolated`，仍不可行再 `allow_extrapolated`；同一轮内优先少用外推、少用插值，再比较能耗。
+- `--ato-data-dir` 是可选覆盖项，支持 `results_区间.xlsx` 或 `cleaned_区间.xlsx`；仅当你想让 ATO 使用另一套数据时才需要指定。
 
 如果当前终端里 `python` 不在 PATH，可以用本机 Python 绝对路径：
 
@@ -158,10 +185,10 @@ python scripts_new/main.py --only energy_menu,dp_schedule
 
 - `data_process.py`：原始运行数据清洗，生成按区间整理后的数据文件。
 - `build_class_lookup_tables.py`：构建运行等级/服务号/区间等对照表。
-- `train_ATO_v8.py`：主线 ATO 相位模板提取脚本，按 Class1-5 学习加速、巡航、制动三段模板。
-- `simulate_ATO_v8.py`：主线速度曲线生成脚本，基于模板和目标时间生成各区间各等级曲线。
+- `train_ATO_v8.py`：主线 ATO 相位模板提取脚本，对正常曲线里真实存在的等级学习加速、巡航、制动三段模板，并记录样本数和可靠性。
+- `simulate_ATO_v8.py`：主线速度曲线生成脚本，真实等级用自身模板，缺失等级只用相邻真实等级生成候选并保留来源标签。
 - `ato_generated_results_energy.py`：读取生成曲线，计算物理模型 + AI 残差后的能耗菜单。
-- `ato_class_globall_v2.py`：主线 DP 排图优化，支持运行等级选择和弹性停站时间，并输出最终方案表和对比图。
+- `ato_class_globall_v2.py`：主线 DP 排图优化，支持运行等级选择、弹性停站时间和按曲线来源分轮规划，并输出最终方案表和对比图。
 - `schedule_to_timetable.py`：OpenTrack/时刻表导出辅助脚本，当前不属于默认主流程。
 - `validate_opt_schedule.py`：旧版验证辅助脚本，当前不属于默认主流程；当前主线以 `ato_class_globall_v2.py` 的输出作为 DP 后收尾结果。
 
@@ -275,10 +302,23 @@ python scripts_new/main.py --only energy_menu,dp_schedule
 
 ## 08_analysis
 
-用途：影响因素、历史载重等探索性分析。
+用途：影响因素、历史载重、运行等级分布等探索性分析。
 
 - `analyze_factors.py`：分析能耗、速度、载重、线路参数等影响因素。
 - `analyze_historical_weights.py`：分析历史载重/重量分布。
+- `summarize_section_class_levels.py`：扫描 Step2 输出的 `results_*.xlsx`，按区间统计实际出现过哪些运行等级，并单独列出 `曲线质量标签=0` 的正常曲线可用等级。
+
+常用命令：
+
+```powershell
+python scripts_new/08_analysis/summarize_section_class_levels.py --data-dir data/data_processed_step2_v3_first5_curve_quality
+```
+
+输出位置：
+
+- `output/analysis/section_class_distribution/section_class_distribution.xlsx`：区间等级汇总和趟次明细两个 sheet。
+- `output/analysis/section_class_distribution/section_class_distribution.csv`：区间等级汇总 CSV。
+- `output/analysis/section_class_distribution/section_class_segment_detail.csv`：每个 segment 的等级明细 CSV。
 
 ## 09_exports_opentrack
 

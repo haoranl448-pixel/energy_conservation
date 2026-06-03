@@ -28,6 +28,7 @@ from scipy.signal import savgol_filter
 import glob
 import os
 import pickle
+import shutil
 from pathlib import Path
 from typing import Dict, List, Optional
 from sklearn.metrics import r2_score # 确保在脚本顶部导
@@ -70,9 +71,13 @@ plt.rcParams['axes.unicode_minus'] = False
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 def get_data_dir_candidates(defaults: List[Path]) -> List[Path]:
-    """Use ENERGY_DATA_DIR when the main pipeline points this run at a test dataset."""
+    """Use the ATO data directory selected by the main pipeline."""
 
-    raw = os.environ.get("ENERGY_DATA_DIR")
+    raw = (
+        os.environ.get("ENERGY_ATO_DATA_DIR")
+        or os.environ.get("ENERGY_RESULTS_DATA_DIR")
+        or os.environ.get("ENERGY_DATA_DIR")
+    )
     if not raw:
         return defaults
     data_dir = Path(raw)
@@ -114,6 +119,8 @@ MIN_RUN_POINTS = 120
 TIME_TABLE_REQUIRED_COLS = ["区段", "Class1", "Class2", "Class3", "Class4", "Class5"]
 RUN_ID_CANDIDATE_COLS = ["日期+服务号", "服务号", "车底号", "列车运行方向"]
 CLASS_COL = "运行等级"
+QUALITY_LABEL_COL = "曲线质量标签"
+NORMAL_QUALITY_LABEL = 0
 
 LAMBDA_MIN = 0.55
 LAMBDA_MAX_RELAX = 3.50
@@ -139,10 +146,42 @@ def ensure_dir(path: Path):
     path.mkdir(parents=True, exist_ok=True)
 
 
+def reset_output_root(path: Path):
+    """Clear previous generated ATO curves before a fresh batch run."""
+
+    resolved = path.resolve()
+    output_root = (PROJECT_ROOT / "output").resolve()
+    try:
+        resolved.relative_to(output_root)
+    except ValueError as exc:
+        raise ValueError(f"拒绝清理非 output 目录: {resolved}") from exc
+
+    if resolved.exists():
+        for child in resolved.iterdir():
+            if child.is_dir():
+                shutil.rmtree(child)
+            else:
+                child.unlink()
+    resolved.mkdir(parents=True, exist_ok=True)
+    print(f"已清理 ATO 曲线输出目录: {resolved}")
+
+
 def normalize_class_label(x):
     if pd.isna(x):
         return None
-    return str(x).strip().lower()
+    text = str(x).strip().lower()
+    if text.startswith("class"):
+        suffix = text[5:].strip()
+        if suffix.replace(".", "", 1).isdigit():
+            value = float(suffix)
+            if value.is_integer():
+                return f"class{int(value)}"
+        return text
+    if text.replace(".", "", 1).isdigit():
+        value = float(text)
+        if value.is_integer():
+            return f"class{int(value)}"
+    return text
 
 def resolve_existing_file(candidates: List[Path], desc: str) -> Path:
     for p in candidates:
@@ -202,6 +241,66 @@ def class_sort_key(class_name: str):
     return order.get(class_name, 999)
 
 
+def class_number(class_name: str) -> Optional[int]:
+    value = class_sort_key(class_name)
+    return None if value == 999 else value
+
+
+def dp_candidate_stage(curve_source: str) -> str:
+    if curve_source == "real":
+        return "real_only"
+    if curve_source == "interpolated":
+        return "allow_interpolated"
+    if curve_source == "extrapolated_adjacent":
+        return "allow_extrapolated"
+    return "not_allowed"
+
+
+def select_generation_source(target_name: str, available_keys, level_target_times: Dict[str, float]) -> Optional[Dict]:
+    """Select the template source for a target class.
+
+    Real classes use their own learned template. Missing classes are generated
+    only from immediately adjacent learned classes, so long-range extrapolation
+    such as class3 -> class1 is not enabled by default.
+    """
+    available = sorted(
+        [k for k in available_keys if class_number(k) is not None],
+        key=class_sort_key,
+    )
+    if target_name in available:
+        return {
+            "curve_source": "real",
+            "parent_ref": target_name,
+            "supporting_refs": target_name,
+        }
+
+    target_num = class_number(target_name)
+    if target_num is None:
+        return None
+
+    adjacent = [k for k in available if abs(class_number(k) - target_num) == 1]
+    if not adjacent:
+        return None
+
+    if len(adjacent) >= 2:
+        curve_source = "interpolated"
+        supporting_refs = "|".join(sorted(adjacent, key=class_sort_key))
+    else:
+        curve_source = "extrapolated_adjacent"
+        supporting_refs = adjacent[0]
+
+    target_time = float(level_target_times[target_name])
+    parent_ref = min(
+        adjacent,
+        key=lambda k: abs(float(level_target_times.get(k, target_time)) - target_time),
+    )
+    return {
+        "curve_source": curve_source,
+        "parent_ref": parent_ref,
+        "supporting_refs": supporting_refs,
+    }
+
+
 def cumtrapz_uniform(y, dt: float) -> np.ndarray:
     y = np.asarray(y, dtype=float)
     out = np.zeros_like(y)
@@ -223,40 +322,60 @@ def build_order_key(series):
 
 
 def resolve_input_files(data_dir: Path, station_pair: str) -> List[Path]:
-    for prefix in ("cleaned", "results"):
+    for prefix in ("results", "cleaned"):
         exact = data_dir / f"{prefix}_{station_pair}.xlsx"
         if exact.exists():
             return [exact]
 
     matches: List[Path] = []
-    for prefix in ("cleaned", "results"):
+    for prefix in ("results", "cleaned"):
         pattern = str(data_dir / f"{prefix}_{station_pair}*.xlsx")
         matches.extend(Path(x) for x in sorted(glob.glob(pattern)))
     return matches
 
 
 def station_pairs_available_in_data_dir(data_dir: Path) -> set[str]:
-    """Return station pairs that have cleaned_*.xlsx or results_*.xlsx in data_dir."""
+    """Return station pairs that have results_*.xlsx or cleaned_*.xlsx in data_dir."""
 
     pairs: set[str] = set()
-    for fp in data_dir.glob("*.xlsx"):
-        for prefix in ("cleaned_", "results_"):
-            if fp.stem.startswith(prefix):
-                pairs.add(fp.stem[len(prefix):])
+    for prefix in ("results_", "cleaned_"):
+        for fp in data_dir.glob(f"{prefix}*.xlsx"):
+            pairs.add(fp.stem[len(prefix):])
     return pairs
 
 
 def filter_table_by_available_data(table: pd.DataFrame, data_dir: Path) -> pd.DataFrame:
-    """When using ENERGY_DATA_DIR, limit processing to sections present in that test directory."""
+    """When main selects an ATO data directory, limit processing to sections present there."""
 
-    if not os.environ.get("ENERGY_DATA_DIR"):
+    if not (
+        os.environ.get("ENERGY_ATO_DATA_DIR")
+        or os.environ.get("ENERGY_RESULTS_DATA_DIR")
+        or os.environ.get("ENERGY_DATA_DIR")
+    ):
         return table
     available = station_pairs_available_in_data_dir(data_dir)
     filtered = table[table["区段"].isin(available)].copy()
     if filtered.empty:
-        raise FileNotFoundError(f"数据目录 {data_dir} 中没有和标准时间表匹配的 cleaned_/results_ 文件。")
+        raise FileNotFoundError(f"数据目录 {data_dir} 中没有和标准时间表匹配的 results_/cleaned_ 文件。")
     skipped = len(table) - len(filtered)
     print(f"按测试数据目录筛选区间: {len(filtered)} 个，跳过标准时间表中未提供数据的 {skipped} 个区间。")
+    return filtered
+
+
+def filter_normal_quality_runs(df: pd.DataFrame) -> pd.DataFrame:
+    """Real ATO comparison samples only use normal daytime runs when the label exists."""
+
+    if QUALITY_LABEL_COL not in df.columns:
+        return df
+    labels = pd.to_numeric(df[QUALITY_LABEL_COL], errors="coerce")
+    before_rows = len(df)
+    before_runs = df["segment"].nunique() if "segment" in df.columns else np.nan
+    filtered = df[labels == NORMAL_QUALITY_LABEL].copy()
+    after_runs = filtered["segment"].nunique() if "segment" in filtered.columns else np.nan
+    print(
+        f"   曲线质量过滤: 仅保留 {QUALITY_LABEL_COL}=0，"
+        f"行数 {before_rows}->{len(filtered)}，趟次 {before_runs}->{after_runs}"
+    )
     return filtered
 
 
@@ -661,7 +780,7 @@ def postcheck_generated_curve(curve_obj: Dict) -> Dict:
 # class2 真实对比
 # =========================
 def locate_source_data_dir() -> Path:
-    return resolve_existing_dir(DATA_DIR_CANDIDATES, "原始 cleaned_xxx 数据")
+    return resolve_existing_dir(DATA_DIR_CANDIDATES, "原始 results_/cleaned_xxx 数据")
 
 
 def load_source_dataframe_for_station(art: Dict, station_pair: str) -> pd.DataFrame:
@@ -673,12 +792,13 @@ def load_source_dataframe_for_station(art: Dict, station_pair: str) -> pd.DataFr
         file_paths = resolve_input_files(data_dir, station_pair)
 
     if not file_paths:
-        raise FileNotFoundError(f"无法定位区间 {station_pair} 的原始 cleaned_xxx.xlsx 文件")
+        raise FileNotFoundError(f"无法定位区间 {station_pair} 的原始 results_/cleaned_xxx.xlsx 文件")
 
     all_df = []
     for fp in file_paths:
         all_df.append(pd.read_excel(fp))
-    return pd.concat(all_df, ignore_index=True)
+    df = pd.concat(all_df, ignore_index=True)
+    return filter_normal_quality_runs(df)
 
 
 def extract_real_runs_for_class(df: pd.DataFrame, class_name: str, art: Dict):
@@ -1017,19 +1137,6 @@ def generate_for_station_pair(station_pair: str, level_target_times: Dict[str, f
     except Exception as e:
         return {"station_pair": station_pair, "status": "missing_artifact", "message": str(e)}
 
-    # 🌟 核心逻辑定义：谁是谁的“基准”
-    def select_parent(target_name, available_keys):
-        # 如果是 class1 或 class2：优先找历史 class2 基因，没有则找 class3
-        if target_name in ["class1", "class2"]:
-            if "class2" in available_keys: return "class2"
-            return "class3" if "class3" in available_keys else None
-
-        # 如果是 class3/4/5：优先找历史 class3 基因，没有则找 class2
-        if target_name in ["class3", "class4", "class5"]:
-            if "class3" in available_keys: return "class3"
-            return "class2" if "class2" in available_keys else None
-        return None
-
     all_results: Dict[str, Dict] = {}
     summary_rows = []
 
@@ -1037,20 +1144,33 @@ def generate_for_station_pair(station_pair: str, level_target_times: Dict[str, f
     for class_name in sorted(level_target_times.keys(), key=class_sort_key):
         T_target = float(level_target_times[class_name])
 
-        # 寻找该等级的最佳父母基因
-        parent_name = select_parent(class_name, multi_art.keys())
+        source_info = select_generation_source(class_name, multi_art.keys(), level_target_times)
 
-        if not parent_name:
-            print(f"   ⚠️ {station_pair} {class_name}: 找不到基准基因，跳过")
+        if not source_info:
+            print(f"   ⚠️ {station_pair} {class_name}: 没有相邻真实等级模板，跳过")
+            summary_rows.append({
+                "station_pair": station_pair, "class_name": class_name, "status": "missing_source",
+                "reason": "no adjacent real template", "curve_source": "missing",
+                "parent_ref": "", "supporting_refs": "", "real_sample_count": 0,
+                "parent_real_sample_count": 0, "sample_reliability": "",
+                "dp_candidate_stage": "not_allowed", "target_time_s": T_target, "curve_csv": ""
+            })
             continue
 
+        parent_name = source_info["parent_ref"]
+        curve_source = source_info["curve_source"]
+        supporting_refs = source_info["supporting_refs"]
         active_art = multi_art[parent_name]
         dt = active_art.get("dt_sample", DT_SAMPLE_FALLBACK)
+        parent_real_sample_count = int(active_art.get("real_sample_count", 0))
+        real_sample_count = parent_real_sample_count if curve_source == "real" else 0
+        sample_reliability = active_art.get("sample_reliability", "unknown") if curve_source == "real" else "generated"
+        candidate_stage = dp_candidate_stage(curve_source)
 
         # 🌟 优化：如果是镜像逻辑（目标就是基准，且时间几乎一样）
         time_diff = abs(T_target - active_art["time_ref_raw"])
         if parent_name == class_name and time_diff < 0.6:
-            print(f"   🎯 {class_name} 使用原生数据镜像 (Time Diff: {time_diff:.2f}s)")
+            print(f"   🎯 {class_name} 使用真实等级模板 (Time Diff: {time_diff:.2f}s)")
             curve_obj = {
                 "t": active_art["t_ref"], "v": active_art["v_ref_t"],
                 "s": np.cumsum(active_art["v_ref_t"] * 0.05),
@@ -1059,10 +1179,9 @@ def generate_for_station_pair(station_pair: str, level_target_times: Dict[str, f
                 "lambda": 1.0, "theta": 0.0, "direction": 0, "distance_error_m": 0.0,
                 "T_acc_new": active_art["T_acc_ref"], "T_mid_new": active_art["T_mid_ref"], "T_br_new": active_art["T_br_ref"]
             }
-            solve_result = {"status": "generated", "reason": "原生数据高保真镜像", "curve": curve_obj}
+            solve_result = {"status": "generated", "reason": "real template mirror", "curve": curve_obj}
         else:
-            # 执行外推逻辑
-            print(f"   ⚓ {class_name} 以 {parent_name} 为基准进行外推")
+            print(f"   ⚓ {class_name} | source={curve_source} | parent={parent_name} | support={supporting_refs}")
             solve_result = solve_curve_for_class(T_target, active_art, dt)
             if solve_result["status"] == "generated":
                 solve_result = postcheck_generated_curve(solve_result["curve"])
@@ -1081,13 +1200,23 @@ def generate_for_station_pair(station_pair: str, level_target_times: Dict[str, f
             df_out.to_csv(curve_csv_path, index=False, encoding="utf-8-sig")
 
             result = {"class_name": class_name, "target_time": T_target, "status": status,
-                      "reason": reason, "curve_obj": curve_obj, "df": df_out}
+                      "reason": reason, "curve_obj": curve_obj, "df": df_out,
+                      "curve_source": curve_source, "parent_ref": parent_name,
+                      "supporting_refs": supporting_refs, "real_sample_count": real_sample_count,
+                      "parent_real_sample_count": parent_real_sample_count,
+                      "sample_reliability": sample_reliability,
+                      "dp_candidate_stage": candidate_stage}
             all_results[class_name] = result
             plot_single_class_detail(class_name, result, output_dir, station_pair)
 
             summary_rows.append({
                 "station_pair": station_pair, "class_name": class_name, "status": status,
-                "reason": reason, "parent_ref": parent_name, # 🌟 核心修复：确保有 reason
+                "reason": reason, "curve_source": curve_source,
+                "parent_ref": parent_name, "supporting_refs": supporting_refs,
+                "real_sample_count": real_sample_count,
+                "parent_real_sample_count": parent_real_sample_count,
+                "sample_reliability": sample_reliability,
+                "dp_candidate_stage": candidate_stage,
                 "target_time_s": round(T_target, 4), "sim_time_s": round(curve_obj["sim_time_s"], 4),
                 "peak_speed_kmh": round(curve_obj["peak_speed_kmh"], 4), "total_dist_m": round(float(curve_obj["s"][-1]), 4),
                 "curve_csv": str(curve_csv_path)
@@ -1096,7 +1225,12 @@ def generate_for_station_pair(station_pair: str, level_target_times: Dict[str, f
             # 失败记录
             summary_rows.append({
                 "station_pair": station_pair, "class_name": class_name, "status": status,
-                "reason": reason, "parent_ref": parent_name, # 🌟 核心修复：确保有 reason
+                "reason": reason, "curve_source": curve_source,
+                "parent_ref": parent_name, "supporting_refs": supporting_refs,
+                "real_sample_count": real_sample_count,
+                "parent_real_sample_count": parent_real_sample_count,
+                "sample_reliability": sample_reliability,
+                "dp_candidate_stage": candidate_stage,
                 "target_time_s": T_target, "curve_csv": ""
             })
 
@@ -1140,7 +1274,7 @@ def generate_for_station_pair(station_pair: str, level_target_times: Dict[str, f
 # 主流程
 # =========================
 def main():
-    ensure_dir(OUTPUT_ROOT)
+    reset_output_root(OUTPUT_ROOT)
 
     standard_times_path = resolve_existing_file(STANDARD_TIMES_CANDIDATES, "standard_class_times.csv")
     model_root = resolve_existing_dir(MODEL_ROOT_CANDIDATES, "class3 模板工件")

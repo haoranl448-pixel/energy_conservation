@@ -20,6 +20,7 @@ from scipy.interpolate import make_interp_spline
 import os
 import glob
 import pickle
+import shutil
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
@@ -59,9 +60,13 @@ from scipy.signal import savgol_filter
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 def get_data_dir_candidates(defaults: List[Path]) -> List[Path]:
-    """Use ENERGY_DATA_DIR when the main pipeline points this run at a test dataset."""
+    """Use the ATO data directory selected by the main pipeline."""
 
-    raw = os.environ.get("ENERGY_DATA_DIR")
+    raw = (
+        os.environ.get("ENERGY_ATO_DATA_DIR")
+        or os.environ.get("ENERGY_RESULTS_DATA_DIR")
+        or os.environ.get("ENERGY_DATA_DIR")
+    )
     if not raw:
         return defaults
     data_dir = Path(raw)
@@ -92,10 +97,13 @@ OUTPUT_ROOT = PROJECT_ROOT / "output" / "ato_phase_results_v3"
 # 全局配置
 # =========================
 CLASS_COL = "运行等级"
+QUALITY_LABEL_COL = "曲线质量标签"
+NORMAL_QUALITY_LABEL = 0
 REFERENCE_CLASS = "class3"
 DT_SAMPLE = 0.05
 END_DIST_TOL = 30.0
 MIN_RUN_POINTS = 120
+REAL_STRONG_MIN_SAMPLES = 3
 
 RUN_ID_CANDIDATE_COLS = [
     "日期+服务号",
@@ -133,11 +141,43 @@ def ensure_dir(path: Path):
     path.mkdir(parents=True, exist_ok=True)
 
 
+def reset_output_root(path: Path):
+    """Clear previous ATO template outputs before a fresh batch run."""
+
+    resolved = path.resolve()
+    output_root = (PROJECT_ROOT / "output").resolve()
+    try:
+        resolved.relative_to(output_root)
+    except ValueError as exc:
+        raise ValueError(f"拒绝清理非 output 目录: {resolved}") from exc
+
+    if resolved.exists():
+        for child in resolved.iterdir():
+            if child.is_dir():
+                shutil.rmtree(child)
+            else:
+                child.unlink()
+    resolved.mkdir(parents=True, exist_ok=True)
+    print(f"已清理 ATO 模板输出目录: {resolved}")
+
+
 
 def normalize_class_label(x) -> Optional[str]:
     if pd.isna(x):
         return None
-    return str(x).strip().lower()
+    text = str(x).strip().lower()
+    if text.startswith("class"):
+        suffix = text[5:].strip()
+        if suffix.replace(".", "", 1).isdigit():
+            value = float(suffix)
+            if value.is_integer():
+                return f"class{int(value)}"
+        return text
+    if text.replace(".", "", 1).isdigit():
+        value = float(text)
+        if value.is_integer():
+            return f"class{int(value)}"
+    return text
 
 
 
@@ -190,40 +230,60 @@ def resolve_existing_dir(candidates: List[Path], desc: str) -> Path:
 
 
 def resolve_input_files(data_dir: Path, station_pair: str) -> List[Path]:
-    for prefix in ("cleaned", "results"):
+    for prefix in ("results", "cleaned"):
         exact = data_dir / f"{prefix}_{station_pair}.xlsx"
         if exact.exists():
             return [exact]
 
     matches: List[Path] = []
-    for prefix in ("cleaned", "results"):
+    for prefix in ("results", "cleaned"):
         pattern = str(data_dir / f"{prefix}_{station_pair}*.xlsx")
         matches.extend(Path(x) for x in sorted(glob.glob(pattern)))
     return matches
 
 
 def station_pairs_available_in_data_dir(data_dir: Path) -> set[str]:
-    """Return station pairs that have cleaned_*.xlsx or results_*.xlsx in data_dir."""
+    """Return station pairs that have results_*.xlsx or cleaned_*.xlsx in data_dir."""
 
     pairs: set[str] = set()
-    for fp in data_dir.glob("*.xlsx"):
-        for prefix in ("cleaned_", "results_"):
-            if fp.stem.startswith(prefix):
-                pairs.add(fp.stem[len(prefix):])
+    for prefix in ("results_", "cleaned_"):
+        for fp in data_dir.glob(f"{prefix}*.xlsx"):
+            pairs.add(fp.stem[len(prefix):])
     return pairs
 
 
 def filter_table_by_available_data(table: pd.DataFrame, data_dir: Path) -> pd.DataFrame:
-    """When using ENERGY_DATA_DIR, limit processing to sections present in that test directory."""
+    """When main selects an ATO data directory, limit processing to sections present there."""
 
-    if not os.environ.get("ENERGY_DATA_DIR"):
+    if not (
+        os.environ.get("ENERGY_ATO_DATA_DIR")
+        or os.environ.get("ENERGY_RESULTS_DATA_DIR")
+        or os.environ.get("ENERGY_DATA_DIR")
+    ):
         return table
     available = station_pairs_available_in_data_dir(data_dir)
     filtered = table[table["区段"].isin(available)].copy()
     if filtered.empty:
-        raise FileNotFoundError(f"数据目录 {data_dir} 中没有和标准时间表匹配的 cleaned_/results_ 文件。")
+        raise FileNotFoundError(f"数据目录 {data_dir} 中没有和标准时间表匹配的 results_/cleaned_ 文件。")
     skipped = len(table) - len(filtered)
     print(f"按测试数据目录筛选区间: {len(filtered)} 个，跳过标准时间表中未提供数据的 {skipped} 个区间。")
+    return filtered
+
+
+def filter_normal_quality_runs(df: pd.DataFrame) -> pd.DataFrame:
+    """ATO templates only use normal daytime runs when 曲线质量标签 is available."""
+
+    if QUALITY_LABEL_COL not in df.columns:
+        return df
+    labels = pd.to_numeric(df[QUALITY_LABEL_COL], errors="coerce")
+    before_rows = len(df)
+    before_runs = df["segment"].nunique() if "segment" in df.columns else np.nan
+    filtered = df[labels == NORMAL_QUALITY_LABEL].copy()
+    after_runs = filtered["segment"].nunique() if "segment" in filtered.columns else np.nan
+    print(
+        f"   曲线质量过滤: 仅保留 {QUALITY_LABEL_COL}=0，"
+        f"行数 {before_rows}->{len(filtered)}，趟次 {before_runs}->{after_runs}"
+    )
     return filtered
 
 
@@ -411,12 +471,16 @@ def train_one_station_pair(station_pair: str, level_target_times: Dict[str, floa
     # 1. 读取数据
     files = resolve_input_files(data_dir, station_pair)
     if not files:
-        return {"station_pair": station_pair, "status": "missing_file", "message": f"未找到 cleaned_{station_pair}.xlsx"}
+        return {"station_pair": station_pair, "status": "missing_file", "message": f"未找到 results_/cleaned_{station_pair}.xlsx"}
 
     all_df = []
     for fp in files:
         all_df.append(pd.read_excel(fp))
     df = pd.concat(all_df, ignore_index=True)
+    source_files = [str(fp) for fp in files]
+    df = filter_normal_quality_runs(df)
+    if df.empty:
+        return {"station_pair": station_pair, "status": "no_quality_zero", "message": f"{QUALITY_LABEL_COL}=0 的正常曲线为空"}
 
     # New processed files may carry the runtime class in a final column named "class".
     # Keep the original downstream column name as the canonical one.
@@ -507,6 +571,15 @@ def train_one_station_pair(station_pair: str, level_target_times: Dict[str, floa
 
         # 🌟 核心修正：确保所有字段都存入字典 🌟
         current_art = {
+            "class_name": current_cls,
+            "curve_source": "real",
+            "parent_ref": current_cls,
+            "supporting_refs": current_cls,
+            "real_sample_count": int(len(valid_runs)),
+            "sample_reliability": "strong" if len(valid_runs) >= REAL_STRONG_MIN_SAMPLES else "weak",
+            "source_files": source_files,
+            "dt_sample": DT_SAMPLE,
+            "end_dist_tol": END_DIST_TOL,
             "v_acc_ref": v_ref_t[:idx_a + 1].copy(),
             "v_mid_ref": v_ref_t[idx_a:idx_b + 1].copy(),
             "v_br_ref": v_ref_t[idx_b:].copy(),
@@ -525,6 +598,11 @@ def train_one_station_pair(station_pair: str, level_target_times: Dict[str, floa
         multi_artifacts[current_cls] = current_art
         summary_stats.append({
             "class": current_cls,
+            "curve_source": "real",
+            "parent_ref": current_cls,
+            "supporting_refs": current_cls,
+            "real_sample_count": int(len(valid_runs)),
+            "sample_reliability": "strong" if len(valid_runs) >= REAL_STRONG_MIN_SAMPLES else "weak",
             "time_s": round(time_ref_raw, 2),
             "samples": len(valid_runs),
             "peak_v_kmh": round(v_peak_ref * 3.6, 2)
@@ -574,7 +652,7 @@ def train_one_station_pair(station_pair: str, level_target_times: Dict[str, floa
 # 主流程
 # =========================
 def main():
-    ensure_dir(OUTPUT_ROOT)
+    reset_output_root(OUTPUT_ROOT)
 
     standard_times_path = resolve_existing_file(STANDARD_TIMES_CANDIDATES, "standard_class_times.csv")
     data_dir = resolve_existing_dir(DATA_DIR_CANDIDATES, "数据")

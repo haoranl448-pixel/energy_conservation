@@ -25,9 +25,9 @@ from src.physics.train_simu import TrainTheoreticalEnergyModel
 
 
 def get_data_dir(default_dir):
-    """Use ENERGY_DATA_DIR when the main pipeline points this run at a test dataset."""
+    """Use the results_*.xlsx directory selected by the main pipeline."""
 
-    raw = os.environ.get("ENERGY_DATA_DIR")
+    raw = os.environ.get("ENERGY_RESULTS_DATA_DIR") or os.environ.get("ENERGY_DATA_DIR")
     if not raw:
         return default_dir
     return raw if os.path.isabs(raw) else os.path.join(project_root, raw)

@@ -9,9 +9,9 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 RES_MODEL_BASE = PROJECT_ROOT / "output" / "models" / "nn_results_residual_v2"
 
 def get_data_dir(default_value: Path) -> Path:
-    """从主程序传入的数据目录读取 results_*.xlsx；未传入时使用默认目录。"""
+    """从主程序传入的 results 数据目录读取 results_*.xlsx；未传入时使用默认目录。"""
 
-    raw = os.environ.get("ENERGY_DATA_DIR")
+    raw = os.environ.get("ENERGY_RESULTS_DATA_DIR") or os.environ.get("ENERGY_DATA_DIR")
     if not raw:
         return default_value
     data_dir = Path(raw)
