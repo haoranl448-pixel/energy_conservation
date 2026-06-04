@@ -36,7 +36,7 @@ def get_target_time(default_value):
 T_TOTAL_TARGET = get_target_time(DEFAULT_T_TOTAL_TARGET)#trip6/default
 SLACK = 10
 NOMINAL_DWELL = 30.0          # default dwell for stations not in config
-MIN_DWELL = 23.0              # default min dwell for elastic stations
+MIN_DWELL = 20.0              # default min dwell for elastic stations
 
 # Per-station dwell config. Stations NOT listed here use defaults above.
 # "nominal": target dwell time (s)
@@ -59,7 +59,7 @@ MANUAL_CONSTRAINTS = {
     "泗港-曹隘": "class4"
 }
 
-GLOBAL_ALLOWED_CLASSES = ["class2", "class3","class4", "class5"]
+GLOBAL_ALLOWED_CLASSES = ["class1","class2", "class3","class4", "class5"]
 CURVE_SOURCE_COL = "曲线来源"
 PARENT_REF_COL = "父等级"
 SUPPORTING_REFS_COL = "支持等级"
@@ -96,6 +96,26 @@ TRAJ_BASE_DIR = PROJECT_ROOT / "output" / "ato_generated_results_new_v4"
 OUT_DIR = PROJECT_ROOT / "output" / "schedule" / "final_plan_report_v2"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 SECTION_PARAMS_FILE = PROJECT_ROOT / "data" / "static" / f"section_params_trip{TRIP_NO}.csv"
+FINAL_COMPARISON_FILE = OUT_DIR / "Final_Planning_Comparison.csv"
+ENERGY_FIRST_COMPARISON_FILE = OUT_DIR / "Final_Planning_Comparison_Energy_First.csv"
+FINAL_REPORT_PNG = OUT_DIR / "Optimized_Full_Line_Report.png"
+ENERGY_FIRST_REPORT_PNG = OUT_DIR / "Optimized_Full_Line_Report_Energy_First.png"
+
+
+def remove_existing_report_outputs():
+    """Delete stale DP report outputs before rebuilding them."""
+
+    output_root = (PROJECT_ROOT / "output").resolve()
+    for path in [FINAL_COMPARISON_FILE, ENERGY_FIRST_COMPARISON_FILE, FINAL_REPORT_PNG, ENERGY_FIRST_REPORT_PNG]:
+        resolved = path.resolve()
+        try:
+            resolved.relative_to(output_root)
+        except ValueError as exc:
+            raise ValueError(f"拒绝删除非 output 目录下的文件: {resolved}") from exc
+
+        if resolved.exists():
+            resolved.unlink()
+            print(f"已删除旧 DP 输出: {resolved}")
 
 def get_data_dir(default_value: Path) -> Path:
     """Read historical results_*.xlsx from the results data directory selected by main."""
@@ -247,6 +267,8 @@ def row_source_meta(row: pd.Series) -> dict:
 # ===================== 4. Core staged DP =====================
 
 def run_optimization():
+    remove_existing_report_outputs()
+
     # A. Load data
     print(f"Trip: {TRIP_NO} (segment index {TRIP_INDEX})")
     print(f"Target total time: {T_TOTAL_TARGET:.2f}s")
@@ -291,12 +313,20 @@ def run_optimization():
             options = all_opts[all_opts['运行等级'].isin(GLOBAL_ALLOWED_CLASSES)]
         return options[options[CURVE_SOURCE_COL].isin(allowed_sources)].copy()
 
-    def run_dp_stage(stage_name: str, allowed_sources: set[str]):
+    def score_key(score: tuple[int, int, float], score_mode: str) -> tuple[float, ...]:
+        """Return the lexicographic key used to choose between DP states."""
+
+        ext_count, int_count, energy_wh = score
+        if score_mode == "energy_first":
+            return energy_wh, ext_count, int_count
+        return ext_count, int_count, energy_wh
+
+    def run_dp_stage(stage_name: str, allowed_sources: set[str], score_mode: str = "priority_first"):
         # score tuple: (extrapolated_count, interpolated_count, energy_wh)
         dp = {0: (0, 0, 0.0)}
         path = []
 
-        print(f"\nDP stage: {stage_name} | sources={sorted(allowed_sources)}")
+        print(f"\nDP stage: {stage_name} | sources={sorted(allowed_sources)} | score={score_mode}")
         for i, sp in enumerate(STATIONS):
             new_dp, new_path = {}, {}
             options = options_for_stage(sp, allowed_sources)
@@ -315,7 +345,7 @@ def run_optimization():
                     e_curr = float(row['预测能耗(Wh)'])
                     ext_add, int_add = source_count_delta(str(row.get(CURVE_SOURCE_COL, "real")))
                     score = (ext_prev + ext_add, int_prev + int_add, e_prev + e_curr)
-                    if t_sum not in new_dp or score < new_dp[t_sum]:
+                    if t_sum not in new_dp or score_key(score, score_mode) < score_key(new_dp[t_sum], score_mode):
                         new_dp[t_sum] = score
                         new_path[t_sum] = (
                             t_prev,
@@ -337,10 +367,11 @@ def run_optimization():
             print(f"  no feasible state. Reachable run time: [{min_r:.1f}s, {max_r:.1f}s], max allowed: {max_run_time:.1f}s")
             return None
 
-        feasible.sort(key=lambda x: x[1])
+        feasible.sort(key=lambda x: score_key(x[1], score_mode))
         best_t_int, best_score = feasible[0]
         return {
             "stage_name": stage_name,
+            "score_mode": score_mode,
             "dp": dp,
             "path": path,
             "feasible": feasible,
@@ -360,127 +391,141 @@ def run_optimization():
         print("ERROR: No DP stage can fit even with min dwell.")
         return
 
-    stage_name = solution["stage_name"]
-    dp = solution["dp"]
-    path = solution["path"]
-    feasible = solution["feasible"]
-    best_t_int = solution["best_t_int"]
-    final_energy = solution["final_energy"]
+    def print_solution_overview(solution_info: dict, label: str) -> None:
+        stage_name = solution_info["stage_name"]
+        dp = solution_info["dp"]
+        feasible = solution_info["feasible"]
+        best_t_int = solution_info["best_t_int"]
+        final_energy = solution_info["final_energy"]
+        score_mode = solution_info["score_mode"]
 
-    # Distribute remaining time as dwell (run_sum <= max_run_time guaranteed)
-    best_dwells = distribute_dwell_delta(best_t_int / 10.0, dwell_configs[:-1])[1]
+        print(f"\nSelected {label}: {stage_name}")
+        print(f"Feasible states: {len(feasible)}")
+        print(
+            f"Best:  run={best_t_int/10.0:.1f}s, energy={final_energy:.1f} Wh, "
+            f"extrapolated={solution_info['extrapolated_count']}, interpolated={solution_info['interpolated_count']}"
+        )
 
-    print(f"\nSelected DP stage: {stage_name}")
-    print(f"Feasible states: {len(feasible)}")
-    print(
-        f"Best:  run={best_t_int/10.0:.1f}s, energy={final_energy:.1f} Wh, "
-        f"extrapolated={solution['extrapolated_count']}, interpolated={solution['interpolated_count']}"
-    )
+        nom_int = to_int(nom_run_time)
+        nearby = [(t, dp[t]) for t in dp.keys() if nom_int - to_int(SLACK) <= t <= nom_int + to_int(SLACK)]
+        if nearby:
+            nearby.sort(key=lambda x: score_key(x[1], score_mode))
+            nom_best_t, nom_best_score = nearby[0]
+            nom_best_e = float(nom_best_score[2])
+            print(f"Nominal-dwell best nearby: run={nom_best_t/10.0:.1f}s, energy={nom_best_e:.1f} Wh")
+            saving = nom_best_e - final_energy
+            extra_run = (best_t_int - nom_best_t) / 10.0
+            if nom_best_e:
+                print(f"Dwell trade: +{extra_run:.1f}s run time -> saves {saving:.1f} Wh ({saving/nom_best_e*100:.1f}%)")
 
-    nom_int = to_int(nom_run_time)
-    nearby = [(t, dp[t]) for t in dp.keys() if nom_int - to_int(SLACK) <= t <= nom_int + to_int(SLACK)]
-    if nearby:
-        nearby.sort(key=lambda x: x[1])
-        nom_best_t, nom_best_score = nearby[0]
-        nom_best_e = float(nom_best_score[2])
-        print(f"Nominal-dwell best nearby: run={nom_best_t/10.0:.1f}s, energy={nom_best_e:.1f} Wh")
-        saving = nom_best_e - final_energy
-        extra_run = (best_t_int - nom_best_t) / 10.0
-        if nom_best_e:
-            print(f"Dwell trade: +{extra_run:.1f}s run time -> saves {saving:.1f} Wh ({saving/nom_best_e*100:.1f}%)")
+    def write_solution_report(solution_info: dict, report_path: Path) -> tuple[list[dict], dict]:
+        stage_name = solution_info["stage_name"]
+        path = solution_info["path"]
+        best_t_int = solution_info["best_t_int"]
 
-    run_sum = best_t_int / 10.0
+        dwell_ok, best_dwells = distribute_dwell_delta(best_t_int / 10.0, dwell_configs[:-1])
+        if not dwell_ok:
+            raise RuntimeError(f"{stage_name} selected an infeasible dwell distribution.")
 
-    # E. Backtrack
-    final_rows = []
-    curr_t = best_t_int
-    for i in range(len(STATIONS) - 1, -1, -1):
-        prev_t, c_name, t_val, e_val, source_meta = path[i][curr_t]
-        sp = STATIONS[i]
-        h_time = df_hist.loc[sp, '历史运行时间(s)']
-        h_raw_energy = df_hist.loc[sp, HIST_RAW_ENERGY_COL]
-        h_model_energy = df_hist.loc[sp, HIST_MODEL_ENERGY_COL] if HIST_MODEL_ENERGY_COL in df_hist.columns else np.nan
+        final_rows = []
+        curr_t = best_t_int
+        for i in range(len(STATIONS) - 1, -1, -1):
+            prev_t, c_name, t_val, e_val, source_meta = path[i][curr_t]
+            sp = STATIONS[i]
+            h_time = df_hist.loc[sp, '历史运行时间(s)']
+            h_raw_energy = df_hist.loc[sp, HIST_RAW_ENERGY_COL]
+            h_model_energy = df_hist.loc[sp, HIST_MODEL_ENERGY_COL] if HIST_MODEL_ENERGY_COL in df_hist.columns else np.nan
 
-        # Dwell after this station (except last)
-        if i < len(STATIONS) - 1:
-            dwell = best_dwells[i]
-        else:
-            dwell = 0.0
+            if i < len(STATIONS) - 1:
+                dwell = best_dwells[i]
+            else:
+                dwell = 0.0
 
-        final_rows.append({
-            "站间区间": sp,
-            "选定等级": c_name,
-            "规划用时(s)": round(t_val, 0),
-            "停站时间(s)": round(dwell, 1) if i < len(STATIONS) - 1 else 0,
-            "历史用时(s)": round(h_time, 2),
-            "规划能耗(Wh)": round(e_val, 2),
-            "历史能耗(Wh)": round(h_raw_energy, 2),
-            "历史模型回放能耗(Wh)": round(h_model_energy, 2) if pd.notna(h_model_energy) else np.nan,
+            final_rows.append({
+                "站间区间": sp,
+                "选定等级": c_name,
+                "规划用时(s)": round(t_val, 0),
+                "停站时间(s)": round(dwell, 1) if i < len(STATIONS) - 1 else 0,
+                "历史用时(s)": round(h_time, 2),
+                "规划能耗(Wh)": round(e_val, 2),
+                "历史能耗(Wh)": round(h_raw_energy, 2),
+                "历史模型回放能耗(Wh)": round(h_model_energy, 2) if pd.notna(h_model_energy) else np.nan,
+                "能耗对比基准": "历史原始实测能耗",
+                "节能量(Wh)": round(h_raw_energy - e_val, 2),
+                "曲线来源": source_meta.get("curve_source", "real"),
+                "父等级": source_meta.get("parent_ref", ""),
+                "支持等级": source_meta.get("supporting_refs", ""),
+                "真实样本数": source_meta.get("real_sample_count", 0),
+                "父等级真实样本数": source_meta.get("parent_real_sample_count", 0),
+                "样本可靠性": source_meta.get("sample_reliability", ""),
+                "规划阶段": stage_name,
+                "MASS": round(mass_map.get(sp, np.nan), 2),
+            })
+            curr_t = prev_t
+
+        final_rows.reverse()
+
+        run_exact = best_t_int / 10.0
+        run_backtrack_sum = sum(r['规划用时(s)'] for r in final_rows)
+        drift = run_exact - run_backtrack_sum
+        if abs(drift) > 0.01:
+            n_adj = int(round(abs(drift) * 10))
+            step = 1 if drift > 0 else -1
+            for j in range(n_adj):
+                final_rows[j % len(final_rows)]['规划用时(s)'] += step * 0.1
+            for r in final_rows:
+                r['规划用时(s)'] = round(r['规划用时(s)'], 0)
+
+        df_res = pd.DataFrame(final_rows)
+        total_h_e = df_res['历史能耗(Wh)'].sum()
+        total_h_model_e = df_res['历史模型回放能耗(Wh)'].sum(skipna=True) if '历史模型回放能耗(Wh)' in df_res.columns else np.nan
+        total_p_e = df_res['规划能耗(Wh)'].sum()
+        total_p_run = df_res['规划用时(s)'].sum()
+        total_p_dwell = df_res['停站时间(s)'].sum()
+        total_p_t = total_p_run + total_p_dwell
+        total_h_t = df_res['历史用时(s)'].sum() + nominal_total_dwell
+        saving_rate = (total_h_e - total_p_e) / total_h_e * 100
+
+        summary_row = {
+            "站间区间": "--- 总计 ---",
+            "选定等级": f"节能率: {saving_rate:.2f}%",
+            "规划用时(s)": total_p_run,
+            "停站时间(s)": total_p_dwell,
+            "历史用时(s)": total_h_t,
+            "规划能耗(Wh)": round(total_p_e, 2),
+            "历史能耗(Wh)": round(total_h_e, 2),
+            "历史模型回放能耗(Wh)": round(total_h_model_e, 2) if pd.notna(total_h_model_e) else np.nan,
             "能耗对比基准": "历史原始实测能耗",
-            "节能量(Wh)": round(h_raw_energy - e_val, 2),
-            "曲线来源": source_meta.get("curve_source", "real"),
-            "父等级": source_meta.get("parent_ref", ""),
-            "支持等级": source_meta.get("supporting_refs", ""),
-            "真实样本数": source_meta.get("real_sample_count", 0),
-            "父等级真实样本数": source_meta.get("parent_real_sample_count", 0),
-            "样本可靠性": source_meta.get("sample_reliability", ""),
+            "节能量(Wh)": round(total_h_e - total_p_e, 2),
+            "曲线来源": "",
+            "父等级": "",
+            "支持等级": "",
+            "真实样本数": "",
+            "父等级真实样本数": "",
+            "样本可靠性": "",
             "规划阶段": stage_name,
-            "MASS": round(mass_map.get(sp, np.nan), 2),
-        })
-        curr_t = prev_t
+            "MASS": "",
+        }
+        df_res = pd.concat([df_res, pd.DataFrame([summary_row])], ignore_index=True)
+        df_res.to_csv(report_path, index=False, encoding='utf-8-sig')
 
-    final_rows.reverse()
+        totals = {
+            "run": total_p_run,
+            "dwell": total_p_dwell,
+            "total_time": total_p_t,
+            "energy": total_p_e,
+            "saving_rate": saving_rate,
+        }
+        return final_rows, totals
 
-    # Fix backtrack rounding drift: scale per-station times to match DP total exactly
-    run_exact = best_t_int / 10.0
-    run_backtrack_sum = sum(r['规划用时(s)'] for r in final_rows)
-    drift = run_exact - run_backtrack_sum
-    if abs(drift) > 0.01:
-        # Distribute drift by adding 1 decisecond to the first N stations
-        n_adj = int(round(abs(drift) * 10))
-        step = 1 if drift > 0 else -1
-        for j in range(n_adj):
-            final_rows[j % len(final_rows)]['规划用时(s)'] += step * 0.1
-        for r in final_rows:
-            r['规划用时(s)'] = round(r['规划用时(s)'], 0)
+    print_solution_overview(solution, "priority-first plan")
+    final_rows, totals = write_solution_report(solution, FINAL_COMPARISON_FILE)
 
-    df_res = pd.DataFrame(final_rows)
-
-    # F. Summary
-    total_h_e = df_res['历史能耗(Wh)'].sum()
-    total_h_model_e = df_res['历史模型回放能耗(Wh)'].sum(skipna=True) if '历史模型回放能耗(Wh)' in df_res.columns else np.nan
-    total_p_e = df_res['规划能耗(Wh)'].sum()
-    total_p_run = df_res['规划用时(s)'].sum()
-    total_p_dwell = df_res['停站时间(s)'].sum()
-    total_p_t = total_p_run + total_p_dwell
-    total_h_t = df_res['历史用时(s)'].sum() + nominal_total_dwell  # fixed historical dwell
-    saving_rate = (total_h_e - total_p_e) / total_h_e * 100
-
-    summary_row = {
-        "站间区间": "--- 总计 ---",
-        "选定等级": f"节能率: {saving_rate:.2f}%",
-        "规划用时(s)": total_p_run,
-        "停站时间(s)": total_p_dwell,
-        "历史用时(s)": total_h_t,
-        "规划能耗(Wh)": round(total_p_e, 2),
-        "历史能耗(Wh)": round(total_h_e, 2),
-        "历史模型回放能耗(Wh)": round(total_h_model_e, 2) if pd.notna(total_h_model_e) else np.nan,
-        "能耗对比基准": "历史原始实测能耗",
-        "节能量(Wh)": round(total_h_e - total_p_e, 2),
-        "曲线来源": "",
-        "父等级": "",
-        "支持等级": "",
-        "真实样本数": "",
-        "父等级真实样本数": "",
-        "样本可靠性": "",
-        "规划阶段": stage_name,
-        "MASS": round(df_res['MASS'].sum(), 2),
-    }
-    df_res = pd.concat([df_res, pd.DataFrame([summary_row])], ignore_index=True)
-    df_res.to_csv(OUT_DIR / "Final_Planning_Comparison.csv", index=False, encoding='utf-8-sig')
-
-    print(f"\nRun: {total_p_run:.1f}s | Dwell: {total_p_dwell:.1f}s | Total: {total_p_t:.1f}s (target: {T_TOTAL_TARGET}s)")
-    print(f"Energy: {total_p_e:.1f} Wh | Saving: {saving_rate:.2f}%")
+    print(
+        f"\nPriority-first report: Run: {totals['run']:.1f}s | Dwell: {totals['dwell']:.1f}s | "
+        f"Total: {totals['total_time']:.1f}s (target: {T_TOTAL_TARGET}s)"
+    )
+    print(f"Energy: {totals['energy']:.1f} Wh | Saving: {totals['saving_rate']:.2f}%")
     for i, row in enumerate(final_rows):
         if i >= len(final_rows):
             break
@@ -490,91 +535,119 @@ def run_optimization():
             tag = f" -> min={min_d:.0f}s" if d <= min_d + 0.5 else ""
             print(f"  Dwell after {row['站间区间']}: {d:.1f}s{tag}")
 
+    energy_solution = run_dp_stage(
+        "energy_first",
+        {"real", "interpolated", "extrapolated_adjacent"},
+        score_mode="energy_first",
+    )
+    if energy_solution is not None:
+        print_solution_overview(energy_solution, "energy-first plan")
+        energy_rows, energy_totals = write_solution_report(energy_solution, ENERGY_FIRST_COMPARISON_FILE)
+        print(
+            f"\nEnergy-first report: Run: {energy_totals['run']:.1f}s | Dwell: {energy_totals['dwell']:.1f}s | "
+            f"Total: {energy_totals['total_time']:.1f}s (target: {T_TOTAL_TARGET}s)"
+        )
+        print(f"Energy: {energy_totals['energy']:.1f} Wh | Saving: {energy_totals['saving_rate']:.2f}%")
+    else:
+        energy_rows = None
+        energy_totals = None
+        print("\nEnergy-first report skipped: no feasible all-source DP solution.")
+
     # ===================== 4. Plotting =====================
-    print("\nPlotting full-line comparison ...")
-    plt.rcParams['font.sans-serif'] = ['SimHei']
-    plt.rcParams['axes.unicode_minus'] = False
+    def plot_solution(solution_rows: list[dict], solution_totals: dict, output_path: Path, title_prefix: str) -> None:
+        print(f"\nPlotting {title_prefix} full-line comparison ...")
+        plt.rcParams['font.sans-serif'] = ['SimHei']
+        plt.rcParams['axes.unicode_minus'] = False
 
-    t_opt_acc = 0.0
-    s_opt_acc = 0.0
-    t_hist_acc = 0.0
-    s_hist_acc = 0.0
-    plot_data = {'opt_t': [], 'opt_v': [], 'opt_s': [],
-                 'hist_t': [], 'hist_v': [], 'hist_s': []}
-    dwell_zones = []
+        t_opt_acc = 0.0
+        s_opt_acc = 0.0
+        t_hist_acc = 0.0
+        s_hist_acc = 0.0
+        plot_data = {'opt_t': [], 'opt_v': [], 'opt_s': [],
+                     'hist_t': [], 'hist_v': [], 'hist_s': []}
+        dwell_zones = []
 
-    for i, row in enumerate(final_rows):
-        if i >= len(STATIONS):
-            break
-        sp = row['站间区间']
-        c_name = row['选定等级']
+        for i, row in enumerate(solution_rows):
+            if i >= len(STATIONS):
+                break
+            sp = row['站间区间']
+            c_name = row['选定等级']
 
-        # Optimized trajectory
-        df_opt = pd.read_csv(TRAJ_BASE_DIR / sp / f"{c_name}_generated_curve.csv")
-        plot_data['opt_t'].extend((df_opt['time_s'] + t_opt_acc).tolist())
-        plot_data['opt_v'].extend((df_opt['velocity_mps'] * 3.6).tolist())
-        plot_data['opt_s'].extend((df_opt['dist_m'] + s_opt_acc).tolist())
+            df_opt = pd.read_csv(TRAJ_BASE_DIR / sp / f"{c_name}_generated_curve.csv")
+            plot_data['opt_t'].extend((df_opt['time_s'] + t_opt_acc).tolist())
+            plot_data['opt_v'].extend((df_opt['velocity_mps'] * 3.6).tolist())
+            plot_data['opt_s'].extend((df_opt['dist_m'] + s_opt_acc).tolist())
 
-        # Historical trajectory
-        df_h_all = pd.read_excel(DATA_DIR / f"results_{sp}.xlsx")
-        target_seg = sorted(df_h_all['segment'].unique())[TRIP_INDEX]
-        df_h = df_h_all[df_h_all['segment'] == target_seg].copy()
-        h_v = df_h['速度(m/s)'].values * 3.6
-        h_t = df_h['时刻'].values - df_h['时刻'].iloc[0]
-        h_s = df_h['累计位移(m)'].values / SLIP_RATIO
+            df_h_all = pd.read_excel(DATA_DIR / f"results_{sp}.xlsx")
+            target_seg = sorted(df_h_all['segment'].unique())[TRIP_INDEX]
+            df_h = df_h_all[df_h_all['segment'] == target_seg].copy()
+            h_v = df_h['速度(m/s)'].values * 3.6
+            h_t = df_h['时刻'].values - df_h['时刻'].iloc[0]
+            h_s = df_h['累计位移(m)'].values / SLIP_RATIO
 
-        plot_data['hist_t'].extend((h_t + t_hist_acc).tolist())
-        plot_data['hist_v'].extend(h_v.tolist())
-        plot_data['hist_s'].extend((h_s + s_hist_acc).tolist())
+            plot_data['hist_t'].extend((h_t + t_hist_acc).tolist())
+            plot_data['hist_v'].extend(h_v.tolist())
+            plot_data['hist_s'].extend((h_s + s_hist_acc).tolist())
 
-        t_opt_acc += row['规划用时(s)']
-        s_opt_acc += df_opt['dist_m'].iloc[-1]
-        t_hist_acc += h_t[-1]
-        s_hist_acc += h_s[-1]
+            t_opt_acc += row['规划用时(s)']
+            s_opt_acc += df_opt['dist_m'].iloc[-1]
+            t_hist_acc += h_t[-1]
+            s_hist_acc += h_s[-1]
 
-        if i < len(STATIONS) - 1:
-            dwell_opt = row['停站时间(s)']
-            dwell_hist = dwell_nominals[i]  # historical uses nominal 30s
+            if i < len(STATIONS) - 1:
+                dwell_opt = row['停站时间(s)']
+                dwell_hist = dwell_nominals[i]
 
-            dwell_zones.append((t_opt_acc, t_opt_acc + dwell_opt))
-            plot_data['opt_t'].extend([t_opt_acc, t_opt_acc + dwell_opt])
-            plot_data['opt_v'].extend([0, 0])
-            plot_data['opt_s'].extend([s_opt_acc, s_opt_acc])
-            t_opt_acc += dwell_opt
+                dwell_zones.append((t_opt_acc, t_opt_acc + dwell_opt))
+                plot_data['opt_t'].extend([t_opt_acc, t_opt_acc + dwell_opt])
+                plot_data['opt_v'].extend([0, 0])
+                plot_data['opt_s'].extend([s_opt_acc, s_opt_acc])
+                t_opt_acc += dwell_opt
 
-            plot_data['hist_t'].extend([t_hist_acc, t_hist_acc + dwell_hist])
-            plot_data['hist_v'].extend([0, 0])
-            plot_data['hist_s'].extend([s_hist_acc, s_hist_acc])
-            t_hist_acc += dwell_hist
+                plot_data['hist_t'].extend([t_hist_acc, t_hist_acc + dwell_hist])
+                plot_data['hist_v'].extend([0, 0])
+                plot_data['hist_s'].extend([s_hist_acc, s_hist_acc])
+                t_hist_acc += dwell_hist
 
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(18, 10))
+        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(18, 10))
 
-    ax1.plot(plot_data['hist_t'], plot_data['hist_v'], color='gray', alpha=0.4,
-             linewidth=1.0, label='historical')
-    ax1.plot(plot_data['opt_t'], plot_data['opt_v'], color='red', linewidth=1.2,
-             label='optimized plan')
-    for start, end in dwell_zones:
-        ax1.axvspan(start, end, color='gray', alpha=0.05)
-    ax1.set_title(f"v-t | total={total_p_t:.1f}s (target={T_TOTAL_TARGET}s) | saving={saving_rate:.2f}%")
-    ax1.set_ylabel("Velocity (km/h)")
-    ax1.legend()
-    ax1.grid(True, linestyle='--', alpha=0.3)
+        ax1.plot(plot_data['hist_t'], plot_data['hist_v'], color='gray', alpha=0.4,
+                 linewidth=1.0, label='historical')
+        ax1.plot(plot_data['opt_t'], plot_data['opt_v'], color='red', linewidth=1.2,
+                 label=title_prefix)
+        for start, end in dwell_zones:
+            ax1.axvspan(start, end, color='gray', alpha=0.05)
+        ax1.set_title(
+            f"{title_prefix} v-t | total={solution_totals['total_time']:.1f}s "
+            f"(target={T_TOTAL_TARGET}s) | saving={solution_totals['saving_rate']:.2f}%"
+        )
+        ax1.set_ylabel("Velocity (km/h)")
+        ax1.legend()
+        ax1.grid(True, linestyle='--', alpha=0.3)
 
-    ax2.plot(plot_data['hist_s'], plot_data['hist_v'], color='gray', alpha=0.4,
-             linewidth=1.0, label='historical')
-    ax2.plot(plot_data['opt_s'], plot_data['opt_v'], color='blue', linewidth=1.2,
-             label='optimized plan')
-    ax2.set_title(f"v-s | distance={s_opt_acc:.0f}m")
-    ax2.set_xlabel("Distance (m)")
-    ax2.set_ylabel("Velocity (km/h)")
-    ax2.legend()
-    ax2.grid(True, linestyle='--', alpha=0.3)
+        ax2.plot(plot_data['hist_s'], plot_data['hist_v'], color='gray', alpha=0.4,
+                 linewidth=1.0, label='historical')
+        ax2.plot(plot_data['opt_s'], plot_data['opt_v'], color='blue', linewidth=1.2,
+                 label=title_prefix)
+        ax2.set_title(f"{title_prefix} v-s | distance={s_opt_acc:.0f}m")
+        ax2.set_xlabel("Distance (m)")
+        ax2.set_ylabel("Velocity (km/h)")
+        ax2.legend()
+        ax2.grid(True, linestyle='--', alpha=0.3)
 
-    plt.tight_layout()
-    fig.savefig(OUT_DIR / "Optimized_Full_Line_Report.png", dpi=300)
-    plt.close()
-    print(f"Saved: {OUT_DIR / 'Optimized_Full_Line_Report.png'}")
-    print(f"Done. Energy: {total_p_e/1000:.3f} kWh, Time: {total_p_t:.1f}s (strict = {T_TOTAL_TARGET}s)")
+        plt.tight_layout()
+        fig.savefig(output_path, dpi=300)
+        plt.close()
+        print(f"Saved: {output_path}")
+
+    plot_solution(final_rows, totals, FINAL_REPORT_PNG, "priority-first plan")
+    if energy_rows is not None and energy_totals is not None:
+        plot_solution(energy_rows, energy_totals, ENERGY_FIRST_REPORT_PNG, "energy-first plan")
+
+    print(
+        f"Done. Energy: {totals['energy']/1000:.3f} kWh, "
+        f"Time: {totals['total_time']:.1f}s (strict = {T_TOTAL_TARGET}s)"
+    )
 
 
 if __name__ == "__main__":

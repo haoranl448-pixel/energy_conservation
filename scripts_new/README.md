@@ -31,7 +31,7 @@ python scripts_new/main.py
 默认处理第 1 趟车；如果想固定改成别的趟，可以直接改 `scripts_new/main.py` 顶部的 `DEFAULT_TRIP_NO`。
 默认 DP 目标总时间使用 `scripts_new/00_main_pipeline/08_ato_class_globall_v2.py` 里的 `DEFAULT_T_TOTAL_TARGET`；如果想固定成某个数，可以直接改 `scripts_new/main.py` 顶部的 `DEFAULT_TARGET_TIME`。
 默认数据目录使用各脚本自己的配置；测试时 `--data-dir` 指定带 `results_*.xlsx` 的主数据目录。
-如果 `results_*.xlsx` 里有 `曲线质量标签`，残差模型训练会使用全部趟次，ATO 模板训练/对比只使用 `曲线质量标签 = 0` 的正常白天趟次。正常曲线里真实存在的等级都会学习模板；缺失等级只作为后续 DP 候选由相邻真实等级生成，不反过来参与学习。
+如果 `results_*.xlsx` 里有 `曲线质量标签`，残差模型训练会使用全部趟次，ATO 模板训练/对比只使用 `曲线质量标签 = 0` 的正常白天趟次。正常曲线里真实存在的等级都会学习模板；模板先用中位数中心线寻找最典型真实趟次，再用这条真实趟次作为 medoid 模板。缺失等级只作为后续 DP 候选由相邻真实等级生成，不反过来参与学习。
 `--ato-data-dir` 只是可选覆盖项；不传时 ATO 默认复用 `--data-dir`。
 默认 DP 排图范围是全正向区间；测试时可以通过 `--line-scope n` 只取前 `n` 个区间。
 
@@ -128,9 +128,9 @@ python scripts_new/main.py --ask-ato-data-dir --from-step ato_template
 - `scripts/ato_class_globall_v2.py` 会读取主程序传入的目标总时间；未传入时使用脚本默认值。
 - `--data-dir` 指定的是 `results_区间.xlsx` 目录，供 `02_train_residual_new.py`、`06_ato_generated_results_energy.py`、`07_full_line_validation_results.py`、`08_ato_class_globall_v2.py` 使用；如果未单独传 `--ato-data-dir`，也会供 `04_train_ATO_v8.py` 和 `05_simulate_ATO_v8.py` 使用。
 - 残差模型训练不筛 `曲线质量标签`，使用全部趟次。
-- ATO 模板训练/真实曲线对比如果读到 `曲线质量标签`，只保留 `曲线质量标签 = 0`；正常曲线中出现过的等级都作为 `real` 模板学习。
+- ATO 模板训练/真实曲线对比如果读到 `曲线质量标签`，只保留 `曲线质量标签 = 0`；正常曲线中出现过的等级都作为 `real` 模板学习。每个区间、每个等级单独归一化，先构建中位数中心线，再选离中心线最近的一条真实历史曲线作为 medoid 模板。
 - 缺失等级只在曲线生成阶段用相邻真实等级补候选，并标记 `曲线来源`：`real`、`interpolated` 或 `extrapolated_adjacent`。远距离外推默认不启用。
-- 每次重新执行 `ato_template` 会先清空 `output/ato_phase_results_v3`；每次重新执行 `ato_simulation` 会先清空 `output/ato_generated_results_new_v4`，避免旧等级文件混在新结果里。
+- 每次重新执行生成类步骤都会先清旧输出：`ato_template` 清空 `output/ato_phase_results_v3`，`ato_simulation` 清空 `output/ato_generated_results_new_v4`，`energy_menu` 删除旧能耗菜单，`historical_baseline` 删除旧 `full_line<趟号>_validation_results.csv`，`dp_schedule` 删除旧最终对比表和最终对比图，避免旧结果混在新结果里。
 - DP 排图按三轮尝试：先 `real_only`，不可行再 `allow_interpolated`，仍不可行再 `allow_extrapolated`；同一轮内优先少用外推、少用插值，再比较能耗。
 - `--ato-data-dir` 是可选覆盖项，支持 `results_区间.xlsx` 或 `cleaned_区间.xlsx`；仅当你想让 ATO 使用另一套数据时才需要指定。
 
@@ -185,7 +185,7 @@ python scripts_new/main.py --only energy_menu,dp_schedule
 
 - `data_process.py`：原始运行数据清洗，生成按区间整理后的数据文件。
 - `build_class_lookup_tables.py`：构建运行等级/服务号/区间等对照表。
-- `train_ATO_v8.py`：主线 ATO 相位模板提取脚本，对正常曲线里真实存在的等级学习加速、巡航、制动三段模板，并记录样本数和可靠性。
+- `train_ATO_v8.py`：主线 ATO 相位模板提取脚本，对正常曲线里真实存在的等级学习加速、巡航、制动三段模板；模板采用最接近中位数中心线的真实 medoid 趟次，并记录样本数、可靠性和代表趟次 ID。
 - `simulate_ATO_v8.py`：主线速度曲线生成脚本，真实等级用自身模板，缺失等级只用相邻真实等级生成候选并保留来源标签。
 - `ato_generated_results_energy.py`：读取生成曲线，计算物理模型 + AI 残差后的能耗菜单。
 - `ato_class_globall_v2.py`：主线 DP 排图优化，支持运行等级选择、弹性停站时间和按曲线来源分轮规划，并输出最终方案表和对比图。

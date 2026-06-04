@@ -34,6 +34,20 @@ def get_trip_no() -> int:
 
 TRIP_NO = get_trip_no()
 TRIP_INDEX = TRIP_NO - 1
+OUTPUT_FILE = PROJECT_ROOT / f"full_line{TRIP_NO}_validation_results.csv"
+
+
+def remove_existing_output_file(path: Path):
+    """Delete the stale historical baseline CSV before rebuilding it."""
+
+    resolved = path.resolve()
+    expected = (PROJECT_ROOT / f"full_line{TRIP_NO}_validation_results.csv").resolve()
+    if resolved != expected:
+        raise ValueError(f"拒绝删除非历史基准输出文件: {resolved}")
+
+    if resolved.exists():
+        resolved.unlink()
+        print(f"已删除旧历史基准: {resolved}")
 
 # 引入你的物理引擎
 sys.path.append(str(PROJECT_ROOT))
@@ -121,7 +135,7 @@ def evaluate_historical_trip(sp):
         res_sum = np.sum(sy.inverse_transform(p_out))
 
     # 6. 计算结果
-    # 历史实测能耗只用于误差诊断；globall_v2 对比时使用的是历史曲线经模型回放后的能耗。
+    # 历史实测能耗用于最终规划节能率对比；模型回放能耗保留用于误差诊断。
     e_real_total = (df['energy'].sum() / 3.6e6) * 1000 # 历史实测 Wh
     e_model_total = np.sum(e_phy_steps[29:]) + res_sum # 历史曲线模型回放 Wh
 
@@ -136,6 +150,8 @@ def evaluate_historical_trip(sp):
     }
 
 if __name__ == "__main__":
+    remove_existing_output_file(OUTPUT_FILE)
+
     # 1. 定义全线 26 个正向区间清单
     line5_stations = [
         "布政-张家潭", "张家潭-同德路", "同德路-石碶", "石碶-雅渡", "雅渡-庙堰",
@@ -176,8 +192,7 @@ if __name__ == "__main__":
         print(df_final.to_string(index=False))
 
         # 建议：顺便保存一份 CSV 结果，方便你填 PPT 或者写报告
-        output_file = f"full_line{TRIP_NO}_validation_results.csv"
-        df_final.to_csv(output_file, index=False, encoding='utf-8-sig')
-        print(f"\n✅ 结果已保存至: {output_file}")
+        df_final.to_csv(OUTPUT_FILE, index=False, encoding='utf-8-sig')
+        print(f"\n✅ 结果已保存至: {OUTPUT_FILE}")
     else:
         print("⚠️ 未提取到任何有效数据，请检查 data_processed 目录下的文件。")

@@ -369,6 +369,55 @@ def resample_to_normalized_time(raw_v: np.ndarray, n_ref: int) -> Optional[np.nd
     return np.interp(tau_dst, tau_src, raw_v)
 
 
+def smooth_template_curve(v: np.ndarray, window: int = 15, poly: int = 3) -> np.ndarray:
+    """Lightly smooth and lock endpoints for a template speed curve."""
+
+    out = np.asarray(v, dtype=float).copy()
+    out = np.clip(out, 0.0, None)
+    if len(out) > 0:
+        out[0] = 0.0
+        out[-1] = 0.0
+    out = safe_savgol(out, window=window, poly=poly)
+    out = np.clip(out, 0.0, None)
+    if len(out) > 0:
+        out[0] = 0.0
+        out[-1] = 0.0
+    return out
+
+
+def build_median_center_curve(v_norm_curves: np.ndarray) -> np.ndarray:
+    """Build the robust center line used only for selecting the real medoid run."""
+
+    raw_median = np.median(v_norm_curves, axis=0)
+    tau = np.linspace(0.0, 1.0, len(raw_median))
+    try:
+        spline = make_interp_spline(tau, raw_median, k=3)
+        center = spline(tau)
+    except Exception:
+        center = raw_median
+    return smooth_template_curve(center, window=31, poly=3)
+
+
+def select_medoid_run(norm_items: List[Tuple[Dict, np.ndarray]], center_v: np.ndarray) -> Tuple[Dict, np.ndarray, float]:
+    """Select the real run whose normalized speed shape is closest to the median center."""
+
+    best_item = None
+    best_v = None
+    best_rmse = float("inf")
+
+    for item, v_norm in norm_items:
+        diff = np.asarray(v_norm, dtype=float) - np.asarray(center_v, dtype=float)
+        rmse = float(np.sqrt(np.nanmean(diff ** 2)))
+        if rmse < best_rmse:
+            best_item = item
+            best_v = v_norm
+            best_rmse = rmse
+
+    if best_item is None or best_v is None:
+        raise ValueError("无法从有效曲线中选择 medoid 代表曲线。")
+    return best_item, best_v, best_rmse
+
+
 
 def detect_phase_boundaries(v_ref_t: np.ndarray, dt_ref: float):
     v = safe_savgol(v_ref_t, window=min(101, len(v_ref_t) - (1 - len(v_ref_t) % 2)), poly=3)
@@ -535,34 +584,28 @@ def train_one_station_pair(station_pair: str, level_target_times: Dict[str, floa
             continue
 
         raw_times = np.array([x["travel_time_raw"] for x in valid_runs], dtype=float)
-        time_ref_raw = float(np.median(raw_times))
+        center_time_raw = float(np.median(raw_times))
         mass_median = float(np.nanmedian(np.concatenate([x["mass_values"] for x in valid_runs])))
 
-        # 归一化重采样
-        n_ref = max(int(round(time_ref_raw / DT_SAMPLE)) + 1, 400)
-        v_norm_curves = []
+        # 归一化重采样：同一区间、同一等级内部对齐，不同等级不会混在一起。
+        n_ref = max(int(round(center_time_raw / DT_SAMPLE)) + 1, 400)
+        norm_items = []
         for item in valid_runs:
             v_norm = resample_to_normalized_time(item["raw_v"], n_ref)
-            if v_norm is not None: v_norm_curves.append(v_norm)
+            if v_norm is not None:
+                norm_items.append((item, v_norm))
 
-        if len(v_norm_curves) == 0: continue
-        v_norm_curves = np.vstack(v_norm_curves)
+        if len(norm_items) == 0: continue
+        v_norm_curves = np.vstack([x[1] for x in norm_items])
 
-        # ======= 🚀 B-Spline “中间线”重构 =======
-        raw_median = np.median(v_norm_curves, axis=0)
-        tau = np.linspace(0.0, 1.0, len(raw_median))
+        # 先构建稳健中心线，再选择最接近中心线的一条真实历史曲线作为最终模板。
+        center_v_ref_t = build_median_center_curve(v_norm_curves)
+        medoid_run, medoid_v_norm, medoid_rmse = select_medoid_run(norm_items, center_v_ref_t)
+        v_ref_t = smooth_template_curve(medoid_v_norm, window=15, poly=3)
+        # Keep the class median time as the template time base; the medoid run supplies the real speed shape.
+        time_ref_raw = center_time_raw
 
-        from scipy.interpolate import make_interp_spline
-        spline = make_interp_spline(tau, raw_median, k=3)
-        v_ref_t = spline(tau)
-
-        v_ref_t = np.clip(v_ref_t, 0.0, None)
-        v_ref_t[0], v_ref_t[-1] = 0.0, 0.0
-        v_ref_t = safe_savgol(v_ref_t, window=31, poly=3)
-        v_ref_t = np.clip(v_ref_t, 0.0, None)
-        v_ref_t[-1] = 0.0 # 再次锁定
-        v_ref_t[0], v_ref_t[-1] = 0.0, 0.0
-        # ===============================================
+        center_t_ref = np.linspace(0.0, 1.0, n_ref) * center_time_raw
 
         # 相位识别
         t_ref = np.linspace(0.0, 1.0, n_ref) * time_ref_raw
@@ -577,6 +620,13 @@ def train_one_station_pair(station_pair: str, level_target_times: Dict[str, floa
             "supporting_refs": current_cls,
             "real_sample_count": int(len(valid_runs)),
             "sample_reliability": "strong" if len(valid_runs) >= REAL_STRONG_MIN_SAMPLES else "weak",
+            "template_source": "medoid_real_run",
+            "template_run_id": medoid_run.get("run_id", ""),
+            "template_distance_to_median_rmse_mps": float(medoid_rmse),
+            "template_run_time_raw": float(medoid_run["travel_time_raw"]),
+            "center_time_median_s": center_time_raw,
+            "center_v_ref_t": center_v_ref_t,
+            "center_t_ref": center_t_ref,
             "source_files": source_files,
             "dt_sample": DT_SAMPLE,
             "end_dist_tol": END_DIST_TOL,
@@ -592,6 +642,7 @@ def train_one_station_pair(station_pair: str, level_target_times: Dict[str, floa
             "v_ref_t": v_ref_t,
             "t_ref": t_ref,
             "mass_median": mass_median,
+            "medoid_run_sample": medoid_run,
             "valid_runs_samples": valid_runs  # 👈 修正：把样本存进去供下方绘图使用
         }
 
@@ -603,6 +654,10 @@ def train_one_station_pair(station_pair: str, level_target_times: Dict[str, floa
             "supporting_refs": current_cls,
             "real_sample_count": int(len(valid_runs)),
             "sample_reliability": "strong" if len(valid_runs) >= REAL_STRONG_MIN_SAMPLES else "weak",
+            "template_source": "medoid_real_run",
+            "template_run_id": medoid_run.get("run_id", ""),
+            "template_distance_to_median_rmse_mps": round(float(medoid_rmse), 6),
+            "center_time_median_s": round(center_time_raw, 2),
             "time_s": round(time_ref_raw, 2),
             "samples": len(valid_runs),
             "peak_v_kmh": round(v_peak_ref * 3.6, 2)
@@ -628,11 +683,15 @@ def train_one_station_pair(station_pair: str, level_target_times: Dict[str, floa
         for run in art_data["valid_runs_samples"]:
             plt.plot(run["raw_t"], run["raw_v"] * 3.6, color="#95a5a6", alpha=0.15, linewidth=1)
 
-        # 2. 绘制 Spline 重构后的参考线 (红线)
-        plt.plot(art_data["t_ref"], art_data["v_ref_t"] * 3.6,
-                 label=f"Ref {cls_name} (Spline Refined)", color='red', linewidth=2.5)
+        if "center_v_ref_t" in art_data and "center_t_ref" in art_data:
+            plt.plot(art_data["center_t_ref"], art_data["center_v_ref_t"] * 3.6,
+                     label=f"Median center {cls_name}", color="#2874a6", linewidth=2.0, alpha=0.9)
 
-        plt.title(f"{station_pair} - {cls_name} Reference Curve")
+        # 2. 绘制最终采用的真实代表模板线 (红线)
+        plt.plot(art_data["t_ref"], art_data["v_ref_t"] * 3.6,
+                 label=f"Template {cls_name} (medoid real run)", color='red', linewidth=2.5)
+
+        plt.title(f"{station_pair} - {cls_name} Reference Curve | run={art_data.get('template_run_id', '')}")
         plt.xlabel("Time (s)")
         plt.ylabel("Velocity (km/h)")
         plt.legend()

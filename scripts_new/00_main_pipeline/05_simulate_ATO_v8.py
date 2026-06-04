@@ -128,6 +128,7 @@ LAMBDA_GRID_N = 320
 DIST_TOL_EXACT = 2.0  # 数值误差容忍范围，单位 m
 OVERSPEED_EPS_KMH = 1e-9
 NEAR_CAP_TOL_KMH = 0.02
+REAL_TEMPLATE_MIRROR_TOL_S = 1e-9  # 不再允许 0.6s 容差；几乎完全相等才镜像真实模板
 NEAR_CAP_MIN_POINTS = 4
 
 
@@ -1167,9 +1168,10 @@ def generate_for_station_pair(station_pair: str, level_target_times: Dict[str, f
         sample_reliability = active_art.get("sample_reliability", "unknown") if curve_source == "real" else "generated"
         candidate_stage = dp_candidate_stage(curve_source)
 
-        # 🌟 优化：如果是镜像逻辑（目标就是基准，且时间几乎一样）
+        # 只有目标时间与真实模板时间几乎完全一致时才镜像；
+        # 否则重新生成到标准等级时间，避免 sim_time_s 偏离 standard_class_times.csv。
         time_diff = abs(T_target - active_art["time_ref_raw"])
-        if parent_name == class_name and time_diff < 0.6:
+        if parent_name == class_name and time_diff <= REAL_TEMPLATE_MIRROR_TOL_S:
             print(f"   🎯 {class_name} 使用真实等级模板 (Time Diff: {time_diff:.2f}s)")
             curve_obj = {
                 "t": active_art["t_ref"], "v": active_art["v_ref_t"],

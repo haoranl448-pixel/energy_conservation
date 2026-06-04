@@ -1,0 +1,7 @@
+﻿站间区间,选定等级,规划用时(s),停站时间(s),历史用时(s),规划能耗(Wh),历史能耗(Wh),历史模型回放能耗(Wh),能耗对比基准,节能量(Wh),曲线来源,父等级,支持等级,真实样本数,父等级真实样本数,样本可靠性,规划阶段,MASS
+布政-张家潭,class5,127.0,20.7,116.8,11930.77,13470.93,13230.12,历史原始实测能耗,1540.16,extrapolated_adjacent,class4,class4,0,8,generated,energy_first,215.24
+张家潭-同德路,class1,141.0,20.7,150.8,18235.25,17564.43,18033.83,历史原始实测能耗,-670.82,extrapolated_adjacent,class2,class2,0,1,generated,energy_first,215.94
+同德路-石碶,class5,120.0,20.7,106.15,11890.55,16328.44,16571.02,历史原始实测能耗,4437.89,extrapolated_adjacent,class4,class4,0,4,generated,energy_first,216.42
+石碶-雅渡,class5,90.0,20.7,79.25,9191.89,12340.67,12558.69,历史原始实测能耗,3148.78,extrapolated_adjacent,class4,class4,0,2,generated,energy_first,220.6
+雅渡-庙堰,class5,146.0,0.0,133.7,17951.28,20805.04,20926.72,历史原始实测能耗,2853.76,extrapolated_adjacent,class4,class4,0,4,generated,energy_first,222.3
+--- 总计 ---,节能率: 14.05%,624.0,82.8,706.7,69199.74,80509.51,81320.38,历史原始实测能耗,11309.77,,,,,,,energy_first,

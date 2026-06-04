@@ -52,6 +52,21 @@ from src.physics.train_simu import TrainTheoreticalEnergyModel
 DT = 0.05
 SEQ_LEN_RES = 30
 
+
+def remove_existing_output_file(path: Path, label: str):
+    """Delete a stale output file before rebuilding it."""
+
+    resolved = path.resolve()
+    output_root = (PROJECT_ROOT / "output").resolve()
+    try:
+        resolved.relative_to(output_root)
+    except ValueError as exc:
+        raise ValueError(f"拒绝删除非 output 目录下的文件: {resolved}") from exc
+
+    if resolved.exists():
+        resolved.unlink()
+        print(f"已删除旧{label}: {resolved}")
+
 # ===================== 2. 模型定义 (自包含) =====================
 class PositionalEncoding(nn.Module):
     def __init__(self, d_model, max_len=5000):
@@ -135,6 +150,8 @@ def get_energy(sp, class_csv_path, mass_val):
 # ===================== 4. 主流程 =====================
 
 def main():
+    remove_existing_output_file(OUTPUT_MENU, "能耗菜单")
+
     df_params = pd.read_csv(PARAM_FILE).set_index('station_pair')
     energy_menu = []
 

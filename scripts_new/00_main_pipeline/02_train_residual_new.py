@@ -35,6 +35,31 @@ def get_data_dir(default_dir):
 
 DATA_DIR = get_data_dir(os.path.join(project_root, "data", "data_processed"))
 
+
+def get_line_scope(default_value="full"):
+    """Read the section scope selected by main.py.
+
+    full/all means all forward sections; a positive integer means the first N
+    forward sections. This keeps residual training aligned with later ATO/DP
+    steps when the pipeline is run with --line-scope.
+    """
+
+    raw = os.environ.get("ENERGY_LINE_SCOPE", default_value).strip().lower()
+    if raw in {"full", "all"}:
+        return "full"
+    if raw == "first5":
+        return "5"
+    try:
+        section_count = int(raw)
+    except ValueError as exc:
+        raise ValueError("ENERGY_LINE_SCOPE must be 'full' or a positive integer section count.") from exc
+    if section_count < 1:
+        raise ValueError("ENERGY_LINE_SCOPE section count must be >= 1.")
+    return str(section_count)
+
+
+LINE_SCOPE = get_line_scope()
+
 # --- 🚀 提速参数配置 ---
 FEATURE_COLS = ['v', 'a', 'e_phy', 'grad', 'mass', 'curv']
 SEQ_LEN = 30
@@ -42,6 +67,7 @@ BATCH_SIZE = 512  # 🚀 提速点 1：大幅增加 Batch Size
 MAX_EPOCHS = 150  # 最大轮数
 PATIENCE = 5      # 🚀 提速点 2：连续 5 轮不下降则早停
 LR = 0.001        # 配合大 Batch Size，略微调高学习率
+EARLY_STOP_MIN_DELTA = 1e-5  # validation loss 至少改善这么多才算有效提升
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"⚡ 当前训练设备: {DEVICE}")
@@ -245,6 +271,7 @@ def train_station(sp):
     # 8. 训练
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     train_dl = DataLoader(TensorDataset(torch.FloatTensor(X_train_seq), torch.FloatTensor(y_train_seq).unsqueeze(1)), batch_size=BATCH_SIZE, shuffle=True)
+    test_dl = DataLoader(TensorDataset(torch.FloatTensor(X_test_seq), torch.FloatTensor(y_test_seq).unsqueeze(1)), batch_size=BATCH_SIZE, shuffle=False)
     model = ResidualTransformerV2(input_dim=6).to(device)
     optimizer = optim.Adam(model.parameters(), lr=LR)
     criterion = nn.SmoothL1Loss()
@@ -252,10 +279,8 @@ def train_station(sp):
         # ⬇️⬇️⬇️ 这里加回了 print 语句 ⬇️⬇️⬇️
     print(f"   ⏳ 开始训练残差模型 (样本数: {len(X_train_seq)})...")
     best_loss = float('inf')
-
-
-    # --- 🚀 核心早停逻辑 ---
-
+    best_epoch = 0
+    patience_counter = 0
 
     print(f"▶️ 开始训练: {sp} (样本数: {len(X_train_seq)})")
 
@@ -263,25 +288,43 @@ def train_station(sp):
         model.train()
         epoch_losses = []
         for bx, by in train_dl:
-            bx, by = bx.to(DEVICE), by.to(DEVICE)
+            bx, by = bx.to(device), by.to(device)
             optimizer.zero_grad()
             loss = criterion(model(bx), by)
             loss.backward()
             optimizer.step()
             epoch_losses.append(loss.item())
 
-        avg_loss = np.mean(epoch_losses)
+        avg_train_loss = np.mean(epoch_losses)
+
+        model.eval()
+        val_losses = []
+        with torch.no_grad():
+            for bx, by in test_dl:
+                bx, by = bx.to(device), by.to(device)
+                val_losses.append(criterion(model(bx), by).item())
+        avg_val_loss = np.mean(val_losses) if val_losses else avg_train_loss
 
         # 打印进度 (每 10 轮一次)
         if (ep + 1) % 10 == 0:
-            print(f"      Epoch {ep+1:3d} | Loss: {avg_loss:.6f}")
+            print(f"      Epoch {ep+1:3d} | Train: {avg_train_loss:.6f} | Val: {avg_val_loss:.6f}")
 
-        # 早停检查
-        if avg_loss < best_loss:
-            best_loss = avg_loss
+        # 早停检查：验证集连续 PATIENCE 轮没有有效提升就停止。
+        if avg_val_loss < best_loss - EARLY_STOP_MIN_DELTA:
+            best_loss = avg_val_loss
+            best_epoch = ep + 1
+            patience_counter = 0
             torch.save(model.state_dict(), f"{out_dir}/best_res_model.pth")
+        else:
+            patience_counter += 1
+            if patience_counter >= PATIENCE:
+                print(
+                    f"      ⏹️ 早停: Epoch {ep+1}, "
+                    f"best epoch={best_epoch}, best val loss={best_loss:.6f}"
+                )
+                break
 
-    print(f"   ✅ 训练结束 (Best Loss: {best_loss:.5f})")
+    print(f"   ✅ 训练结束 (Best Val Loss: {best_loss:.5f}, Best Epoch: {best_epoch})")
 
 
     # ================= 9. 绘图 (三纵轴版: v, s, E) =================
@@ -373,9 +416,23 @@ LINE5_SECTIONS = [
 ]
 
 
+def select_sections_for_scope():
+    """Return the forward sections that should be trained in this run."""
+
+    if LINE_SCOPE == "full":
+        return LINE5_SECTIONS
+
+    section_count = int(LINE_SCOPE)
+    if section_count > len(LINE5_SECTIONS):
+        raise ValueError(f"ENERGY_LINE_SCOPE cannot exceed {len(LINE5_SECTIONS)} sections.")
+    return LINE5_SECTIONS[:section_count]
+
+
 def main():
+    sections = select_sections_for_scope()
     print(f"📁 残差训练数据目录: {DATA_DIR}")
-    for sp in LINE5_SECTIONS:
+    print(f"🚦 残差训练区间范围: {LINE_SCOPE} ({len(sections)} sections)")
+    for sp in sections:
         try: train_station(sp)
         except Exception as e: print(f"❌ {sp} 失败: {e}")
 
