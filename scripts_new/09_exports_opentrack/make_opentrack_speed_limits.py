@@ -16,6 +16,7 @@ DEFAULT_PLAN_CSV = PROJECT_ROOT / "output" / "schedule" / "final_plan_report_v2 
 DEFAULT_ENERGY_MENU = PROJECT_ROOT / "output" / "analysis" / "ato_class_energy_menu1_new_v3.csv"
 DEFAULT_ROUTE_MAP = PROJECT_ROOT / "output" / "opentrack_route_map" / "priority_history_probe_route_map.csv"
 DEFAULT_OUTPUT = PROJECT_ROOT / "output" / "opentrack_speed_limits" / "speed_limits_priority.csv"
+DEFAULT_CURVE_DIR = PROJECT_ROOT / "output" / "ato_generated_results_new_v4"
 
 
 def parse_args() -> argparse.Namespace:
@@ -58,7 +59,39 @@ def parse_args() -> argparse.Namespace:
         "--speed-margin",
         type=float,
         default=0.0,
-        help="Additional km/h added to the ATO peak speed before sending the limit.",
+        help="Additional km/h added to the selected ATO speed before sending the limit.",
+    )
+    parser.add_argument(
+        "--speed-method",
+        choices=["cruise-avg", "peak"],
+        default="cruise-avg",
+        help=(
+            "Speed used for setPositionSpeed. cruise-avg reads the generated curve "
+            "and averages the high-speed cruise plateau; peak keeps the old peak-speed behavior."
+        ),
+    )
+    parser.add_argument(
+        "--curve-dir",
+        default=str(DEFAULT_CURVE_DIR),
+        help="Directory containing <section>/<class>_generated_curve.csv files for --speed-method cruise-avg.",
+    )
+    parser.add_argument(
+        "--cruise-min-speed-ratio",
+        type=float,
+        default=0.92,
+        help="Cruise candidate speed must be at least this ratio of the curve peak speed.",
+    )
+    parser.add_argument(
+        "--cruise-accel-eps",
+        type=float,
+        default=0.25,
+        help="Cruise candidate acceleration threshold in m/s^2.",
+    )
+    parser.add_argument(
+        "--cruise-min-points",
+        type=int,
+        default=10,
+        help="Minimum cruise points before accepting the acceleration-filtered plateau.",
     )
     parser.add_argument(
         "--ceil-speed",
@@ -107,6 +140,18 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--timeout", type=float, default=10.0, help="Socket timeout in seconds.")
     parser.add_argument("--wait-response", action="store_true", help="Wait for HTTP responses from OpenTrack.")
     parser.add_argument("--sleep", type=float, default=0.02, help="Delay between sent commands.")
+    parser.add_argument(
+        "--send-retries",
+        type=int,
+        default=8,
+        help="Retry count when OpenTrack temporarily refuses a command connection.",
+    )
+    parser.add_argument(
+        "--retry-delay",
+        type=float,
+        default=1.0,
+        help="Seconds to wait between transient connection retries.",
+    )
     parser.add_argument("--verbose", action="store_true", help="Print each XML command while sending.")
     return parser.parse_args()
 
@@ -166,11 +211,100 @@ def build_route_index(rows: list[dict[str, str]]) -> dict[str, dict[str, str]]:
     return index
 
 
-def make_speed_limit(peak_speed: float, margin: float, ceil_speed: bool) -> float:
-    speed = peak_speed + margin
+def make_speed_limit(base_speed: float, margin: float, ceil_speed: bool) -> float:
+    speed = base_speed + margin
     if ceil_speed:
         speed = float(math.ceil(speed))
     return speed
+
+
+def mean(values: list[float]) -> float | None:
+    if not values:
+        return None
+    return sum(values) / len(values)
+
+
+def read_generated_curve(curve_path: Path) -> list[dict[str, float]]:
+    rows: list[dict[str, float]] = []
+    with curve_path.open("r", encoding="utf-8-sig", newline="") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            time_s = as_float(row.get("time_s"))
+            speed_kmh = as_float(row.get("velocity_kmh"))
+            speed_mps = as_float(row.get("velocity_mps"))
+            if speed_kmh is None and speed_mps is not None:
+                speed_kmh = speed_mps * 3.6
+            if speed_mps is None and speed_kmh is not None:
+                speed_mps = speed_kmh / 3.6
+            if time_s is None or speed_kmh is None or speed_mps is None:
+                continue
+            rows.append({"time_s": time_s, "speed_kmh": speed_kmh, "speed_mps": speed_mps})
+    return rows
+
+
+def curve_accelerations(curve: list[dict[str, float]]) -> list[float]:
+    accels: list[float] = []
+    previous: dict[str, float] | None = None
+    for row in curve:
+        if previous is None:
+            accels.append(0.0)
+        else:
+            dt = row["time_s"] - previous["time_s"]
+            if dt <= 0:
+                accels.append(0.0)
+            else:
+                accels.append((row["speed_mps"] - previous["speed_mps"]) / dt)
+        previous = row
+    return accels
+
+
+def cruise_average_speed(
+    section: str,
+    selected_class: str,
+    args: argparse.Namespace,
+    warnings: list[str],
+) -> dict[str, Any]:
+    curve_path = Path(args.curve_dir) / section / f"{selected_class}_generated_curve.csv"
+    result: dict[str, Any] = {
+        "speed_kmh": None,
+        "cruise_avg_speed_kmh": None,
+        "cruise_point_count": 0,
+        "curve_peak_speed_kmh": None,
+        "curve_path": str(curve_path),
+    }
+    if not curve_path.exists():
+        warnings.append("missing_generated_curve_for_cruise_avg")
+        return result
+
+    curve = read_generated_curve(curve_path)
+    speeds = [row["speed_kmh"] for row in curve if row["speed_kmh"] >= 0]
+    if not speeds:
+        warnings.append("empty_generated_curve_for_cruise_avg")
+        return result
+
+    curve_peak = max(speeds)
+    result["curve_peak_speed_kmh"] = curve_peak
+    threshold = curve_peak * args.cruise_min_speed_ratio
+    accels = curve_accelerations(curve)
+
+    cruise_speeds = [
+        row["speed_kmh"]
+        for row, accel in zip(curve, accels)
+        if row["speed_kmh"] >= threshold and abs(accel) <= args.cruise_accel_eps
+    ]
+    if len(cruise_speeds) < args.cruise_min_points:
+        warnings.append("cruise_accel_filter_relaxed")
+        cruise_speeds = [row["speed_kmh"] for row in curve if row["speed_kmh"] >= threshold]
+
+    cruise_avg = mean(cruise_speeds)
+    if cruise_avg is None:
+        warnings.append("cruise_avg_fallback_to_curve_peak")
+        cruise_avg = curve_peak
+
+    result["speed_kmh"] = cruise_avg
+    result["cruise_avg_speed_kmh"] = cruise_avg
+    result["cruise_point_count"] = len(cruise_speeds)
+    return result
 
 
 def to_opentrack_speed(speed_kmh: float | None, unit: str) -> float | None:
@@ -214,9 +348,27 @@ def make_limit_rows(args: argparse.Namespace) -> list[dict[str, Any]]:
         peak_speed = as_float(energy.get("峰值速度(kmh)") if energy else None)
         if peak_speed is None:
             warning.append("missing_peak_speed")
+        cruise_info: dict[str, Any] = {
+            "speed_kmh": None,
+            "cruise_avg_speed_kmh": None,
+            "cruise_point_count": "",
+            "curve_peak_speed_kmh": None,
+            "curve_path": "",
+        }
+
+        if args.speed_method == "peak":
+            speed_base = peak_speed
+        else:
+            cruise_info = cruise_average_speed(section, selected_class, args, warning)
+            speed_base = as_float(cruise_info.get("speed_kmh"))
+            if speed_base is None and peak_speed is not None:
+                warning.append("cruise_avg_missing_fallback_to_menu_peak")
+                speed_base = peak_speed
+
+        if speed_base is None:
             speed_limit = None
         else:
-            speed_limit = make_speed_limit(peak_speed, args.speed_margin, args.ceil_speed)
+            speed_limit = make_speed_limit(speed_base, args.speed_margin, args.ceil_speed)
         opentrack_speed = to_opentrack_speed(speed_limit, args.opentrack_speed_unit)
 
         start_route_id = (route.get("startRouteID") if route else "") or ""
@@ -250,11 +402,17 @@ def make_limit_rows(args: argparse.Namespace) -> list[dict[str, Any]]:
                 "section": section,
                 "selected_class": selected_class,
                 "planned_time_s": plan.get("规划用时(s)", ""),
+                "speed_method": args.speed_method,
+                "speed_base_kmh": format_float(speed_base),
+                "cruise_avg_speed_kmh": format_float(as_float(cruise_info.get("cruise_avg_speed_kmh"))),
+                "cruise_point_count": cruise_info.get("cruise_point_count", ""),
+                "curve_peak_speed_kmh": format_float(as_float(cruise_info.get("curve_peak_speed_kmh"))),
                 "peak_speed_kmh": format_float(peak_speed),
                 "speed_margin_kmh": format_float(args.speed_margin),
                 "speed_limit_kmh": format_float(speed_limit),
                 "opentrack_speed_unit": args.opentrack_speed_unit,
                 "opentrack_speed_value": format_float(opentrack_speed),
+                "curve_path": cruise_info.get("curve_path", ""),
                 "curve_source": plan.get("曲线来源", energy.get("曲线来源", "") if energy else ""),
                 "sample_reliability": plan.get("样本可靠性", energy.get("样本可靠性", "") if energy else ""),
                 "range_mode": args.range_mode,
@@ -268,6 +426,29 @@ def make_limit_rows(args: argparse.Namespace) -> list[dict[str, Any]]:
             }
         )
     return output_rows
+
+
+def send_command_with_retry(
+    command_name: str,
+    attrs: dict[str, Any],
+    args: argparse.Namespace,
+    section: str,
+) -> tuple[int, str]:
+    retries = max(int(args.send_retries), 0)
+    delay = max(float(args.retry_delay), 0.0)
+    for attempt in range(retries + 1):
+        try:
+            return send_command(command_name, attrs, args)
+        except OSError as exc:
+            if attempt >= retries:
+                raise
+            print(
+                f"  {section}: OpenTrack connection failed ({exc}); "
+                f"retry {attempt + 1}/{retries} in {delay:.2f}s"
+            )
+            if delay > 0:
+                time.sleep(delay)
+    raise RuntimeError("Unreachable retry state.")
 
 
 def send_rows(rows: list[dict[str, Any]], args: argparse.Namespace) -> int:
@@ -286,7 +467,12 @@ def send_rows(rows: list[dict[str, Any]], args: argparse.Namespace) -> int:
         attrs["startRouteOffset"] = as_float(row.get("startRouteOffset"))
         attrs["endRouteID"] = row.get("endRouteID")
         attrs["endRouteOffset"] = as_float(row.get("endRouteOffset"))
-        status, text = send_command("setPositionSpeed", attrs, args)
+        status, text = send_command_with_retry(
+            "setPositionSpeed",
+            attrs,
+            args,
+            str(row.get("section") or "<unknown section>"),
+        )
         sent += 1
         print(f"[{sent:02d}] {row.get('section')} {row.get('selected_class')} <= {row.get('speed_limit_kmh')} km/h")
         print_response(status, text)

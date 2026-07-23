@@ -4,6 +4,13 @@ from scipy.interpolate import interp1d
 from pathlib import Path
 import sys
 import math
+from trip_traceability import (
+    load_trip_traceability,
+    print_traceability_summary,
+    resolve_traceability_manifest,
+    select_trip_rows,
+    traceability_metadata,
+)
 # ===================== 1. 路径与配置 =====================
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 RES_MODEL_BASE = PROJECT_ROOT / "output" / "models" / "nn_results_residual_v2"
@@ -34,6 +41,8 @@ def get_trip_no() -> int:
 
 TRIP_NO = get_trip_no()
 TRIP_INDEX = TRIP_NO - 1
+TRACEABILITY_MANIFEST = resolve_traceability_manifest(PROJECT_ROOT, DATA_DIR)
+TRIP_TRACEABILITY = load_trip_traceability(TRACEABILITY_MANIFEST, TRIP_NO, direction="UP")
 OUTPUT_FILE = PROJECT_ROOT / f"full_line{TRIP_NO}_validation_results.csv"
 
 
@@ -89,12 +98,16 @@ def evaluate_historical_trip(sp):
     cols = ['速度(m/s)', '加速度(m/s²)', '累计位移(m)', 'energy', '时刻', '重量', 'gradient', 'curvature']
     for c in cols: df_all[c] = pd.to_numeric(df_all[c], errors='coerce')
 
-    # 2. 提取用户选择的第 TRIP_NO 趟车；TRIP_INDEX 是从 0 开始的 segment 索引。
-    segs = sorted(df_all['segment'].unique())
-    if TRIP_INDEX >= len(segs):
-        raise IndexError(f"{sp} 只有 {len(segs)} 个 segment，无法提取第 {TRIP_NO} 趟车。")
-    target_seg = segs[TRIP_INDEX]
-    df = df_all[df_all['segment'] == target_seg].copy().dropna(subset=['速度(m/s)'])
+    # 2. 追溯表模式按全局运行链选择本区间 segment；没有追溯表时才使用旧的本地序号。
+    df, target_seg, trace_record, selection_mode = select_trip_rows(
+        df_all,
+        sp,
+        TRIP_INDEX,
+        TRIP_TRACEABILITY,
+    )
+    df = df.dropna(subset=['速度(m/s)'])
+    if df.empty:
+        raise ValueError(f"{sp} segment={target_seg} 没有有效速度数据。")
 
     t_seq = df['时刻'].values - df['时刻'].iloc[0]
     v_seq = df['速度(m/s)'].values
@@ -139,7 +152,7 @@ def evaluate_historical_trip(sp):
     e_real_total = (df['energy'].sum() / 3.6e6) * 1000 # 历史实测 Wh
     e_model_total = np.sum(e_phy_steps[29:]) + res_sum # 历史曲线模型回放 Wh
 
-    return {
+    result = {
         "站间区间": sp,
         "历史运行时间(s)": round(t_seq[-1], 2),
         "历史实测能耗(Wh)": round(e_real_total, 2),
@@ -148,6 +161,8 @@ def evaluate_historical_trip(sp):
         "残差占比": round(res_sum, 2),
         "误差(%)": round((e_model_total - e_real_total)/e_real_total*100, 2)
     }
+    result.update(traceability_metadata(trace_record, target_seg, selection_mode))
+    return result
 
 if __name__ == "__main__":
     remove_existing_output_file(OUTPUT_FILE)
@@ -165,6 +180,9 @@ if __name__ == "__main__":
     results = []
     print(f"🚀 开始全线 {len(line5_stations)} 个区间的历史数据验证：第 {TRIP_NO} 趟车...")
     print(f"历史数据目录: {DATA_DIR}")
+    print_traceability_summary(TRIP_TRACEABILITY, TRIP_NO)
+    if TRIP_TRACEABILITY is not None:
+        TRIP_TRACEABILITY.require_sections(line5_stations)
 
     # 2. 循环处理每一个区间
     for i, sp in enumerate(line5_stations, 1):

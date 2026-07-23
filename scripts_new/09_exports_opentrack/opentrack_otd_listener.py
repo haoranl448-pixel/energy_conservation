@@ -67,7 +67,12 @@ def make_handler(logger: OTDMessageLogger):
             self.send_header("Content-Length", str(len(body)))
             self.send_header("Connection", "close")
             self.end_headers()
-            self.wfile.write(body)
+            try:
+                self.wfile.write(body)
+            except (BrokenPipeError, ConnectionAbortedError, ConnectionResetError):
+                # OpenTrack often closes fire-and-forget OTD requests before reading
+                # the empty HTTP response. The incoming message is already logged.
+                pass
 
     return OTDHandler
 

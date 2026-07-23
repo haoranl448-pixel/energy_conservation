@@ -35,16 +35,52 @@ python scripts_new/main.py
 `--ato-data-dir` 只是可选覆盖项；不传时 ATO 默认复用 `--data-dir`。
 默认 DP 排图范围是全正向区间；测试时可以通过 `--line-scope n` 只取前 `n` 个区间。
 
+### 全局趟次追溯
+
+现在 `--trip-no N` 表示正向线路的第 N 条**全局运行链**，不再默认认为每个区间的第 N 个 `segment` 是同一趟车。
+
+主程序使用 `trip_traceability_manifest_v1.csv` 查询这一趟在每个区间真正对应的：
+
+- `segment`
+- `来源run_id`
+- `全局趟次候选ID`
+
+这个映射同时用于：
+
+- `energy_menu`：提取该趟在每个区间的重量；
+- `historical_baseline`：提取该趟真实的运行时间、实测能耗和历史曲线；
+- `dp_schedule`：校验能耗菜单、历史基准和重量表确实来自同一条全局运行链，并按同一映射绘制历史曲线。
+
+推荐直接使用带追溯表的数据目录：
+
+```powershell
+python scripts_new\main.py --only energy_menu,historical_baseline --trip-no 6 --line-scope full --data-dir data\data_processed_step2_v3_all_curve_quality_traceability
+```
+
+也可以显式指定追溯表：
+
+```powershell
+python scripts_new\main.py --only energy_menu,historical_baseline --trip-no 6 --data-dir data\data_processed_step2_v3_all_curve_quality --traceability-manifest data\data_processed_step2_v3_all_curve_quality_traceability\trip_traceability_manifest_v1.csv
+```
+
+如果不写 `--traceability-manifest`，主程序会依次检查：
+
+1. `--data-dir` 目录里的 `trip_traceability_manifest_v1.csv`；
+2. 与数据目录同级、名称加 `_traceability` 的目录。
+
+找不到追溯表时会明确提示并回退到旧的“各区间独立第 N 个 segment”模式。启用追溯后，如果直接复用旧版能耗菜单或历史基准，DP 会拒绝运行并提示先重跑 `energy_menu,historical_baseline`，避免新旧口径混用。
+
 
 默认的参数：
 从第 1 步跑到最后一步
-trip-no = 1
+trip-no = 1（有追溯表时表示第 1 条全局运行链）
 target-time = 不传，DP 用 08_ato_class_globall_v2.py 里的默认值
 data-dir = 不传，残差/能耗/历史/DP 用自己的默认 results 目录；
         默认是：D:\energy_conservation\data\data_processed
 ato-data-dir = 不传，ATO 模板训练/曲线生成默认复用 data-dir；
         如果 data-dir 也不传，ATO 脚本才使用自己的默认目录
 line-scope = full，DP 默认跑全正向区间；传数字时跑前 N 个正向区间
+traceability-manifest = 自动在 data-dir 或同级 *_traceability 目录中查找
 dry-run = False，真的执行
 遇到报错 = 停止
 log-dir = 自动生成 output/pipeline_logs/时间戳

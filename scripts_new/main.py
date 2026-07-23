@@ -43,6 +43,7 @@ DEFAULT_RESULTS_DATA_DIR = None
 # None 表示复用 results 数据目录；如果 results 也为空，则 ATO 脚本使用自己的默认目录。
 DEFAULT_ATO_DATA_DIR = None
 DEFAULT_LINE_SCOPE = "full"
+TRACEABILITY_FILENAME = "trip_traceability_manifest_v1.csv"
 
 
 def configure_stdio() -> None:
@@ -249,6 +250,7 @@ def run_step(
     results_data_dir: Path | None,
     ato_data_dir: Path | None,
     line_scope: str,
+    traceability_manifest: Path | None,
 ) -> int:
     """执行单个流水线步骤。"""
 
@@ -264,7 +266,7 @@ def run_step(
     # 打印实际命令；带空格的路径会加引号，方便复制排查。
     print("Command:", " ".join(f'"{part}"' if " " in part else part for part in command))
     # 趟号以环境变量传给子脚本；子脚本用它决定读写 trip1/trip6 等文件。
-    print(f"Trip:    {trip_no} (segment index {trip_no - 1})")
+    print(f"Trip:    {trip_no} (global 1-based trip; legacy local index {trip_no - 1})")
     # 目标总时间只在 DP 排图步骤使用；不传时沿用 globall_v2.py 里的默认值。
     if target_time is None:
         print("Target:  script default")
@@ -275,6 +277,7 @@ def run_step(
     # ATO 数据目录供 ATO 模板训练/曲线生成使用；未单独指定时复用 results 数据目录。
     print(f"ATO:     {ato_data_dir if ato_data_dir is not None else 'script default'}")
     print(f"Scope:   {line_scope}")
+    print(f"Trace:   {traceability_manifest if traceability_manifest is not None else 'not found (legacy local index)'}")
 
     # 如果脚本不存在，直接返回 127，表示命令/文件不存在。
     if not script_path.exists():
@@ -299,6 +302,8 @@ def run_step(
     if ato_data_dir is not None and step.id in {"ato_template", "ato_simulation"}:
         child_env["ENERGY_ATO_DATA_DIR"] = str(ato_data_dir)
     child_env["ENERGY_LINE_SCOPE"] = line_scope
+    if traceability_manifest is not None:
+        child_env["ENERGY_TRACEABILITY_MANIFEST"] = str(traceability_manifest)
     # 子脚本里有 emoji/特殊符号输出；强制 UTF-8 容错，避免 Windows GBK 控制台报错。
     child_env["PYTHONIOENCODING"] = "utf-8:replace"
     child_env["PYTHONUTF8"] = "1"
@@ -321,6 +326,7 @@ def run_step(
         log.write(f"# ENERGY_RESULTS_DATA_DIR: {results_data_dir if results_data_dir is not None else 'script default'}\n")
         log.write(f"# ENERGY_ATO_DATA_DIR: {ato_data_dir if ato_data_dir is not None else 'script default'}\n")
         log.write(f"# ENERGY_LINE_SCOPE: {line_scope}\n")
+        log.write(f"# ENERGY_TRACEABILITY_MANIFEST: {traceability_manifest if traceability_manifest is not None else 'not found'}\n")
         log.write("# PYTHONIOENCODING: utf-8:replace\n")
         log.write(f"# started: {datetime.now().isoformat(timespec='seconds')}\n\n")
         # 启动子脚本。
@@ -404,6 +410,14 @@ def build_parser() -> argparse.ArgumentParser:
         "--line-scope",
         default=DEFAULT_LINE_SCOPE,
         help="Station range used by DP schedule optimization: full/all or a positive section count, e.g. 5.",
+    )
+    parser.add_argument(
+        "--traceability-manifest",
+        default=None,
+        help=(
+            "CSV mapping each global trip to the matching local segment in every section. "
+            "If omitted, main searches inside --data-dir and its sibling *_traceability directory."
+        ),
     )
     # --ask-data-dir：运行时询问 results 数据目录。
     parser.add_argument("--ask-data-dir", "--ask-results-data-dir", dest="ask_results_data_dir", action="store_true", help="Prompt for the results_*.xlsx data directory before running.")
@@ -508,6 +522,35 @@ def resolve_ato_data_dir(args: argparse.Namespace, project_root: Path) -> Path |
     return resolve_optional_dir(data_dir_value, project_root, "ATO data directory")
 
 
+def resolve_traceability_manifest(
+    args: argparse.Namespace,
+    project_root: Path,
+    results_data_dir: Path | None,
+) -> Path | None:
+    """Resolve an explicit manifest or auto-detect the one paired with --data-dir."""
+
+    if args.traceability_manifest:
+        path = Path(args.traceability_manifest)
+        if not path.is_absolute():
+            path = project_root / path
+        if not path.is_file():
+            raise FileNotFoundError(f"Traceability manifest not found: {path}")
+        return path
+
+    if results_data_dir is None:
+        return None
+
+    candidates = [results_data_dir / TRACEABILITY_FILENAME]
+    if not results_data_dir.name.endswith("_traceability"):
+        candidates.append(
+            results_data_dir.with_name(f"{results_data_dir.name}_traceability") / TRACEABILITY_FILENAME
+        )
+    for candidate in candidates:
+        if candidate.is_file():
+            return candidate
+    return None
+
+
 def resolve_line_scope(args: argparse.Namespace) -> str:
     """得到 DP 排图使用的区间范围；full 表示全正向区间，数字表示前 N 个区间。"""
 
@@ -548,6 +591,7 @@ def main() -> int:
     ato_data_dir = resolve_ato_data_dir(args, project_root)
     effective_ato_data_dir = ato_data_dir if ato_data_dir is not None else results_data_dir
     line_scope = resolve_line_scope(args)
+    traceability_manifest = resolve_traceability_manifest(args, project_root, results_data_dir)
     # 根据 --only/--skip/--from-step/--to-step 等参数选出要跑的步骤。
     selected_steps = select_steps(args)
 
@@ -574,11 +618,12 @@ def main() -> int:
     print(f"Python:       {args.python}")
     print(f"Log dir:      {log_dir}")
     print(f"Dry run:      {args.dry_run}")
-    print(f"Trip no:      {trip_no} (segment index {trip_no - 1})")
+    print(f"Trip no:      {trip_no} (global trip; legacy local index {trip_no - 1})")
     print(f"Target time:  {f'{target_time:.2f}s' if target_time is not None else 'script default'}")
     print(f"Results dir:  {results_data_dir if results_data_dir is not None else 'script default'}")
     print(f"ATO dir:      {effective_ato_data_dir if effective_ato_data_dir is not None else 'script default'}")
     print(f"Line scope:   {line_scope}")
+    print(f"Traceability: {traceability_manifest if traceability_manifest is not None else 'not found; legacy local-index mode'}")
     # 打印最终选中的步骤列表。
     print("\nSelected steps:")
     print_steps(selected_steps)
@@ -599,6 +644,7 @@ def main() -> int:
             results_data_dir=results_data_dir,
             ato_data_dir=effective_ato_data_dir,
             line_scope=line_scope,
+            traceability_manifest=traceability_manifest,
         )
         # 非 0 退出码表示失败。
         if code != 0:

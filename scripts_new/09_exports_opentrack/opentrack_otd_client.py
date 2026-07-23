@@ -104,7 +104,15 @@ def parse_bool(value: str) -> bool:
     raise argparse.ArgumentTypeError(f"Expected boolean 1/0 yes/no true/false, got {value!r}")
 
 
-def iter_timetable_entries(xml_path: Path, train_id_override: str | None = None):
+def is_success_status(status: int) -> bool:
+    return status == 0 or 200 <= status < 300
+
+
+def iter_timetable_entries(
+    xml_path: Path,
+    train_id_override: str | None = None,
+    include_delta_load: bool = True,
+):
     root = ET.parse(xml_path).getroot()
     courses = root.findall("course")
     if not courses:
@@ -124,6 +132,8 @@ def iter_timetable_entries(xml_path: Path, train_id_override: str | None = None)
             departure = seconds_from_hms(entry.findtext("departureTime"))
             dwell_text = entry.findtext("waitTime")
             dwell = float(dwell_text) if dwell_text not in (None, "") else None
+            delta_load_text = entry.findtext("deltaLoad")
+            delta_load = float(delta_load_text) if delta_load_text not in (None, "") else None
             stop_info = (entry.attrib.get("stopInformation") or "").lower()
             stop_flag = stop_info in {"yes", "true", "1"}
 
@@ -135,6 +145,8 @@ def iter_timetable_entries(xml_path: Path, train_id_override: str | None = None)
                 "dwellTime": dwell,
                 "stopFlag": stop_flag,
             }
+            if include_delta_load and delta_load is not None:
+                attrs["deltaLoad"] = delta_load
             yield attrs
 
 
@@ -221,22 +233,29 @@ def command_load_timetable(args: argparse.Namespace) -> int:
     failures = 0
     if args.reset:
         status, text = send_command("resetTimetable", {}, args)
-        print(f"resetTimetable -> HTTP {status}")
-        if not (200 <= status < 300):
+        print(f"resetTimetable -> HTTP {status}" if status else f"resetTimetable -> {text}")
+        if not is_success_status(status):
             failures += 1
             if text.strip():
                 print(text.strip())
 
-    for attrs in iter_timetable_entries(xml_path, train_id_override=args.train_id):
+    for attrs in iter_timetable_entries(
+        xml_path,
+        train_id_override=args.train_id,
+        include_delta_load=args.include_delta_load,
+    ):
         status, text = send_command("addTimetableEntry", attrs, args)
         sent += 1
-        if not (200 <= status < 300):
+        if not is_success_status(status):
             failures += 1
             print(f"addTimetableEntry {attrs.get('trainID')} {attrs.get('stationID')} -> HTTP {status}")
             if text.strip():
                 print(text.strip())
         elif args.verbose:
-            print(f"addTimetableEntry {attrs.get('trainID')} {attrs.get('stationID')} -> HTTP {status}")
+            delta_note = ""
+            if "deltaLoad" in attrs:
+                delta_note = f" deltaLoad={attrs['deltaLoad']}"
+            print(f"addTimetableEntry {attrs.get('trainID')} {attrs.get('stationID')}{delta_note} -> HTTP {status}")
         if args.sleep > 0:
             time.sleep(args.sleep)
 
@@ -305,6 +324,13 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("xml_file", help="OpenTrack timetable XML file.")
     p.add_argument("--train-id", default=None, help="Override <courseID> as trainID.")
     p.add_argument("--reset", action="store_true", help="Send resetTimetable before entries.")
+    p.add_argument(
+        "--no-delta-load",
+        dest="include_delta_load",
+        action="store_false",
+        default=True,
+        help="Do not send deltaLoad from timetable XML entries.",
+    )
     p.add_argument("--sleep", type=float, default=0.02, help="Delay between commands.")
     p.set_defaults(func=command_load_timetable)
 

@@ -17,6 +17,7 @@ SECTION_COL = "站间区间"
 PLAN_RUN_COL = "规划用时(s)"
 HISTORY_RUN_COL = "历史用时(s)"
 DWELL_COL = "停站时间(s)"
+HISTORY_DWELL_COL = "历史停站时间(s)"
 MASS_COL = "MASS"
 
 
@@ -38,6 +39,11 @@ def parse_args() -> argparse.Namespace:
         help="Energy-first comparison CSV.",
     )
     parser.add_argument(
+        "--real-priority-5pct-csv",
+        default=None,
+        help="Optional real-priority, dwell +/-5%% comparison CSV.",
+    )
+    parser.add_argument(
         "--template",
         default=str(DEFAULT_TEMPLATE),
         help="Example OpenTrack XML. Used only to mirror the basic root attributes.",
@@ -57,7 +63,8 @@ def parse_args() -> argparse.Namespace:
         choices=["csv", "fixed", "zero"],
         default="csv",
         help=(
-            "Dwell time for historical timetable: csv uses 停站时间(s), "
+            "Dwell time for historical timetable: csv prefers 历史停站时间(s) "
+            "and falls back to 停站时间(s), "
             "fixed uses --fixed-history-dwell, zero uses 0."
         ),
     )
@@ -85,6 +92,16 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Write station_id_mapping.csv next to the XML files.",
     )
+    parser.add_argument(
+        "--course-suffix",
+        default="",
+        help="Optional suffix appended to course IDs, for example trip001.",
+    )
+    parser.add_argument(
+        "--file-suffix",
+        default="",
+        help="Optional suffix appended to output XML file names, for example trip001.",
+    )
     return parser.parse_args()
 
 
@@ -94,7 +111,7 @@ def read_planning_csv(path: Path) -> pd.DataFrame:
     if missing:
         raise ValueError(f"{path} missing required columns: {sorted(missing)}")
 
-    for col in [PLAN_RUN_COL, HISTORY_RUN_COL, DWELL_COL, MASS_COL]:
+    for col in [PLAN_RUN_COL, HISTORY_RUN_COL, DWELL_COL, HISTORY_DWELL_COL, MASS_COL]:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors="coerce")
 
@@ -164,6 +181,21 @@ def format_seconds(value: float) -> str:
     if abs(value - round(value)) < 1e-9:
         return str(int(round(value)))
     return f"{value:.3f}".rstrip("0").rstrip(".")
+
+
+def with_suffix(value: str, suffix: str) -> str:
+    suffix = suffix.strip("_ ")
+    if not suffix:
+        return value
+    return f"{value}_{suffix}"
+
+
+def xml_name(base_name: str, suffix: str) -> str:
+    suffix = suffix.strip("_ ")
+    if not suffix:
+        return base_name
+    path = Path(base_name)
+    return f"{path.stem}_{suffix}{path.suffix}"
 
 
 def make_entry_xml(
@@ -256,7 +288,10 @@ def build_timetable_xml(
             dwell_seconds = 0.0
         elif run_col == HISTORY_RUN_COL:
             if dwell_mode == "csv":
-                dwell_seconds = seconds_value(row[DWELL_COL])
+                historical_dwell = row.get(HISTORY_DWELL_COL, row[DWELL_COL])
+                if pd.isna(historical_dwell):
+                    historical_dwell = row[DWELL_COL]
+                dwell_seconds = seconds_value(historical_dwell)
             elif dwell_mode == "fixed":
                 dwell_seconds = seconds_value(fixed_history_dwell)
             else:
@@ -355,17 +390,36 @@ def main() -> int:
             ],
         ),
     ]
+    if args.real_priority_5pct_csv:
+        jobs.append(
+            (
+                Path(args.real_priority_5pct_csv),
+                "real_priority_dwell_5pct",
+                [
+                    (
+                        "real_priority_dwell_5pct_dp_planned_timetable.xml",
+                        "real_priority_dwell_5pct_dp",
+                        PLAN_RUN_COL,
+                    ),
+                    (
+                        "real_priority_dwell_5pct_history_timetable.xml",
+                        "real_priority_dwell_5pct_history",
+                        HISTORY_RUN_COL,
+                    ),
+                ],
+            )
+        )
 
     station_maps: list[pd.DataFrame] = []
     for csv_path, label, outputs in jobs:
         df = read_planning_csv(csv_path)
         print(f"Loaded {label}: {csv_path} ({len(df)} sections)")
         for file_name, course_id, run_col in outputs:
-            path = output_dir / file_name
+            path = output_dir / xml_name(file_name, args.file_suffix)
             station_map = write_one(
                 df=df,
                 output_path=path,
-                course_id=course_id,
+                course_id=with_suffix(course_id, args.course_suffix),
                 run_col=run_col,
                 dwell_mode=args.history_dwell_mode,
                 fixed_history_dwell=args.fixed_history_dwell,

@@ -31,6 +31,16 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from scipy.signal import savgol_filter
 
+PLOT_FONT_CANDIDATES = [
+    "Microsoft YaHei",
+    "SimHei",
+    "SimSun",
+    "Arial Unicode MS",
+    "DejaVu Sans",
+]
+plt.rcParams["font.sans-serif"] = PLOT_FONT_CANDIDATES
+plt.rcParams["axes.unicode_minus"] = False
+
 
 # =========================
 # 路径配置（相对脚本位置）
@@ -691,7 +701,17 @@ def train_one_station_pair(station_pair: str, level_target_times: Dict[str, floa
         plt.plot(art_data["t_ref"], art_data["v_ref_t"] * 3.6,
                  label=f"Template {cls_name} (medoid real run)", color='red', linewidth=2.5)
 
-        plt.title(f"{station_pair} - {cls_name} Reference Curve | run={art_data.get('template_run_id', '')}")
+        standard_time = level_target_times.get(cls_name)
+        template_median_time = art_data.get("center_time_median_s", art_data.get("time_ref_raw"))
+        standard_label = f"standard={standard_time:.2f}s" if standard_time is not None else "standard=n/a"
+        template_label = (
+            f"template median={template_median_time:.2f}s"
+            if template_median_time is not None else "template median=n/a"
+        )
+        plt.title(
+            f"{station_pair} - {cls_name} Reference Curve | {standard_label} | {template_label}\n"
+            f"run={art_data.get('template_run_id', '')}"
+        )
         plt.xlabel("Time (s)")
         plt.ylabel("Velocity (km/h)")
         plt.legend()

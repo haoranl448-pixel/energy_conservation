@@ -11,7 +11,7 @@ import openpyxl
 
 
 PROJECT_ROOT = Path(r"D:\energy_conservation")
-DEFAULT_TSVP = Path(r"D:\OutPut\OT_priority_history.tsvP")
+DEFAULT_TSVP = Path(r"D:\OutPut\OT_priority_history_trip001.tsvP")
 DEFAULT_DATA_DIR = PROJECT_ROOT / "data" / "data_processed_step2_v3_all_curve_quality"
 DEFAULT_ROUTE_MAP = PROJECT_ROOT / "output" / "opentrack_route_map_newdoc" / "priority_dp_first5_route_map.csv"
 DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "output" / "opentrack_tsvp_compare"
@@ -154,11 +154,88 @@ def header_index(headers: list[str], name: str) -> int | None:
     return normalized.get(name)
 
 
+def records_to_history_curve(
+    records: list[tuple[float, float, float, float | None, float | None]],
+) -> dict[str, list[float]]:
+    records.sort(key=lambda item: item[0])
+    t0 = records[0][0]
+    s0 = records[0][2]
+    first_cum = records[0][4]
+
+    time_s: list[float] = []
+    speed_kmh: list[float] = []
+    distance_km: list[float] = []
+    energy_kwh: list[float] = []
+    running_energy_j = 0.0
+
+    for t, v, s, e_step, e_cum in records:
+        time_s.append(t - t0)
+        speed_kmh.append(v)
+        distance_km.append(s - s0)
+        if e_cum is not None and first_cum is not None:
+            energy_kwh.append((e_cum - first_cum) / 3_600_000.0)
+        else:
+            running_energy_j += e_step or 0.0
+            energy_kwh.append(running_energy_j / 3_600_000.0)
+
+    return {
+        "time_s": time_s,
+        "speed_kmh": speed_kmh,
+        "distance_km": distance_km,
+        "energy_kwh": energy_kwh,
+    }
+
+
+def read_cached_history_section(
+    cache_path: Path,
+    section: str,
+    args: argparse.Namespace,
+) -> dict[str, list[float]]:
+    import pandas as pd
+
+    frame = pd.read_pickle(cache_path)
+    required = [TIME_COL, SPEED_COL, DIST_COL]
+    missing = [column for column in required if column not in frame.columns]
+    if missing:
+        raise ValueError(f"{cache_path.name}: missing cached columns {missing}")
+    if CUM_ENERGY_COL not in frame.columns and STEP_ENERGY_COL not in frame.columns:
+        raise ValueError(f"{cache_path.name}: missing cached energy/cumulative_energy column")
+
+    if args.run_id and RUN_ID_COL in frame.columns:
+        frame = frame[frame[RUN_ID_COL].astype(str).str.strip().eq(str(args.run_id).strip())]
+    if args.quality_label is not None and QUALITY_COL in frame.columns:
+        frame = frame[
+            frame[QUALITY_COL].astype(str).str.strip().eq(str(args.quality_label).strip())
+        ]
+
+    records: list[tuple[float, float, float, float | None, float | None]] = []
+    has_step_energy = STEP_ENERGY_COL in frame.columns
+    has_cum_energy = CUM_ENERGY_COL in frame.columns
+    for _, row in frame.iterrows():
+        t = as_float(row.get(TIME_COL))
+        v_ms = as_float(row.get(SPEED_COL))
+        s_m = as_float(row.get(DIST_COL))
+        e_step = as_float(row.get(STEP_ENERGY_COL)) if has_step_energy else None
+        e_cum = as_float(row.get(CUM_ENERGY_COL)) if has_cum_energy else None
+        if t is None or v_ms is None or s_m is None:
+            continue
+        records.append((t, v_ms * 3.6, s_m / 1000.0, e_step, e_cum))
+
+    if not records:
+        raise ValueError(f"{cache_path.name}: no cached historical rows selected for {section}")
+    return records_to_history_curve(records)
+
+
 def read_history_section(
     xlsx_path: Path,
     section: str,
     args: argparse.Namespace,
 ) -> dict[str, list[float]]:
+    cache_by_section = getattr(args, "history_section_cache", None) or {}
+    cache_path = cache_by_section.get(section)
+    if cache_path and Path(cache_path).is_file():
+        return read_cached_history_section(Path(cache_path), section, args)
+
     if not xlsx_path.exists():
         raise FileNotFoundError(f"Missing Step2 xlsx for {section}: {xlsx_path}")
 
@@ -189,7 +266,8 @@ def read_history_section(
         if idx_cum_energy is None and idx_energy is None:
             raise ValueError(f"{xlsx_path.name}: missing energy/cumulative_energy column")
 
-        target_segment = args.trip_no - 1
+        segment_by_section = getattr(args, "segment_by_section", None) or {}
+        target_segment = int(segment_by_section.get(section, args.trip_no - 1))
         records: list[tuple[float, float, float, float | None, float | None]] = []
         seen_target_segment = False
 
@@ -226,34 +304,7 @@ def read_history_section(
         if not records:
             selector = f"run_id={args.run_id}" if args.run_id else f"trip_no={args.trip_no}"
             raise ValueError(f"{xlsx_path.name}: no rows selected for {selector}")
-
-        records.sort(key=lambda item: item[0])
-        t0 = records[0][0]
-        s0 = records[0][2]
-        first_cum = records[0][4]
-
-        time_s: list[float] = []
-        speed_kmh: list[float] = []
-        distance_km: list[float] = []
-        energy_kwh: list[float] = []
-        running_energy_j = 0.0
-
-        for t, v, s, e_step, e_cum in records:
-            time_s.append(t - t0)
-            speed_kmh.append(v)
-            distance_km.append(s - s0)
-            if e_cum is not None and first_cum is not None:
-                energy_kwh.append((e_cum - first_cum) / 3_600_000.0)
-            else:
-                running_energy_j += e_step or 0.0
-                energy_kwh.append(running_energy_j / 3_600_000.0)
-
-        return {
-            "time_s": time_s,
-            "speed_kmh": speed_kmh,
-            "distance_km": distance_km,
-            "energy_kwh": energy_kwh,
-        }
+        return records_to_history_curve(records)
     finally:
         wb.close()
 
@@ -297,7 +348,17 @@ def read_history_line(sections: list[str], args: argparse.Namespace) -> tuple[di
     for idx, section in enumerate(sections):
         xlsx_path = Path(args.data_dir) / f"results_{section}.xlsx"
         section_data = read_history_section(xlsx_path, section, args)
-        append_history_section(full, section_data, args.history_dwell, idx == 0)
+        run_time_by_section = getattr(args, "history_run_time_by_section", None) or {}
+        target_run_time = run_time_by_section.get(section)
+        if target_run_time is not None and section_data["time_s"]:
+            raw_run_time = section_data["time_s"][-1]
+            if raw_run_time > 0:
+                scale = float(target_run_time) / raw_run_time
+                section_data["time_s"] = [value * scale for value in section_data["time_s"]]
+        dwell_by_section = getattr(args, "history_dwell_by_section", None) or {}
+        dwell_key = sections[idx - 1] if idx > 0 else section
+        dwell_s = float(dwell_by_section.get(dwell_key, args.history_dwell))
+        append_history_section(full, section_data, dwell_s, idx == 0)
         summary_rows.append(
             {
                 "source": "history",
@@ -324,6 +385,42 @@ def curve_summary(source: str, curve: dict[str, list[float]]) -> dict[str, Any]:
     }
 
 
+def energy_error(ot: dict[str, list[float]], history: dict[str, list[float]]) -> tuple[float | None, float | None]:
+    if not ot["energy_kwh"] or not history["energy_kwh"]:
+        return None, None
+    ot_final = ot["energy_kwh"][-1]
+    history_final = history["energy_kwh"][-1]
+    diff = ot_final - history_final
+    if abs(history_final) < 1e-9:
+        return diff, None
+    return diff, diff / history_final * 100.0
+
+
+def add_energy_error_box(ax: Any, diff_kwh: float | None, pct: float | None) -> None:
+    if diff_kwh is None:
+        text = "\u80fd\u8017\u8bef\u5dee: N/A"
+    elif pct is None:
+        text = f"\u80fd\u8017\u8bef\u5dee: N/A\nOT-History: {diff_kwh:+.3f} kWh"
+    else:
+        text = f"\u80fd\u8017\u8bef\u5dee: {pct:+.2f}%\nOT-History: {diff_kwh:+.3f} kWh"
+
+    ax.text(
+        0.98,
+        0.05,
+        text,
+        transform=ax.transAxes,
+        ha="right",
+        va="bottom",
+        fontsize=10,
+        bbox={
+            "boxstyle": "round,pad=0.35",
+            "facecolor": "white",
+            "edgecolor": "#999999",
+            "alpha": 0.9,
+        },
+    )
+
+
 def plot_compare(
     ot: dict[str, list[float]],
     history: dict[str, list[float]],
@@ -338,6 +435,7 @@ def plot_compare(
 
     fig, axes = plt.subplots(2, 2, figsize=(16, 10))
     ax_vt, ax_vs, ax_et, ax_es = axes.ravel()
+    diff_kwh, diff_pct = energy_error(ot, history)
 
     ax_vt.plot(ot["time_s"], ot["speed_kmh"], color="#1f77b4", lw=2.0, label="OpenTrack")
     ax_vt.plot(history["time_s"], history["speed_kmh"], color="#111111", lw=1.8, ls="--", label="History")
@@ -356,12 +454,14 @@ def plot_compare(
     ax_et.set_title("E-t")
     ax_et.set_xlabel("Time (s)")
     ax_et.set_ylabel("Cumulative Energy (kWh)")
+    add_energy_error_box(ax_et, diff_kwh, diff_pct)
 
     ax_es.plot(ot["distance_km"], ot["energy_kwh"], color="#d62728", lw=2.0, label="OpenTrack")
     ax_es.plot(history["distance_km"], history["energy_kwh"], color="#111111", lw=1.8, ls="--", label="History")
     ax_es.set_title("E-s")
     ax_es.set_xlabel("Distance (km)")
     ax_es.set_ylabel("Cumulative Energy (kWh)")
+    add_energy_error_box(ax_es, diff_kwh, diff_pct)
 
     for ax in axes.ravel():
         ax.grid(True, alpha=0.25)
@@ -401,7 +501,20 @@ def main() -> int:
     )
     plot_compare(ot_curve, history_curve, output_png, title, args.dpi, args.show)
 
+    diff_kwh, diff_pct = energy_error(ot_curve, history_curve)
     summary_rows = [curve_summary("opentrack", ot_curve), curve_summary("history_total", history_curve)]
+    summary_rows.append(
+        {
+            "source": "energy_error",
+            "section_index": "",
+            "section": "OpenTrack - History",
+            "points": "",
+            "duration_s": "",
+            "distance_km": "",
+            "energy_kwh": diff_kwh if diff_kwh is not None else "",
+            "energy_error_pct": diff_pct if diff_pct is not None else "",
+        }
+    )
     summary_rows.extend(history_summary)
     write_csv(summary_csv, summary_rows)
 
@@ -411,6 +524,8 @@ def main() -> int:
         f"History:     {history_curve['time_s'][-1]:.1f}s, "
         f"{history_curve['distance_km'][-1]:.3f} km, {history_curve['energy_kwh'][-1]:.3f} kWh"
     )
+    if diff_kwh is not None and diff_pct is not None:
+        print(f"Energy err:  {diff_pct:+.2f}% ({diff_kwh:+.3f} kWh, OpenTrack - History)")
     print(f"Plot:        {output_png}")
     print(f"Summary CSV: {summary_csv}")
     return 0

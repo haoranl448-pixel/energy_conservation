@@ -59,6 +59,12 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="Optional curve quality label filter, for example 0 for normal curves only.",
     )
+    parser.add_argument(
+        "--cruise-min-speed-ratio",
+        type=float,
+        default=0.92,
+        help="Cruise average uses speeds at least this ratio of the historical max speed.",
+    )
     return parser.parse_args()
 
 
@@ -115,6 +121,21 @@ def percentile(values: list[float], q: float) -> float | None:
     if lo == hi:
         return ordered[lo]
     return ordered[lo] * (hi - pos) + ordered[hi] * (pos - lo)
+
+
+def mean(values: list[float]) -> float | None:
+    if not values:
+        return None
+    return sum(values) / len(values)
+
+
+def cruise_average(values: list[float], min_speed_ratio: float) -> tuple[float | None, int]:
+    if not values:
+        return None, 0
+    max_speed = max(values)
+    threshold = max_speed * min_speed_ratio
+    cruise_values = [value for value in values if value >= threshold]
+    return mean(cruise_values), len(cruise_values)
 
 
 def find_col(headers: list[str], candidates: list[str]) -> int | None:
@@ -233,6 +254,7 @@ def summarize_section_file(
         output_rows: list[dict[str, Any]] = []
         for (segment, run_id), group in sorted(groups.items(), key=lambda item: (item[0][0], item[0][1])):
             speeds = group["speeds"]
+            cruise_avg, cruise_count = cruise_average(speeds, args.cruise_min_speed_ratio)
             output_rows.append(
                 {
                     "section_index": section_index,
@@ -243,6 +265,10 @@ def summarize_section_file(
                     "quality_labels": "|".join(sorted(group["quality_labels"])),
                     "row_count": len(speeds),
                     "speed_source": args.speed_source,
+                    "avg_speed_kmh": format_float(mean(speeds)),
+                    "cruise_avg_speed_kmh": format_float(cruise_avg),
+                    "cruise_point_count": cruise_count,
+                    "cruise_min_speed_ratio": format_float(args.cruise_min_speed_ratio),
                     "max_speed_kmh": format_float(max(speeds) if speeds else None),
                     "p99_speed_kmh": format_float(percentile(speeds, 0.99)),
                     "p95_speed_kmh": format_float(percentile(speeds, 0.95)),

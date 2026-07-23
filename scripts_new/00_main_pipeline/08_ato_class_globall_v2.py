@@ -16,6 +16,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
 import os
+import hashlib
+import sys
+from trip_traceability import (
+    load_trip_traceability,
+    print_traceability_summary,
+    resolve_traceability_manifest,
+    select_trip_rows,
+)
 
 # ===================== 1. Global config =====================
 DEFAULT_T_TOTAL_TARGET = 692.65
@@ -32,11 +40,28 @@ def get_target_time(default_value):
     return value
 
 
+def env_flag(name, default=False):
+    """Read a boolean flag from environment variables."""
+
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    return raw.strip().lower() in {"1", "true", "yes", "y", "on"}
+
+
 #T_TOTAL_TARGET = 694.7#trip1
 T_TOTAL_TARGET = get_target_time(DEFAULT_T_TOTAL_TARGET)#trip6/default
+SKIP_PLOTS = env_flag("ENERGY_SKIP_PLOTS", False)
 SLACK = 10
 NOMINAL_DWELL = 30.0          # default dwell for stations not in config
-MIN_DWELL = 20.0              # default min dwell for elastic stations
+MIN_DWELL = 24.0              # default min dwell for elastic stations
+HISTORICAL_DWELL_TOLERANCE = float(os.environ.get("ENERGY_DWELL_TOLERANCE", "0.02"))
+if not 0.0 <= HISTORICAL_DWELL_TOLERANCE <= 0.20:
+    raise ValueError("ENERGY_DWELL_TOLERANCE must be between 0 and 0.20.")
+REAL_PRIORITY_DWELL_TOLERANCE = 0.05
+TOTAL_TIME_TOLERANCE = float(os.environ.get("ENERGY_TOTAL_TIME_TOLERANCE", "0"))
+if not 0.0 <= TOTAL_TIME_TOLERANCE <= 10.0:
+    raise ValueError("ENERGY_TOTAL_TIME_TOLERANCE must be between 0 and 10 seconds.")
 
 # Per-station dwell config. Stations NOT listed here use defaults above.
 # "nominal": target dwell time (s)
@@ -59,7 +84,7 @@ MANUAL_CONSTRAINTS = {
     "泗港-曹隘": "class4"
 }
 
-GLOBAL_ALLOWED_CLASSES = ["class1","class2", "class3","class4", "class5"]
+GLOBAL_ALLOWED_CLASSES = ["class1","class2", "class3","class4", "class4"]
 CURVE_SOURCE_COL = "曲线来源"
 PARENT_REF_COL = "父等级"
 SUPPORTING_REFS_COL = "支持等级"
@@ -69,6 +94,7 @@ SAMPLE_RELIABILITY_COL = "样本可靠性"
 DP_CANDIDATE_STAGE_COL = "DP候选阶段"
 HIST_RAW_ENERGY_COL = "历史实测能耗(Wh)"
 HIST_MODEL_ENERGY_COL = "历史能耗(Wh)"
+HIST_RUN_TIME_COL = "历史运行时间(s)"
 
 DP_SOURCE_STAGES = [
     ("real_only", {"real"}),
@@ -98,15 +124,27 @@ OUT_DIR.mkdir(parents=True, exist_ok=True)
 SECTION_PARAMS_FILE = PROJECT_ROOT / "data" / "static" / f"section_params_trip{TRIP_NO}.csv"
 FINAL_COMPARISON_FILE = OUT_DIR / "Final_Planning_Comparison.csv"
 ENERGY_FIRST_COMPARISON_FILE = OUT_DIR / "Final_Planning_Comparison_Energy_First.csv"
+REAL_PRIORITY_5PCT_COMPARISON_FILE = OUT_DIR / "Final_Planning_Comparison_Real_Priority_Dwell_5pct.csv"
 FINAL_REPORT_PNG = OUT_DIR / "Optimized_Full_Line_Report.png"
 ENERGY_FIRST_REPORT_PNG = OUT_DIR / "Optimized_Full_Line_Report_Energy_First.png"
+REAL_PRIORITY_5PCT_REPORT_PNG = OUT_DIR / "Optimized_Full_Line_Report_Real_Priority_Dwell_5pct.png"
+HISTORY_CURVE_CACHE_DIR = PROJECT_ROOT / "output" / "cache" / "planning_history_curves"
+HISTORY_CURVE_CACHE_VERSION = "history_trip_curve_v2_traceability"
+_HISTORY_CURVE_MEMORY_CACHE = {}
 
 
 def remove_existing_report_outputs():
     """Delete stale DP report outputs before rebuilding them."""
 
     output_root = (PROJECT_ROOT / "output").resolve()
-    for path in [FINAL_COMPARISON_FILE, ENERGY_FIRST_COMPARISON_FILE, FINAL_REPORT_PNG, ENERGY_FIRST_REPORT_PNG]:
+    for path in [
+        FINAL_COMPARISON_FILE,
+        ENERGY_FIRST_COMPARISON_FILE,
+        REAL_PRIORITY_5PCT_COMPARISON_FILE,
+        FINAL_REPORT_PNG,
+        ENERGY_FIRST_REPORT_PNG,
+        REAL_PRIORITY_5PCT_REPORT_PNG,
+    ]:
         resolved = path.resolve()
         try:
             resolved.relative_to(output_root)
@@ -132,6 +170,83 @@ def get_data_dir(default_value: Path) -> Path:
 DATA_DIR = get_data_dir(PROJECT_ROOT / "data" / "data_processed")
 SLIP_RATIO = 1.0
 TRIP_INDEX = TRIP_NO - 1
+TRACEABILITY_MANIFEST = resolve_traceability_manifest(PROJECT_ROOT, DATA_DIR)
+TRIP_TRACEABILITY = load_trip_traceability(TRACEABILITY_MANIFEST, TRIP_NO, direction="UP")
+
+
+def get_historical_dwell_file() -> Path | None:
+    """Return the optional trip/station dwell detail CSV selected by the batch runner."""
+
+    raw = os.environ.get("ENERGY_HISTORICAL_DWELL_FILE")
+    if not raw:
+        return None
+    path = Path(raw)
+    if not path.is_absolute():
+        path = PROJECT_ROOT / path
+    return path
+
+
+HISTORICAL_DWELL_FILE = get_historical_dwell_file()
+
+
+def get_history_curve_cache_path(excel_path: Path, sp: str) -> Path:
+    """Build a cache path that changes whenever the source Excel changes."""
+
+    stat = excel_path.stat()
+    if TRIP_TRACEABILITY is not None:
+        record = TRIP_TRACEABILITY.record_for(sp)
+        selection_key = f"{record.global_trip_id}|{record.segment}|{record.source_run_id}"
+    else:
+        selection_key = f"legacy_local_index|{TRIP_INDEX}"
+    key_src = "|".join([
+        HISTORY_CURVE_CACHE_VERSION,
+        str(excel_path.resolve()),
+        str(stat.st_size),
+        str(stat.st_mtime_ns),
+        sp,
+        selection_key,
+    ])
+    key = hashlib.sha1(key_src.encode("utf-8", errors="surrogatepass")).hexdigest()
+    return HISTORY_CURVE_CACHE_DIR / f"{key}.pkl"
+
+
+def load_history_trip_curve(sp: str) -> pd.DataFrame:
+    """Load one historical trip curve, using disk cache to avoid repeated Excel reads."""
+
+    excel_path = DATA_DIR / f"results_{sp}.xlsx"
+    if not excel_path.exists():
+        raise FileNotFoundError(f"History curve Excel not found: {excel_path}")
+
+    cache_path = get_history_curve_cache_path(excel_path, sp)
+    memory_key = str(cache_path)
+    if memory_key in _HISTORY_CURVE_MEMORY_CACHE:
+        return _HISTORY_CURVE_MEMORY_CACHE[memory_key]
+
+    if cache_path.exists():
+        df_h = pd.read_pickle(cache_path)
+        print(f"  History curve cache hit: {sp} trip {TRIP_NO}")
+    else:
+        print(f"  Building history curve cache from Excel: {sp} trip {TRIP_NO}")
+        df_h_all = pd.read_excel(excel_path)
+        if "segment" not in df_h_all.columns:
+            raise ValueError(f"{excel_path} missing required column: segment")
+
+        df_h, target_seg, record, selection_mode = select_trip_rows(
+            df_h_all,
+            sp,
+            TRIP_INDEX,
+            TRIP_TRACEABILITY,
+        )
+        print(
+            f"    selected segment={target_seg}"
+            + (f", run_id={record.source_run_id}" if record else "")
+            + f" [{selection_mode}]"
+        )
+        HISTORY_CURVE_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+        df_h.to_pickle(cache_path)
+
+    _HISTORY_CURVE_MEMORY_CACHE[memory_key] = df_h
+    return df_h
 
 FULL_LINE_STATIONS = [
     "布政-张家潭", "张家潭-同德路", "同德路-石碶", "石碶-雅渡", "雅渡-庙堰",
@@ -173,6 +288,110 @@ def get_dwell_config(sp):
         cfg = STATION_DWELL_CONFIG[sp]
         return cfg["nominal"], cfg["min"]
     return NOMINAL_DWELL, MIN_DWELL
+
+
+def load_historical_dwell_profile() -> tuple[list[float], list[str]]:
+    """Load dwell after each section, falling back to station medians when needed.
+
+    The detail CSV produced by analyze_historical_dwell_first70.py stores a dwell
+    against the preceding section.  That is exactly the dwell interval that must
+    be inserted after the section in the full-line timetable.
+    """
+
+    if HISTORICAL_DWELL_FILE is None:
+        values = [get_dwell_config(sp)[0] for sp in STATIONS]
+        values[-1] = 0.0
+        return values, ["legacy_default"] * (len(STATIONS) - 1) + ["terminal"]
+    if not HISTORICAL_DWELL_FILE.exists():
+        raise FileNotFoundError(f"Historical dwell detail CSV not found: {HISTORICAL_DWELL_FILE}")
+
+    detail = pd.read_csv(HISTORICAL_DWELL_FILE, encoding="utf-8-sig")
+    required = {"趟次", "停车站", "上一运行区间", "历史停站时间(s)"}
+    missing = sorted(required - set(detail.columns))
+    if missing:
+        raise ValueError(f"Historical dwell detail CSV missing columns: {missing}")
+
+    detail = detail.copy()
+    detail["趟次"] = pd.to_numeric(detail["趟次"], errors="coerce")
+    detail["历史停站时间(s)"] = pd.to_numeric(detail["历史停站时间(s)"], errors="coerce")
+    valid_for_median = detail[detail["历史停站时间(s)"].between(20.0, 60.0, inclusive="both")]
+    station_medians = valid_for_median.groupby("停车站")["历史停站时间(s)"].median().to_dict()
+    selected = detail[detail["趟次"] == TRIP_NO]
+
+    values: list[float] = []
+    sources: list[str] = []
+    for sp in STATIONS[:-1]:
+        rows = selected[selected["上一运行区间"].astype(str).str.strip() == sp]
+        actual = rows["历史停站时间(s)"].dropna()
+        if not actual.empty and float(actual.iloc[0]) > 0:
+            values.append(float(actual.iloc[0]))
+            sources.append("actual")
+            continue
+
+        destination = sp.split("-", 1)[1]
+        median = station_medians.get(destination)
+        if median is not None and np.isfinite(median) and float(median) > 0:
+            values.append(float(median))
+            sources.append("station_median")
+        else:
+            values.append(NOMINAL_DWELL)
+            sources.append("fixed_default")
+
+    values.append(0.0)
+    sources.append("terminal")
+    return values, sources
+
+
+def distribute_historical_dwell(
+    run_time_sum: float,
+    historical_dwells: list[float],
+    tolerance: float,
+) -> tuple[bool, list[float] | None]:
+    """Fit the required dwell total while keeping every station within tolerance."""
+
+    if not historical_dwells:
+        return abs(run_time_sum - T_TOTAL_TARGET) <= 0.05, []
+
+    history = np.asarray(historical_dwells, dtype=float)
+    target_total = T_TOTAL_TARGET - run_time_sum
+    history_total = float(history.sum())
+    lower = history * (1.0 - tolerance)
+    upper = history * (1.0 + tolerance)
+    lower_total = float(lower.sum())
+    upper_total = float(upper.sum())
+    if target_total < lower_total:
+        if lower_total - target_total > TOTAL_TIME_TOLERANCE + 0.05:
+            return False, None
+        target_total = lower_total
+    elif target_total > upper_total:
+        if target_total - upper_total > TOTAL_TIME_TOLERANCE + 0.05:
+            return False, None
+        target_total = upper_total
+
+    if history_total <= 0:
+        return abs(target_total) <= 0.05, [0.0] * len(historical_dwells)
+
+    dwell = history * (target_total / history_total)
+    dwell = np.clip(dwell, lower, upper)
+    dwell = np.round(dwell, 2)
+
+    # Repair the 0.01 s rounding residue without taking any station outside its band.
+    units = int(round((target_total - float(dwell.sum())) * 100))
+    direction = 1 if units > 0 else -1
+    for _ in range(abs(units)):
+        changed = False
+        for index in range(len(dwell)):
+            candidate = round(float(dwell[index]) + direction * 0.01, 2)
+            if lower[index] - 1e-9 <= candidate <= upper[index] + 1e-9:
+                dwell[index] = candidate
+                changed = True
+                break
+        if not changed:
+            return False, None
+
+    if abs(float(dwell.sum()) - target_total) > 0.0051:
+        return False, None
+    return True, dwell.tolist()
 
 
 def distribute_dwell_delta(run_time_sum, dwell_configs):
@@ -264,46 +483,194 @@ def row_source_meta(row: pd.Series) -> dict:
     }
 
 
+def format_section_list(items: list[str], limit: int = 8) -> str:
+    """Keep diagnostics readable when many sections are missing."""
+
+    if not items:
+        return "无"
+    shown = items[:limit]
+    suffix = "" if len(items) <= limit else f" ... 另 {len(items) - limit} 个"
+    return "、".join(shown) + suffix
+
+
+def print_input_diagnostics(
+    df_menu: pd.DataFrame,
+    df_hist: pd.DataFrame,
+    max_run_time: float,
+    nom_run_time: float,
+    historical_dwell_total: float | None = None,
+    minimum_dwell_total: float | None = None,
+) -> None:
+    """Explain whether the selected trip has enough full-line data for DP."""
+
+    menu_sections = set(df_menu["站间区间"].dropna().astype(str)) if "站间区间" in df_menu.columns else set()
+    hist_sections = set(df_hist.index.dropna().astype(str))
+    missing_menu = [sp for sp in STATIONS if sp not in menu_sections]
+    missing_hist = [sp for sp in STATIONS if sp not in hist_sections]
+
+    hist_run_sum = np.nan
+    if HIST_RUN_TIME_COL in df_hist.columns:
+        hist_run_sum = pd.to_numeric(df_hist.loc[df_hist.index.intersection(STATIONS), HIST_RUN_TIME_COL], errors="coerce").sum()
+
+    nominal_dwell_total = (
+        historical_dwell_total
+        if historical_dwell_total is not None
+        else sum(get_dwell_config(sp)[0] for sp in STATIONS[:-1])
+    )
+    min_dwell_total = (
+        minimum_dwell_total
+        if minimum_dwell_total is not None
+        else nominal_dwell_total
+    )
+
+    print("\nDP input diagnostics:")
+    print(f"  Selected global trip: {TRIP_NO} (legacy local index {TRIP_INDEX})")
+    print(f"  Target total time: {T_TOTAL_TARGET:.1f}s")
+    print(f"  Allowed running time: <= {max_run_time:.1f}s within dwell tolerance, exact-dwell run {nom_run_time:.1f}s")
+    print(f"  Dwell totals: historical={nominal_dwell_total:.1f}s, tolerance minimum={min_dwell_total:.1f}s")
+
+    if np.isfinite(hist_run_sum):
+        coverage_note = "full-line" if not missing_hist else f"partial {len(hist_sections & set(STATIONS))}/{len(STATIONS)} sections"
+        print(f"  Historical selected-trip run time in {HIST_FILE.name}: {hist_run_sum:.1f}s ({coverage_note}, dwell not included)")
+        if not missing_hist:
+            print(f"  Historical selected-trip total with historical dwell: {hist_run_sum + nominal_dwell_total:.1f}s")
+            print(f"  Historical selected-trip total at tolerance minimum: {hist_run_sum + min_dwell_total:.1f}s")
+    else:
+        print(f"  Historical selected-trip run time: unavailable; {HIST_FILE.name} lacks {HIST_RUN_TIME_COL}")
+
+    print(f"  Menu coverage: {len(menu_sections & set(STATIONS))}/{len(STATIONS)} sections")
+    if missing_menu:
+        print(f"  Missing menu sections: {format_section_list(missing_menu)}")
+    print(f"  History coverage: {len(hist_sections & set(STATIONS))}/{len(STATIONS)} sections")
+    if missing_hist:
+        print(f"  Missing history sections: {format_section_list(missing_hist)}")
+
+    if missing_menu or missing_hist:
+        print(
+            "  Hint: 当前 trip 的 energy menu 或 historical baseline 不是全线覆盖。"
+            " 如果只从 dp_schedule 开始跑，它会复用旧文件；请先为该 trip 重新生成 full-line energy_menu 和 historical_baseline。"
+        )
+
+
+def _canonical_number_text(value) -> str:
+    """Normalize CSV numbers such as 5 and 5.0 before traceability comparison."""
+
+    text = str(value).strip()
+    try:
+        number = float(text)
+    except ValueError:
+        return text
+    return f"{number:g}"
+
+
+def validate_traceability_inputs(
+    df_menu: pd.DataFrame,
+    df_hist: pd.DataFrame,
+    df_mass: pd.DataFrame,
+) -> None:
+    """Reject stale per-section-index files when this run uses a global trip chain."""
+
+    if TRIP_TRACEABILITY is None:
+        return
+
+    required_columns = {"全局趟次ID", "历史segment", "历史来源run_id", "趟次选择方式"}
+    tables = [
+        ("energy menu", df_menu, "站间区间", False),
+        ("historical baseline", df_hist, "站间区间", True),
+        ("section mass params", df_mass, "station_pair", False),
+    ]
+    expected_id = TRIP_TRACEABILITY.global_trip_id
+
+    for label, table, section_column, section_is_index in tables:
+        missing = sorted(required_columns - set(table.columns))
+        if missing:
+            raise ValueError(
+                f"{label} 缺少追溯字段 {missing}。当前文件可能是旧版按各区间第 N 趟生成的；"
+                "请先重新运行 energy_menu 和 historical_baseline。"
+            )
+
+        for section in STATIONS:
+            rows = table.loc[[section]] if section_is_index and section in table.index else None
+            if not section_is_index:
+                rows = table[table[section_column].astype(str).str.strip().eq(section)]
+            if rows is None or rows.empty:
+                continue
+
+            record = TRIP_TRACEABILITY.record_for(section)
+            ids = rows["全局趟次ID"].dropna().astype(str).str.strip().unique().tolist()
+            segments = {
+                _canonical_number_text(value)
+                for value in rows["历史segment"].dropna().tolist()
+            }
+            run_ids = {
+                _canonical_number_text(value)
+                for value in rows["历史来源run_id"].dropna().tolist()
+            }
+            if ids != [expected_id]:
+                raise ValueError(f"{label} 的 {section} 全局趟次ID不一致: {ids}, expected={expected_id}")
+            if segments != {_canonical_number_text(record.segment)}:
+                raise ValueError(
+                    f"{label} 的 {section} segment不一致: {segments}, expected={record.segment}"
+                )
+            if run_ids != {_canonical_number_text(record.source_run_id)}:
+                raise ValueError(
+                    f"{label} 的 {section} 来源run_id不一致: {run_ids}, expected={record.source_run_id}"
+                )
+
+
 # ===================== 4. Core staged DP =====================
 
 def run_optimization():
-    remove_existing_report_outputs()
-
     # A. Load data
-    print(f"Trip: {TRIP_NO} (segment index {TRIP_INDEX})")
+    print(f"Global trip: {TRIP_NO} (legacy local index {TRIP_INDEX})")
     print(f"Target total time: {T_TOTAL_TARGET:.2f}s")
     print(f"Line scope: {LINE_SCOPE} ({len(STATIONS)} sections)")
     print(f"Menu file: {MENU_FILE}")
     print(f"History file: {HIST_FILE}")
     print(f"Historical curve data dir: {DATA_DIR}")
+    print_traceability_summary(TRIP_TRACEABILITY, TRIP_NO)
+    if TRIP_TRACEABILITY is not None:
+        TRIP_TRACEABILITY.require_sections(STATIONS)
     df_menu = ensure_menu_source_columns(pd.read_csv(MENU_FILE))
     df_hist = pd.read_csv(HIST_FILE).set_index('站间区间')
     if HIST_RAW_ENERGY_COL not in df_hist.columns:
         raise ValueError(f"{HIST_FILE} 缺少 {HIST_RAW_ENERGY_COL}，请先运行 historical_baseline 生成带原始实测能耗的历史基准。")
     df_mass = pd.read_csv(SECTION_PARAMS_FILE)
+    validate_traceability_inputs(df_menu, df_hist, df_mass)
+    # Only clear the previous report after all selected-trip inputs have passed
+    # traceability validation. A stale input should not destroy the last report.
+    remove_existing_report_outputs()
     mass_map = dict(zip(df_mass['station_pair'], df_mass['MASS']))
 
-    # B. Build dwell configs
-    dwell_configs = [get_dwell_config(sp) for sp in STATIONS]
-    dwell_mins = [d[1] for d in dwell_configs]
-    dwell_nominals = [d[0] for d in dwell_configs]
-    min_total_dwell = sum(dwell_mins[:-1])       # no dwell after last run
-    nominal_total_dwell = sum(dwell_nominals[:-1])
-    max_run_time = T_TOTAL_TARGET - min_total_dwell  # longest running we can afford
-    nom_run_time = T_TOTAL_TARGET - nominal_total_dwell  # nominal for display
+    # B. Historical dwell is the primary planning constraint.  Only if no exact
+    # running-time combination exists do we allow a small per-station tolerance.
+    historical_dwells, historical_dwell_sources = load_historical_dwell_profile()
+    historical_total_dwell = sum(historical_dwells[:-1])
+    tolerance_min_total = historical_total_dwell * (1.0 - HISTORICAL_DWELL_TOLERANCE)
+    tolerance_max_total = historical_total_dwell * (1.0 + HISTORICAL_DWELL_TOLERANCE)
+    max_run_time = T_TOTAL_TARGET - tolerance_min_total
+    nom_run_time = T_TOTAL_TARGET - historical_total_dwell
 
     # C. Staged DP. Prefer real curves first; only open generated candidates if needed.
     def to_int(t): return int(round(t * 10))
-    max_run_int = to_int(max_run_time)
-
-    print(f"Max run (at min dwell): {max_run_time:.1f}s")
-    print(f"Nom run (at nominal):   {nom_run_time:.1f}s")
-    print(f"Dwell budget to trade:   {nominal_total_dwell - min_total_dwell:.0f}s")
-    print(f"Dwell config ({len(STATIONS)-1} intervals):")
-    for sp in STATIONS:
-        n, m = get_dwell_config(sp)
-        tag = "LOCKED" if n == m else f"elastic ({m:.0f}-{n:.0f}s)"
-        print(f"  {sp}: nominal={n:.0f}s, min={m:.0f}s [{tag}]")
+    print(f"Historical dwell file:   {HISTORICAL_DWELL_FILE or 'not supplied (legacy default)'}")
+    print(f"Historical dwell total:  {historical_total_dwell:.1f}s")
+    print(f"Exact-dwell target run:  {nom_run_time:.1f}s")
+    print(
+        f"Fallback dwell band:     {tolerance_min_total:.1f}-{tolerance_max_total:.1f}s "
+        f"(±{HISTORICAL_DWELL_TOLERANCE * 100:.1f}%)"
+    )
+    print_input_diagnostics(
+        df_menu,
+        df_hist,
+        max_run_time,
+        nom_run_time,
+        historical_total_dwell,
+        tolerance_min_total,
+    )
+    print(f"Historical dwell profile ({len(STATIONS)-1} intervals):")
+    for index, sp in enumerate(STATIONS[:-1]):
+        print(f"  {sp}: {historical_dwells[index]:.1f}s [{historical_dwell_sources[index]}]")
 
     def options_for_stage(sp: str, allowed_sources: set[str]) -> pd.DataFrame:
         all_opts = df_menu[df_menu['站间区间'] == sp]
@@ -321,17 +688,39 @@ def run_optimization():
             return energy_wh, ext_count, int_count
         return ext_count, int_count, energy_wh
 
-    def run_dp_stage(stage_name: str, allowed_sources: set[str], score_mode: str = "priority_first"):
+    def run_dp_stage(
+        stage_name: str,
+        allowed_sources: set[str],
+        min_run_time: float,
+        max_run_time_for_stage: float,
+        dwell_mode: str,
+        dwell_tolerance: float,
+        score_mode: str = "priority_first",
+    ):
         # score tuple: (extrapolated_count, interpolated_count, energy_wh)
         dp = {0: (0, 0, 0.0)}
         path = []
 
-        print(f"\nDP stage: {stage_name} | sources={sorted(allowed_sources)} | score={score_mode}")
+        min_run_int = to_int(min_run_time)
+        max_run_int = to_int(max_run_time_for_stage)
+        print(
+            f"\nDP stage: {stage_name} | dwell={dwell_mode} | "
+            f"run_range=[{min_run_time:.1f}, {max_run_time_for_stage:.1f}] | "
+            f"sources={sorted(allowed_sources)} | score={score_mode}"
+        )
         for i, sp in enumerate(STATIONS):
             new_dp, new_path = {}, {}
             options = options_for_stage(sp, allowed_sources)
             if options.empty:
                 print(f"  [{i+1}/{len(STATIONS)}] {sp} -> no options in this stage")
+                all_opts = df_menu[df_menu['站间区间'] == sp]
+                if all_opts.empty:
+                    print(f"      reason: menu file has no rows for this section ({MENU_FILE.name})")
+                else:
+                    classes = sorted(all_opts['运行等级'].dropna().astype(str).unique().tolist())
+                    sources = sorted(all_opts[CURVE_SOURCE_COL].dropna().astype(str).unique().tolist())
+                    print(f"      available classes: {classes}")
+                    print(f"      available sources: {sources}; allowed sources now: {sorted(allowed_sources)}")
                 return None
 
             for t_prev, score_prev in dp.items():
@@ -360,14 +749,27 @@ def run_optimization():
             if not dp:
                 return None
 
-        feasible = [(t, dp[t]) for t in dp.keys() if t <= max_run_int]
+        feasible = [(t, dp[t]) for t in dp.keys() if min_run_int <= t <= max_run_int]
         if not feasible:
             min_r = min(dp.keys()) / 10.0
             max_r = max(dp.keys()) / 10.0
-            print(f"  no feasible state. Reachable run time: [{min_r:.1f}s, {max_r:.1f}s], max allowed: {max_run_time:.1f}s")
+            print(
+                f"  no feasible state. Reachable run time: [{min_r:.1f}s, {max_r:.1f}s], "
+                f"required: [{min_run_time:.1f}s, {max_run_time_for_stage:.1f}s]"
+            )
             return None
 
-        feasible.sort(key=lambda x: score_key(x[1], score_mode))
+        def feasible_key(item):
+            t_int, score = item
+            dwell_deviation = abs((T_TOTAL_TARGET - t_int / 10.0) - historical_total_dwell)
+            ext_count, int_count, energy_wh = score
+            if score_mode == "energy_first":
+                return energy_wh, ext_count, int_count, dwell_deviation
+            if score_mode == "real_priority_energy":
+                return ext_count, int_count, energy_wh, dwell_deviation
+            return ext_count, int_count, dwell_deviation, energy_wh
+
+        feasible.sort(key=feasible_key)
         best_t_int, best_score = feasible[0]
         return {
             "stage_name": stage_name,
@@ -379,17 +781,61 @@ def run_optimization():
             "final_energy": float(best_score[2]),
             "extrapolated_count": int(best_score[0]),
             "interpolated_count": int(best_score[1]),
+            "dwell_mode": dwell_mode,
+            "dwell_tolerance": dwell_tolerance,
         }
 
-    solution = None
-    for stage_name, allowed_sources in DP_SOURCE_STAGES:
-        solution = run_dp_stage(stage_name, allowed_sources)
-        if solution is not None:
-            break
+    def build_dwell_stages(total_time_tolerance: float):
+        return [
+            (
+                "historical_exact",
+                0.0,
+                nom_run_time - total_time_tolerance,
+                nom_run_time + total_time_tolerance,
+            ),
+            (
+                f"historical_tolerance_{HISTORICAL_DWELL_TOLERANCE * 100:.1f}pct",
+                HISTORICAL_DWELL_TOLERANCE,
+                T_TOTAL_TARGET - tolerance_max_total - total_time_tolerance,
+                T_TOTAL_TARGET - tolerance_min_total + total_time_tolerance,
+            ),
+        ]
+
+    def find_priority_solution(stages):
+        for dwell_mode, dwell_tolerance, min_run_for_stage, max_run_for_stage in stages:
+            for stage_name, allowed_sources in DP_SOURCE_STAGES:
+                candidate = run_dp_stage(
+                    stage_name,
+                    allowed_sources,
+                    min_run_for_stage,
+                    max_run_for_stage,
+                    dwell_mode,
+                    dwell_tolerance,
+                )
+                if candidate is not None:
+                    return candidate
+        return None
+
+    # First enforce the historical target exactly.  A total-time tolerance is a
+    # last resort only after exact dwell and the dwell-tolerance band both fail.
+    dwell_stages = build_dwell_stages(0.0)
+    solution = find_priority_solution(dwell_stages)
+    if solution is None and TOTAL_TIME_TOLERANCE > 0:
+        print(f"\nTrying nearest total time within +/-{TOTAL_TIME_TOLERANCE:.1f}s.")
+        dwell_stages = build_dwell_stages(TOTAL_TIME_TOLERANCE)
+        solution = find_priority_solution(dwell_stages)
 
     if solution is None:
-        print("ERROR: No DP stage can fit even with min dwell.")
-        return
+        print("ERROR: No DP stage can fit historical dwell, including the configured tolerance band.")
+        print_input_diagnostics(
+            df_menu,
+            df_hist,
+            max_run_time,
+            nom_run_time,
+            historical_total_dwell,
+            tolerance_min_total,
+        )
+        return False
 
     def print_solution_overview(solution_info: dict, label: str) -> None:
         stage_name = solution_info["stage_name"]
@@ -423,7 +869,11 @@ def run_optimization():
         path = solution_info["path"]
         best_t_int = solution_info["best_t_int"]
 
-        dwell_ok, best_dwells = distribute_dwell_delta(best_t_int / 10.0, dwell_configs[:-1])
+        dwell_ok, best_dwells = distribute_historical_dwell(
+            best_t_int / 10.0,
+            historical_dwells[:-1],
+            solution_info["dwell_tolerance"],
+        )
         if not dwell_ok:
             raise RuntimeError(f"{stage_name} selected an infeasible dwell distribution.")
 
@@ -432,9 +882,10 @@ def run_optimization():
         for i in range(len(STATIONS) - 1, -1, -1):
             prev_t, c_name, t_val, e_val, source_meta = path[i][curr_t]
             sp = STATIONS[i]
-            h_time = df_hist.loc[sp, '历史运行时间(s)']
-            h_raw_energy = df_hist.loc[sp, HIST_RAW_ENERGY_COL]
-            h_model_energy = df_hist.loc[sp, HIST_MODEL_ENERGY_COL] if HIST_MODEL_ENERGY_COL in df_hist.columns else np.nan
+            hist_row = df_hist.loc[sp]
+            h_time = hist_row['历史运行时间(s)']
+            h_raw_energy = hist_row[HIST_RAW_ENERGY_COL]
+            h_model_energy = hist_row[HIST_MODEL_ENERGY_COL] if HIST_MODEL_ENERGY_COL in df_hist.columns else np.nan
 
             if i < len(STATIONS) - 1:
                 dwell = best_dwells[i]
@@ -444,8 +895,10 @@ def run_optimization():
             final_rows.append({
                 "站间区间": sp,
                 "选定等级": c_name,
-                "规划用时(s)": round(t_val, 0),
-                "停站时间(s)": round(dwell, 1) if i < len(STATIONS) - 1 else 0,
+                "规划用时(s)": round(t_val, 1),
+                "停站时间(s)": round(dwell, 2) if i < len(STATIONS) - 1 else 0,
+                "历史停站时间(s)": round(historical_dwells[i], 1) if i < len(STATIONS) - 1 else 0,
+                "停站偏差(s)": round(dwell - historical_dwells[i], 2) if i < len(STATIONS) - 1 else 0,
                 "历史用时(s)": round(h_time, 2),
                 "规划能耗(Wh)": round(e_val, 2),
                 "历史能耗(Wh)": round(h_raw_energy, 2),
@@ -460,6 +913,9 @@ def run_optimization():
                 "样本可靠性": source_meta.get("sample_reliability", ""),
                 "规划阶段": stage_name,
                 "MASS": round(mass_map.get(sp, np.nan), 2),
+                "全局趟次ID": hist_row.get("全局趟次ID", ""),
+                "历史segment": hist_row.get("历史segment", ""),
+                "历史来源run_id": hist_row.get("历史来源run_id", ""),
             })
             curr_t = prev_t
 
@@ -474,7 +930,7 @@ def run_optimization():
             for j in range(n_adj):
                 final_rows[j % len(final_rows)]['规划用时(s)'] += step * 0.1
             for r in final_rows:
-                r['规划用时(s)'] = round(r['规划用时(s)'], 0)
+                r['规划用时(s)'] = round(r['规划用时(s)'], 1)
 
         df_res = pd.DataFrame(final_rows)
         total_h_e = df_res['历史能耗(Wh)'].sum()
@@ -483,7 +939,8 @@ def run_optimization():
         total_p_run = df_res['规划用时(s)'].sum()
         total_p_dwell = df_res['停站时间(s)'].sum()
         total_p_t = total_p_run + total_p_dwell
-        total_h_t = df_res['历史用时(s)'].sum() + nominal_total_dwell
+        total_h_dwell = df_res['历史停站时间(s)'].sum()
+        total_h_t = df_res['历史用时(s)'].sum() + total_h_dwell
         saving_rate = (total_h_e - total_p_e) / total_h_e * 100
 
         summary_row = {
@@ -491,6 +948,8 @@ def run_optimization():
             "选定等级": f"节能率: {saving_rate:.2f}%",
             "规划用时(s)": total_p_run,
             "停站时间(s)": total_p_dwell,
+            "历史停站时间(s)": total_h_dwell,
+            "停站偏差(s)": round(total_p_dwell - total_h_dwell, 2),
             "历史用时(s)": total_h_t,
             "规划能耗(Wh)": round(total_p_e, 2),
             "历史能耗(Wh)": round(total_h_e, 2),
@@ -531,15 +990,72 @@ def run_optimization():
             break
         d = row['停站时间(s)']
         if d > 0:
-            _, min_d = dwell_configs[i]  # config for this section controls dwell at its destination
-            tag = f" -> min={min_d:.0f}s" if d <= min_d + 0.5 else ""
-            print(f"  Dwell after {row['站间区间']}: {d:.1f}s{tag}")
+            h_dwell = row['历史停站时间(s)']
+            print(f"  Dwell after {row['站间区间']}: {d:.1f}s (history {h_dwell:.1f}s)")
 
-    energy_solution = run_dp_stage(
-        "energy_first",
-        {"real", "interpolated", "extrapolated_adjacent"},
-        score_mode="energy_first",
-    )
+    # Additional comparison plan: keep real curves as the first priority, allow
+    # every historical dwell value to move within +/-5%, then minimize energy.
+    # Unlike the default priority plan, dwell closeness is not ranked ahead of
+    # energy inside this wider band; otherwise a 5% experiment would usually
+    # reproduce the 2% result and reveal no usable energy-saving headroom.
+    real_priority_min_dwell = historical_total_dwell * (1.0 - REAL_PRIORITY_DWELL_TOLERANCE)
+    real_priority_max_dwell = historical_total_dwell * (1.0 + REAL_PRIORITY_DWELL_TOLERANCE)
+
+    def find_real_priority_energy_solution(total_time_tolerance: float):
+        min_run = T_TOTAL_TARGET - real_priority_max_dwell - total_time_tolerance
+        max_run = T_TOTAL_TARGET - real_priority_min_dwell + total_time_tolerance
+        dwell_mode = f"historical_tolerance_{REAL_PRIORITY_DWELL_TOLERANCE * 100:.1f}pct_energy"
+        for stage_name, allowed_sources in DP_SOURCE_STAGES:
+            candidate = run_dp_stage(
+                stage_name,
+                allowed_sources,
+                min_run,
+                max_run,
+                dwell_mode,
+                REAL_PRIORITY_DWELL_TOLERANCE,
+                score_mode="real_priority_energy",
+            )
+            if candidate is not None:
+                return candidate
+        return None
+
+    real_priority_solution = find_real_priority_energy_solution(0.0)
+    if real_priority_solution is None and TOTAL_TIME_TOLERANCE > 0:
+        real_priority_solution = find_real_priority_energy_solution(TOTAL_TIME_TOLERANCE)
+
+    if real_priority_solution is not None:
+        print_solution_overview(real_priority_solution, "real-priority dwell-5pct plan")
+        real_priority_rows, real_priority_totals = write_solution_report(
+            real_priority_solution,
+            REAL_PRIORITY_5PCT_COMPARISON_FILE,
+        )
+        print(
+            f"\nReal-priority dwell-5pct report: Run: {real_priority_totals['run']:.1f}s | "
+            f"Dwell: {real_priority_totals['dwell']:.1f}s | "
+            f"Total: {real_priority_totals['total_time']:.1f}s (target: {T_TOTAL_TARGET}s)"
+        )
+        print(
+            f"Energy: {real_priority_totals['energy']:.1f} Wh | "
+            f"Saving: {real_priority_totals['saving_rate']:.2f}%"
+        )
+    else:
+        real_priority_rows = None
+        real_priority_totals = None
+        print("\nReal-priority dwell-5pct report skipped: no feasible staged DP solution.")
+
+    energy_solution = None
+    for dwell_mode, dwell_tolerance, min_run_for_stage, max_run_for_stage in dwell_stages:
+        energy_solution = run_dp_stage(
+            "energy_first",
+            {"real", "interpolated", "extrapolated_adjacent"},
+            min_run_for_stage,
+            max_run_for_stage,
+            dwell_mode,
+            dwell_tolerance,
+            score_mode="energy_first",
+        )
+        if energy_solution is not None:
+            break
     if energy_solution is not None:
         print_solution_overview(energy_solution, "energy-first plan")
         energy_rows, energy_totals = write_solution_report(energy_solution, ENERGY_FIRST_COMPARISON_FILE)
@@ -578,9 +1094,7 @@ def run_optimization():
             plot_data['opt_v'].extend((df_opt['velocity_mps'] * 3.6).tolist())
             plot_data['opt_s'].extend((df_opt['dist_m'] + s_opt_acc).tolist())
 
-            df_h_all = pd.read_excel(DATA_DIR / f"results_{sp}.xlsx")
-            target_seg = sorted(df_h_all['segment'].unique())[TRIP_INDEX]
-            df_h = df_h_all[df_h_all['segment'] == target_seg].copy()
+            df_h = load_history_trip_curve(sp)
             h_v = df_h['速度(m/s)'].values * 3.6
             h_t = df_h['时刻'].values - df_h['时刻'].iloc[0]
             h_s = df_h['累计位移(m)'].values / SLIP_RATIO
@@ -596,7 +1110,7 @@ def run_optimization():
 
             if i < len(STATIONS) - 1:
                 dwell_opt = row['停站时间(s)']
-                dwell_hist = dwell_nominals[i]
+                dwell_hist = historical_dwells[i]
 
                 dwell_zones.append((t_opt_acc, t_opt_acc + dwell_opt))
                 plot_data['opt_t'].extend([t_opt_acc, t_opt_acc + dwell_opt])
@@ -640,15 +1154,27 @@ def run_optimization():
         plt.close()
         print(f"Saved: {output_path}")
 
-    plot_solution(final_rows, totals, FINAL_REPORT_PNG, "priority-first plan")
-    if energy_rows is not None and energy_totals is not None:
-        plot_solution(energy_rows, energy_totals, ENERGY_FIRST_REPORT_PNG, "energy-first plan")
+    if SKIP_PLOTS:
+        print("Skipping DP plot outputs because ENERGY_SKIP_PLOTS=1.")
+    else:
+        plot_solution(final_rows, totals, FINAL_REPORT_PNG, "priority-first plan")
+        if real_priority_rows is not None and real_priority_totals is not None:
+            plot_solution(
+                real_priority_rows,
+                real_priority_totals,
+                REAL_PRIORITY_5PCT_REPORT_PNG,
+                "real-priority dwell-5pct plan",
+            )
+        if energy_rows is not None and energy_totals is not None:
+            plot_solution(energy_rows, energy_totals, ENERGY_FIRST_REPORT_PNG, "energy-first plan")
 
     print(
         f"Done. Energy: {totals['energy']/1000:.3f} kWh, "
         f"Time: {totals['total_time']:.1f}s (strict = {T_TOTAL_TARGET}s)"
     )
+    return True
 
 
 if __name__ == "__main__":
-    run_optimization()
+    ok = run_optimization()
+    sys.exit(0 if ok else 1)

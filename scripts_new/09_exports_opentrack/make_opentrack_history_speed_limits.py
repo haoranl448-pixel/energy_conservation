@@ -81,9 +81,15 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--method",
-        choices=["max", "p99", "p95"],
+        choices=["max", "p99", "p95", "avg", "cruise-avg"],
         default="max",
         help="How to summarize the historical speed curve into a section speed limit.",
+    )
+    parser.add_argument(
+        "--cruise-min-speed-ratio",
+        type=float,
+        default=0.92,
+        help="Cruise average uses speeds at least this ratio of the historical max speed.",
     )
     parser.add_argument(
         "--speed-margin",
@@ -181,13 +187,32 @@ def percentile(values: list[float], q: float) -> float | None:
     return values[lo] * (hi - pos) + values[hi] * (pos - lo)
 
 
-def summarize_speed(values: list[float], method: str) -> float | None:
+def mean(values: list[float]) -> float | None:
+    if not values:
+        return None
+    return sum(values) / len(values)
+
+
+def cruise_average(values: list[float], min_speed_ratio: float) -> tuple[float | None, int]:
+    if not values:
+        return None, 0
+    max_speed = max(values)
+    threshold = max_speed * min_speed_ratio
+    cruise_values = [value for value in values if value >= threshold]
+    return mean(cruise_values), len(cruise_values)
+
+
+def summarize_speed(values: list[float], method: str, cruise_min_speed_ratio: float) -> float | None:
     if not values:
         return None
     if method == "p99":
         return percentile(values, 0.99)
     if method == "p95":
         return percentile(values, 0.95)
+    if method == "avg":
+        return mean(values)
+    if method == "cruise-avg":
+        return cruise_average(values, cruise_min_speed_ratio)[0]
     return max(values)
 
 
@@ -221,6 +246,7 @@ def extract_section_history_speed(
     quality_label: str | None,
     speed_source: str,
     method: str,
+    cruise_min_speed_ratio: float,
     fast_segment_break: bool,
 ) -> dict[str, Any]:
     wb = openpyxl.load_workbook(xlsx_path, read_only=True, data_only=True)
@@ -285,7 +311,8 @@ def extract_section_history_speed(
         if quality_idx is not None and row[quality_idx] is not None:
             selected_quality.add(str(row[quality_idx]).strip())
 
-    speed_limit = summarize_speed(speeds, method)
+    cruise_avg, cruise_count = cruise_average(speeds, cruise_min_speed_ratio)
+    speed_limit = summarize_speed(speeds, method, cruise_min_speed_ratio)
     return {
         "section": section_name or xlsx_path.stem.replace("results_", "", 1),
         "xlsx_file": str(xlsx_path),
@@ -294,6 +321,9 @@ def extract_section_history_speed(
         "segments": "|".join(sorted(selected_segments)),
         "quality_labels": "|".join(sorted(selected_quality)),
         "historical_speed_kmh": speed_limit,
+        "avg_speed_kmh": mean(speeds),
+        "cruise_avg_speed_kmh": cruise_avg,
+        "cruise_point_count": cruise_count,
         "max_speed_kmh": max(speeds) if speeds else None,
         "p99_speed_kmh": percentile(speeds, 0.99),
         "p95_speed_kmh": percentile(speeds, 0.95),
@@ -341,6 +371,9 @@ def make_limit_rows(args: argparse.Namespace) -> list[dict[str, Any]]:
                 "segments": "",
                 "quality_labels": "",
                 "historical_speed_kmh": None,
+                "avg_speed_kmh": None,
+                "cruise_avg_speed_kmh": None,
+                "cruise_point_count": None,
                 "max_speed_kmh": None,
                 "p99_speed_kmh": None,
                 "p95_speed_kmh": None,
@@ -353,6 +386,7 @@ def make_limit_rows(args: argparse.Namespace) -> list[dict[str, Any]]:
                 quality_label=args.quality_label,
                 speed_source=args.speed_source,
                 method=args.method,
+                cruise_min_speed_ratio=args.cruise_min_speed_ratio,
                 fast_segment_break=not args.no_fast_segment_break,
             )
             if not hist["row_count"]:
@@ -406,6 +440,9 @@ def make_limit_rows(args: argparse.Namespace) -> list[dict[str, Any]]:
                 "row_count": hist["row_count"],
                 "method": args.method,
                 "historical_speed_kmh": format_float(speed_kmh),
+                "avg_speed_kmh": format_float(hist["avg_speed_kmh"]),
+                "cruise_avg_speed_kmh": format_float(hist["cruise_avg_speed_kmh"]),
+                "cruise_point_count": hist["cruise_point_count"],
                 "max_speed_kmh": format_float(hist["max_speed_kmh"]),
                 "p99_speed_kmh": format_float(hist["p99_speed_kmh"]),
                 "p95_speed_kmh": format_float(hist["p95_speed_kmh"]),
