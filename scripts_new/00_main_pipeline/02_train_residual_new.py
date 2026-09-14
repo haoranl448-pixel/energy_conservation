@@ -36,6 +36,20 @@ def get_data_dir(default_dir):
 DATA_DIR = get_data_dir(os.path.join(project_root, "data", "data_processed"))
 
 
+def get_model_output_dir(default_dir):
+    """Allow a retraining run to write beside, rather than over, active weights."""
+
+    raw = os.environ.get("ENERGY_RESIDUAL_MODEL_DIR")
+    if not raw:
+        return default_dir
+    return raw if os.path.isabs(raw) else os.path.join(project_root, raw)
+
+
+MODEL_OUTPUT_BASE = get_model_output_dir(
+    os.path.join(project_root, "output", "models", "nn_results_residual_v2")
+)
+
+
 def get_line_scope(default_value="full"):
     """Read the section scope selected by main.py.
 
@@ -60,17 +74,17 @@ def get_line_scope(default_value="full"):
 
 LINE_SCOPE = get_line_scope()
 
-# --- 🚀 提速参数配置 ---
+# --- 提速参数配置 ---
 FEATURE_COLS = ['v', 'a', 'e_phy', 'grad', 'mass', 'curv']
 SEQ_LEN = 30
-BATCH_SIZE = 512  # 🚀 提速点 1：大幅增加 Batch Size
+BATCH_SIZE = 512  # 提速点 1：大幅增加 Batch Size
 MAX_EPOCHS = 150  # 最大轮数
-PATIENCE = 5      # 🚀 提速点 2：连续 5 轮不下降则早停
+PATIENCE = 5      # 提速点 2：连续 5 轮不下降则早停
 LR = 0.001        # 配合大 Batch Size，略微调高学习率
 EARLY_STOP_MIN_DELTA = 1e-5  # validation loss 至少改善这么多才算有效提升
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(f"⚡ 当前训练设备: {DEVICE}")
+print(f"当前训练设备: {DEVICE}")
 
 # ================= 2. 模型定义 =================
 class PositionalEncoding(nn.Module):
@@ -117,7 +131,7 @@ def read_data(station_pair):
     files = sorted(glob.glob(pattern_new))
     if not files: files = sorted(glob.glob(pattern_old))
     if not files:
-        print(f"   ⚠️ 未找到数据: {station_pair}")
+        print(f"   [WARN] 未找到数据: {station_pair}")
         return None
     return pd.concat([pd.read_excel(f) for f in files], ignore_index=True)
 
@@ -125,9 +139,9 @@ def read_data(station_pair):
 
 
 def train_station(sp):
-    out_dir = os.path.join(project_root, "output", "models", "nn_results_residual_v2", sp)
+    out_dir = os.path.join(MODEL_OUTPUT_BASE, sp)
     os.makedirs(out_dir, exist_ok=True)
-    print(f"\n🚀 [残差6特征] 开始训练: {sp}")
+    print(f"\n[残差6特征] 开始训练: {sp}")
 
 
 
@@ -168,7 +182,12 @@ def train_station(sp):
         t_seq = trip_data['时刻'].values
         v_seq = trip_data['速度(m/s)'].values
         mass_val = trip_data['重量'].iloc[0]
-        e_seq_wh = sim_model.run_batch_simulation(t_seq, v_seq, mass_val)
+        e_seq_wh = sim_model.run_batch_simulation(
+            t_seq,
+            v_seq,
+            mass_val,
+            section_name=sp,
+        )
         L = min(len(trip_data), len(e_seq_wh))
         df.loc[trip_data.index[:L], 'energy_phy'] = e_seq_wh[:L]
 
@@ -258,7 +277,7 @@ def train_station(sp):
 
 
 
-    # # 🚀 提速点 3：设置 pin_memory 加快数据搬运
+    # # 提速点 3：设置 pin_memory 加快数据搬运
     # train_loader = DataLoader(
     #     TensorDataset(torch.FloatTensor(X_train_seq), torch.FloatTensor(y_train_seq).unsqueeze(1)),
     #     batch_size=BATCH_SIZE, shuffle=True, pin_memory=True
@@ -276,13 +295,13 @@ def train_station(sp):
     optimizer = optim.Adam(model.parameters(), lr=LR)
     criterion = nn.SmoothL1Loss()
 
-        # ⬇️⬇️⬇️ 这里加回了 print 语句 ⬇️⬇️⬇️
-    print(f"   ⏳ 开始训练残差模型 (样本数: {len(X_train_seq)})...")
+        # 这里加回了 print 语句
+    print(f"   开始训练残差模型 (样本数: {len(X_train_seq)})...")
     best_loss = float('inf')
     best_epoch = 0
     patience_counter = 0
 
-    print(f"▶️ 开始训练: {sp} (样本数: {len(X_train_seq)})")
+    print(f"开始训练: {sp} (样本数: {len(X_train_seq)})")
 
     for ep in range(MAX_EPOCHS):
         model.train()
@@ -319,12 +338,12 @@ def train_station(sp):
             patience_counter += 1
             if patience_counter >= PATIENCE:
                 print(
-                    f"      ⏹️ 早停: Epoch {ep+1}, "
+                    f"      早停: Epoch {ep+1}, "
                     f"best epoch={best_epoch}, best val loss={best_loss:.6f}"
                 )
                 break
 
-    print(f"   ✅ 训练结束 (Best Val Loss: {best_loss:.5f}, Best Epoch: {best_epoch})")
+    print(f"   训练结束 (Best Val Loss: {best_loss:.5f}, Best Epoch: {best_epoch})")
 
 
     # ================= 9. 绘图 (三纵轴版: v, s, E) =================
@@ -397,7 +416,7 @@ def train_station(sp):
     plt.tight_layout()
     plt.savefig(f"{out_dir}/triple_axis_fusion.png", dpi=300)
     plt.close()
-    print(f"   📊 三纵轴对标图已保存: {out_dir}/triple_axis_fusion.png")
+    print(f"   三纵轴对标图已保存: {out_dir}/triple_axis_fusion.png")
 
 
 
@@ -430,11 +449,12 @@ def select_sections_for_scope():
 
 def main():
     sections = select_sections_for_scope()
-    print(f"📁 残差训练数据目录: {DATA_DIR}")
-    print(f"🚦 残差训练区间范围: {LINE_SCOPE} ({len(sections)} sections)")
+    print(f"残差训练数据目录: {DATA_DIR}")
+    print(f"残差模型输出目录: {MODEL_OUTPUT_BASE}")
+    print(f"残差训练区间范围: {LINE_SCOPE} ({len(sections)} sections)")
     for sp in sections:
         try: train_station(sp)
-        except Exception as e: print(f"❌ {sp} 失败: {e}")
+        except Exception as e: print(f"[ERROR] {sp} 失败: {e}")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,5 @@
+﻿trip_no,trip_label,status,target_time_s,run_time_s,dwell_time_s,section_count,dwell_actual_count,dwell_fallback_count,trip_dir
+35,trip035,ok,3814.25,3023.25,791.0,26,25,0,D:\energy_conservation\output\schedule\batch_trip_reports_fixed_35_40_53_57\trip035
+40,trip040,ok,3813.05,3025.05,788.0,26,25,0,D:\energy_conservation\output\schedule\batch_trip_reports_fixed_35_40_53_57\trip040
+53,trip053,ok,3808.2999999999997,3027.2999999999997,781.0,26,25,0,D:\energy_conservation\output\schedule\batch_trip_reports_fixed_35_40_53_57\trip053
+57,trip057,ok,3735.9500000000003,2967.9500000000003,768.0,26,25,0,D:\energy_conservation\output\schedule\batch_trip_reports_fixed_35_40_53_57\trip057

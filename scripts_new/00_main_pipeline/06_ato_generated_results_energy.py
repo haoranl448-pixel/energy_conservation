@@ -359,7 +359,12 @@ def get_energy(sp, class_csv_path, mass_val):
 
     # 2. 物理仿真
     engine = TrainTheoreticalEnergyModel()
-    e_phy_steps = engine.run_batch_simulation(t_arr, v_arr, mass_val)
+    e_phy_steps = engine.run_batch_simulation(
+        t_arr,
+        v_arr,
+        mass_val,
+        section_name=sp,
+    )
 
     # 3. 加载模型与地图插值。同一区间内多个等级共用，避免重复读取大 Excel / pkl / pth。
     sx, sy, model = get_residual_assets(sp)

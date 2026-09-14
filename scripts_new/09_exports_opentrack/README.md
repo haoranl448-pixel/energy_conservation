@@ -12,19 +12,36 @@
 cd D:\energy_conservation
 ```
 
-## 1. 文件夹里的主要脚本
+## 1. 文件夹里的代码文件
 
-| 脚本 | 作用 |
-| --- | --- |
-| `batch_build_trip_plans_and_timetables.py` | 批量生成每趟的 DP 优化表和 OpenTrack timetable。 |
-| `make_opentrack_timetables.py` | 把 `Final_Planning_Comparison*.csv` 转成 OpenTrack timetable XML。 |
-| `opentrack_otd_listener.py` | 本机启动一个 OTD 接收端，接收 OpenTrack 发来的仿真消息并写 JSONL 日志。 |
-| `opentrack_otd_client.py` | 向 OpenTrack 的 OTD Server 发送 SOAP/HTTP 命令。 |
-| `opentrack_otd_build_route_map.py` | 根据 OTD 日志生成“站间区间 -> OpenTrack routeID/offset”的映射表。 |
-| `make_opentrack_speed_limits.py` | 根据 DP 规划等级和能耗菜单，生成并可下发优化方案限速。 |
-| `build_opentrack_history_speed_lookup.py` | 从 Step2 数据中预先提取历史每趟每区间速度上限，生成可复用查表 CSV。 |
-| `make_opentrack_history_speed_limits_from_lookup.py` | 从历史速度查表 CSV 中取某一趟限速，并可下发给 OpenTrack。 |
-| `plot_opentrack_tsvp_vs_history.py` | 读取 OpenTrack `.tsvP` 输出，和历史曲线绘图对比。 |
+| 脚本 | 具体作用 | 状态 |
+| --- | --- | --- |
+| `batch_build_trip_plans_and_timetables.py` | 批量执行能耗菜单、历史基准、三类 DP 规划和 timetable 生成，并为每趟建立统一结果目录。 | 当前批处理 |
+| `make_opentrack_timetables.py` | 把历史、标准 DP、Energy First 和停站放宽5%规划表转换为 OpenTrack timetable XML。 | 当前工具 |
+| `make_opentrack_history_timetables_from_reports.py` | 从历史趟次报告直接生成历史 timetable，适合无需重跑 DP 的场景。 | 当前工具 |
+| `merge_opentrack_timetables.py` | 把多趟单独 timetable XML 合并成一个 OpenTrack 导入文件，并可调整时间偏移。 | 当前工具 |
+| `make_timetable.py` | 根据旧版标准时间和载重分布随机生成 timetable。 | 历史工具 |
+| `onvert_to_opentrack_format.py` | 把旧版 CSV 转换成 OpenTrack XML；文件名缺少首字母 `c`，保留原名以免破坏引用。 | 历史工具 |
+| `opentrack_otd_common.py` | OTD 公共模块，负责 SOAP 封装、XML 命令构造、时间解析和响应内容处理。 | 当前公共模块 |
+| `opentrack_otd_listener.py` | 在本机9004端口接收 OpenTrack 消息，并把 position、route、timetable 等消息写入 JSONL。 | 当前 OTD 工具 |
+| `opentrack_otd_client.py` | 连接 OpenTrack 9002端口，下发仿真控制、位置回报、限速和 timetable 命令。 | 当前 OTD 工具 |
+| `opentrack_otd_build_route_map.py` | 从 OTD JSONL 日志建立“站间区间到 routeID/offset”的映射，并输出位置与进路诊断表。 | 当前 OTD 工具 |
+| `build_opentrack_history_speed_lookup.py` | 从 Step2 历史轨迹预计算每趟、每区间的最大值/分位数/巡航均速等查表数据。 | 当前限速工具 |
+| `make_opentrack_history_speed_limits_from_lookup.py` | 按追溯表从 lookup 提取指定全局趟次的历史限速，生成 CSV，并可通过 OTD 下发。 | 当前限速工具 |
+| `make_opentrack_history_speed_limits.py` | 不经过 lookup，直接扫描历史 Excel 生成并下发限速，速度较慢。 | 兼容限速工具 |
+| `make_opentrack_speed_limits.py` | 根据规划表选中的等级、能耗菜单和 route map 生成规划限速，并可通过 OTD 下发。 | 当前限速工具 |
+| `send_complete25_scenario_speed_limits.ps1` | 封装新增12趟的 history/standard/energy-first/dwell5 限速命令，减少手工路径输入。 | 当前批量辅助 |
+| `plot_opentrack_tsvp_vs_history.py` | 将单个 OpenTrack `.tsvP` 与真实历史轨迹比较，绘制 v-t、v-s、E-t、E-s。 | 当前绘图基础 |
+| `batch_plot_opentrack_tsvp_vs_history.py` | 对多趟 `.tsvP` 批量执行历史对比并汇总误差。 | 当前批量绘图 |
+| `plot_opentrack_three_way_compare.py` | 为同一趟生成多个两两对比图及统计行，作为其他 OpenTrack 绘图脚本的公共实现。 | 当前绘图模块 |
+| `plot_opentrack_energy_first_compare.py` | 专门补充 Energy First 与历史/其他方案的 OpenTrack 对比。 | 专项绘图 |
+| `plot_opentrack_four_source_compare.py` | 比较 OpenTrack 历史、OpenTrack 规划、真实历史和代码规划等四类来源。 | 当前绘图 |
+| `plot_opentrack_section_energy_bars.py` | 按区间绘制规划与历史的能耗柱状图，并叠加载重或节能率信息。 | 当前汇报绘图 |
+| `plot_opentrack_section_energy_distance.py` | 按区间里程展示 OpenTrack 规划/历史能耗及区间差异。 | 当前汇报绘图 |
+| `plot_opentrack_trip_energy_bars.py` | 以趟次为横轴汇总不同规划方案的总能耗或节能量。 | 当前汇报绘图 |
+| `plot_simu_ot_code_trip_compare.py` | 对前10趟逐趟比较代码估计、Simulink 仿真和 OpenTrack 结果。 | 阶段性绘图 |
+| `plot_simu_ot_code_trip_compare_complete25.py` | 复用已审计的25趟缓存，加入 OpenTrack 结果并仅执行重绘，不重跑模型或 DP。 | 当前综合绘图 |
+| `output_excle.py` | 将旧版模型预测与验证指标输出为 Excel/CSV。 | 历史报表工具 |
 
 ## 2. OpenTrack OTD/API 的端口关系
 

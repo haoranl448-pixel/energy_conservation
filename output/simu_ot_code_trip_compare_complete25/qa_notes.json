@@ -1,0 +1,17 @@
+{
+  "backend": "python",
+  "archetype": "quantitative grid",
+  "claim": "Compare matched per-trip code, Simu and OpenTrack cumulative energy and speed results.",
+  "trip_count": 25,
+  "scenario_count": 4,
+  "figure_count": 100,
+  "source_mapping": {
+    "code_and_simu": "D:\\energy_conservation\\output\\cache\\simu_code_replay\\batch_simu_code_trip_compare_complete25\\section_comparison_summary.csv",
+    "opentrack": "D:\\OutPut"
+  },
+  "statistics": "Deterministic per-trip comparisons; 25-trip summary is the arithmetic mean of paired trip savings and percentages.",
+  "exclusions": "None among the requested 25 trips.",
+  "trip53": "Uses the final named TSVP files; duplicate OTD listener events are not accumulated.",
+  "trip6_dwell5": "Re-rendered from corrected 2026-09-08 TSVP after the mismatched demonstration run was replaced.",
+  "trip6_dwell5_opentrack_kwh": 395.2860833333333
+}

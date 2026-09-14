@@ -1,0 +1,2 @@
+﻿trip_no,trip_label,status,target_time_s,run_time_s,dwell_time_s,section_count,dwell_actual_count,dwell_fallback_count,trip_dir
+53,trip053,ok,3808.2999999999997,3027.2999999999997,781.0,26,25,0,D:\energy_conservation\output\schedule\batch_trip_reports_complete25_replacement53\trip053

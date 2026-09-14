@@ -1,0 +1,15 @@
+metric,scope,value
+requested_trips,all,70
+plotted_or_calculated_trips,all,70
+valid_for_average_trips,valid,70
+flagged_distance_mismatch_trips,all,0
+failed_trips,all,0
+energy_error_pct_count,all_ok,70
+energy_error_pct_mean,all_ok,-2.9247709627759537
+energy_error_pct_mean_abs,all_ok,3.626893562657839
+energy_error_pct_median,all_ok,-3.339602909908284
+energy_error_pct_median_abs,all_ok,3.572467626568532
+energy_error_pct_min,all_ok,-7.193048884859763
+energy_error_pct_max,all_ok,13.900074160996093
+energy_error_pct_max_abs,all_ok,13.900074160996093
+

@@ -1,0 +1,4 @@
+﻿trip_no,trip_label,audit_pass,section_count,global_trip_id,trip_start,trip_end,trainset,periods,historical_run_time_s,historical_real_energy_kwh,historical_model_energy_kwh,min_mass_t,avg_mass_t,max_mass_t,mass_range_t,class_counts,quality_counts,night_or_unvalidated_sections,hard_quality_issue_sections
+53,trip053,True,26,UP053_20240709_151522_R2836,2024-07-09 15:15:22,2024-07-09 16:18:48,5012,,3027.3,400.295,399.365,215.24,215.67,216.34,1.1,"{""2"": 6, ""3"": 17, ""4"": 3}","{""0"": 26}",0,0
+57,trip057,True,26,UP057_20240710_070757_R3070,2024-07-10 07:07:57,2024-07-10 08:10:16,5012,,2967.95,441.514,441.374,215.24,219.29,225.9,10.66,"{""2"": 15, ""3"": 10, ""4"": 1}","{""0"": 26}",0,0
+58,trip058,False,26,UP058_20240710_170518_R3128,2024-07-10 17:05:18,2024-07-10 18:07:37,5012,,2971.25,443.712,441.596,215.24,219.89,228.7,13.46,"{""2"": 14, ""3"": 12}","{""0"": 25, ""7"": 1}",0,1

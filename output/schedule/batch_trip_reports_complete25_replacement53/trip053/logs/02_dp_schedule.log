@@ -1,0 +1,279 @@
+Project root: D:\energy_conservation
+Python:       C:\Users\bit11\AppData\Local\Programs\Python\Python311\python.exe
+Log dir:      D:\energy_conservation\output\pipeline_logs\20260905_143015
+Dry run:      False
+Trip no:      53 (global trip; legacy local index 52)
+Target time:  3808.30s
+Results dir:  D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality_traceability
+ATO dir:      D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality_traceability
+Line scope:   full
+Traceability: D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality_traceability\trip_traceability_manifest_v1.csv
+
+Selected steps:
+01. dp_schedule
+    title: DP schedule optimization
+    script: scripts_new/00_main_pipeline/08_ato_class_globall_v2.py
+    desc:  Select the lowest-energy class combination and write final comparison outputs.
+
+=== dp_schedule: DP schedule optimization ===
+Select the lowest-energy class combination and write final comparison outputs.
+Command: C:\Users\bit11\AppData\Local\Programs\Python\Python311\python.exe D:\energy_conservation\scripts_new\00_main_pipeline\08_ato_class_globall_v2.py
+Trip:    53 (global 1-based trip; legacy local index 52)
+Target:  3808.30s
+Results: D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality_traceability
+ATO:     D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality_traceability
+Scope:   full
+Trace:   D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality_traceability\trip_traceability_manifest_v1.csv
+Global trip: 53 (legacy local index 52)
+Target total time: 3808.30s
+Line scope: full (26 sections)
+Menu file: D:\energy_conservation\output\analysis\ato_class_energy_menu53_new_v3.csv
+History file: D:\energy_conservation\full_line53_validation_results.csv
+Historical curve data dir: D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality_traceability
+趟次选择方式: 全局运行链追溯
+全局趟次ID:   UP053_20240709_151522_R2836
+追溯表:       D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality_traceability\trip_traceability_manifest_v1.csv
+映射区间数:   26
+已删除旧 DP 输出: D:\energy_conservation\output\schedule\final_plan_report_v2\Final_Planning_Comparison.csv
+已删除旧 DP 输出: D:\energy_conservation\output\schedule\final_plan_report_v2\Final_Planning_Comparison_Energy_First.csv
+已删除旧 DP 输出: D:\energy_conservation\output\schedule\final_plan_report_v2\Final_Planning_Comparison_Real_Priority_Dwell_5pct.csv
+Historical dwell file:   C:\Users\bit11\Desktop\数据测试代码\debug_reports\historical_dwell_first70\historical_dwell_detail_first70.csv
+Historical dwell total:  781.0s
+Exact-dwell target run:  3027.3s
+Fallback dwell band:     765.4-796.6s (±2.0%)
+
+DP input diagnostics:
+  Selected global trip: 53 (legacy local index 52)
+  Target total time: 3808.3s
+  Allowed running time: <= 3042.9s within dwell tolerance, exact-dwell run 3027.3s
+  Dwell totals: historical=781.0s, tolerance minimum=765.4s
+  Historical selected-trip run time in full_line53_validation_results.csv: 3027.3s (full-line, dwell not included)
+  Historical selected-trip total with historical dwell: 3808.3s
+  Historical selected-trip total at tolerance minimum: 3792.7s
+  Menu coverage: 26/26 sections
+  History coverage: 26/26 sections
+Historical dwell profile (25 intervals):
+  布政-张家潭: 31.0s [actual]
+  张家潭-同德路: 30.0s [actual]
+  同德路-石碶: 35.0s [actual]
+  石碶-雅渡: 30.0s [actual]
+  雅渡-庙堰: 30.0s [actual]
+  庙堰-钟公庙: 30.0s [actual]
+  钟公庙-鄞州区政府: 39.0s [actual]
+  鄞州区政府-钱湖南路: 30.0s [actual]
+  钱湖南路-南高教园区: 35.0s [actual]
+  南高教园区-下应路: 30.0s [actual]
+  下应路-大洋江: 30.0s [actual]
+  大洋江-泗港: 29.0s [actual]
+  泗港-曹隘: 31.0s [actual]
+  曹隘-柳隘: 30.0s [actual]
+  柳隘-海晏北路: 44.0s [actual]
+  海晏北路-民安东路: 29.0s [actual]
+  民安东路-会展中心: 30.0s [actual]
+  会展中心-院士路: 28.0s [actual]
+  院士路-盎孟港: 29.0s [actual]
+  盎孟港-三官堂: 34.0s [actual]
+  三官堂-兴庄路: 30.0s [actual]
+  兴庄路-兴海南路: 30.0s [actual]
+  兴海南路-梅堰: 30.0s [actual]
+  梅堰-永茂路: 27.0s [actual]
+  永茂路-镇海大道: 30.0s [actual]
+
+DP stage: real_only | dwell=historical_exact | run_range=[3027.3, 3027.3] | sources=['real'] | score=priority_first
+  [1/26] 布政-张家潭 -> 2 states
+  [2/26] 张家潭-同德路 -> 4 states
+  [3/26] 同德路-石碶 -> 8 states
+  [4/26] 石碶-雅渡 -> 17 states
+  [5/26] 雅渡-庙堰 -> 44 states
+  [6/26] 庙堰-钟公庙 -> 44 states
+  [7/26] 钟公庙-鄞州区政府 -> 54 states
+  [8/26] 鄞州区政府-钱湖南路 -> 86 states
+  [9/26] 钱湖南路-南高教园区 -> 86 states
+  [10/26] 南高教园区-下应路 -> 101 states
+  [11/26] 下应路-大洋江 -> 131 states
+  [12/26] 大洋江-泗港 -> 131 states
+  [13/26] 泗港-曹隘 -> 131 states
+  [14/26] 曹隘-柳隘 -> 152 states
+  [15/26] 柳隘-海晏北路 -> 152 states
+  [16/26] 海晏北路-民安东路 -> 152 states
+  [17/26] 民安东路-会展中心 -> 161 states
+  [18/26] 会展中心-院士路 -> 161 states
+  [19/26] 院士路-盎孟港 -> 161 states
+  [20/26] 盎孟港-三官堂 -> 233 states
+  [21/26] 三官堂-兴庄路 -> 253 states
+  [22/26] 兴庄路-兴海南路 -> 253 states
+  [23/26] 兴海南路-梅堰 -> 253 states
+  [24/26] 梅堰-永茂路 -> 317 states
+  [25/26] 永茂路-镇海大道 -> 377 states
+  [26/26] 镇海大道-骆驼桥 -> 291 states
+  no feasible state. Reachable run time: [2970.0s, 3047.1s], required: [3027.3s, 3027.3s]
+
+DP stage: allow_interpolated | dwell=historical_exact | run_range=[3027.3, 3027.3] | sources=['interpolated', 'real'] | score=priority_first
+  [1/26] 布政-张家潭 -> 2 states
+  [2/26] 张家潭-同德路 -> 4 states
+  [3/26] 同德路-石碶 -> 8 states
+  [4/26] 石碶-雅渡 -> 17 states
+  [5/26] 雅渡-庙堰 -> 44 states
+  [6/26] 庙堰-钟公庙 -> 44 states
+  [7/26] 钟公庙-鄞州区政府 -> 54 states
+  [8/26] 鄞州区政府-钱湖南路 -> 86 states
+  [9/26] 钱湖南路-南高教园区 -> 86 states
+  [10/26] 南高教园区-下应路 -> 101 states
+  [11/26] 下应路-大洋江 -> 131 states
+  [12/26] 大洋江-泗港 -> 131 states
+  [13/26] 泗港-曹隘 -> 131 states
+  [14/26] 曹隘-柳隘 -> 152 states
+  [15/26] 柳隘-海晏北路 -> 152 states
+  [16/26] 海晏北路-民安东路 -> 152 states
+  [17/26] 民安东路-会展中心 -> 161 states
+  [18/26] 会展中心-院士路 -> 161 states
+  [19/26] 院士路-盎孟港 -> 161 states
+  [20/26] 盎孟港-三官堂 -> 233 states
+  [21/26] 三官堂-兴庄路 -> 253 states
+  [22/26] 兴庄路-兴海南路 -> 253 states
+  [23/26] 兴海南路-梅堰 -> 253 states
+  [24/26] 梅堰-永茂路 -> 317 states
+  [25/26] 永茂路-镇海大道 -> 377 states
+  [26/26] 镇海大道-骆驼桥 -> 291 states
+  no feasible state. Reachable run time: [2970.0s, 3047.1s], required: [3027.3s, 3027.3s]
+
+DP stage: allow_extrapolated | dwell=historical_exact | run_range=[3027.3, 3027.3] | sources=['extrapolated_adjacent', 'interpolated', 'real'] | score=priority_first
+  [1/26] 布政-张家潭 -> 3 states
+  [2/26] 张家潭-同德路 -> 12 states
+  [3/26] 同德路-石碶 -> 27 states
+  [4/26] 石碶-雅渡 -> 61 states
+  [5/26] 雅渡-庙堰 -> 136 states
+  [6/26] 庙堰-钟公庙 -> 157 states
+  [7/26] 钟公庙-鄞州区政府 -> 185 states
+  [8/26] 鄞州区政府-钱湖南路 -> 289 states
+  [9/26] 钱湖南路-南高教园区 -> 309 states
+  [10/26] 南高教园区-下应路 -> 353 states
+  [11/26] 下应路-大洋江 -> 417 states
+  [12/26] 大洋江-泗港 -> 433 states
+  [13/26] 泗港-曹隘 -> 433 states
+  [14/26] 曹隘-柳隘 -> 485 states
+  [15/26] 柳隘-海晏北路 -> 501 states
+  [16/26] 海晏北路-民安东路 -> 517 states
+  [17/26] 民安东路-会展中心 -> 550 states
+  [18/26] 会展中心-院士路 -> 574 states
+  [19/26] 院士路-盎孟港 -> 594 states
+  [20/26] 盎孟港-三官堂 -> 797 states
+  [21/26] 三官堂-兴庄路 -> 872 states
+  [22/26] 兴庄路-兴海南路 -> 917 states
+  [23/26] 兴海南路-梅堰 -> 937 states
+  [24/26] 梅堰-永茂路 -> 1263 states
+  [25/26] 永茂路-镇海大道 -> 1304 states
+  [26/26] 镇海大道-骆驼桥 -> 492 states
+
+Selected priority-first plan: allow_extrapolated
+Feasible states: 1
+Best:  run=3027.3s, energy=397083.6 Wh, extrapolated=3, interpolated=0
+Nominal-dwell best nearby: run=3036.1s, energy=386773.9 Wh
+Dwell trade: +-8.8s run time -> saves -10309.7 Wh (-2.7%)
+
+Priority-first report: Run: 3027.3s | Dwell: 781.0s | Total: 3808.3s (target: 3808.3s)
+Energy: 397083.6 Wh | Saving: 0.80%
+  Dwell after 布政-张家潭: 31.0s (history 31.0s)
+  Dwell after 张家潭-同德路: 30.0s (history 30.0s)
+  Dwell after 同德路-石碶: 35.0s (history 35.0s)
+  Dwell after 石碶-雅渡: 30.0s (history 30.0s)
+  Dwell after 雅渡-庙堰: 30.0s (history 30.0s)
+  Dwell after 庙堰-钟公庙: 30.0s (history 30.0s)
+  Dwell after 钟公庙-鄞州区政府: 39.0s (history 39.0s)
+  Dwell after 鄞州区政府-钱湖南路: 30.0s (history 30.0s)
+  Dwell after 钱湖南路-南高教园区: 35.0s (history 35.0s)
+  Dwell after 南高教园区-下应路: 30.0s (history 30.0s)
+  Dwell after 下应路-大洋江: 30.0s (history 30.0s)
+  Dwell after 大洋江-泗港: 29.0s (history 29.0s)
+  Dwell after 泗港-曹隘: 31.0s (history 31.0s)
+  Dwell after 曹隘-柳隘: 30.0s (history 30.0s)
+  Dwell after 柳隘-海晏北路: 44.0s (history 44.0s)
+  Dwell after 海晏北路-民安东路: 29.0s (history 29.0s)
+  Dwell after 民安东路-会展中心: 30.0s (history 30.0s)
+  Dwell after 会展中心-院士路: 28.0s (history 28.0s)
+  Dwell after 院士路-盎孟港: 29.0s (history 29.0s)
+  Dwell after 盎孟港-三官堂: 34.0s (history 34.0s)
+  Dwell after 三官堂-兴庄路: 30.0s (history 30.0s)
+  Dwell after 兴庄路-兴海南路: 30.0s (history 30.0s)
+  Dwell after 兴海南路-梅堰: 30.0s (history 30.0s)
+  Dwell after 梅堰-永茂路: 27.0s (history 27.0s)
+  Dwell after 永茂路-镇海大道: 30.0s (history 30.0s)
+
+DP stage: real_only | dwell=historical_tolerance_5.0pct_energy | run_range=[2988.2, 3066.4] | sources=['real'] | score=real_priority_energy
+  [1/26] 布政-张家潭 -> 2 states
+  [2/26] 张家潭-同德路 -> 4 states
+  [3/26] 同德路-石碶 -> 8 states
+  [4/26] 石碶-雅渡 -> 17 states
+  [5/26] 雅渡-庙堰 -> 44 states
+  [6/26] 庙堰-钟公庙 -> 44 states
+  [7/26] 钟公庙-鄞州区政府 -> 54 states
+  [8/26] 鄞州区政府-钱湖南路 -> 86 states
+  [9/26] 钱湖南路-南高教园区 -> 86 states
+  [10/26] 南高教园区-下应路 -> 101 states
+  [11/26] 下应路-大洋江 -> 131 states
+  [12/26] 大洋江-泗港 -> 131 states
+  [13/26] 泗港-曹隘 -> 131 states
+  [14/26] 曹隘-柳隘 -> 152 states
+  [15/26] 柳隘-海晏北路 -> 152 states
+  [16/26] 海晏北路-民安东路 -> 152 states
+  [17/26] 民安东路-会展中心 -> 161 states
+  [18/26] 会展中心-院士路 -> 161 states
+  [19/26] 院士路-盎孟港 -> 161 states
+  [20/26] 盎孟港-三官堂 -> 233 states
+  [21/26] 三官堂-兴庄路 -> 253 states
+  [22/26] 兴庄路-兴海南路 -> 253 states
+  [23/26] 兴海南路-梅堰 -> 253 states
+  [24/26] 梅堰-永茂路 -> 317 states
+  [25/26] 永茂路-镇海大道 -> 377 states
+  [26/26] 镇海大道-骆驼桥 -> 424 states
+
+Selected real-priority dwell-5pct plan: real_only
+Feasible states: 312
+Best:  run=3063.0s, energy=383145.8 Wh, extrapolated=0, interpolated=0
+Nominal-dwell best nearby: run=3036.1s, energy=386773.9 Wh
+Dwell trade: +26.9s run time -> saves 3628.2 Wh (0.9%)
+
+Real-priority dwell-5pct report: Run: 3063.0s | Dwell: 745.3s | Total: 3808.3s (target: 3808.3s)
+Energy: 383145.8 Wh | Saving: 4.28%
+
+DP stage: energy_first | dwell=historical_exact | run_range=[3027.3, 3027.3] | sources=['extrapolated_adjacent', 'interpolated', 'real'] | score=energy_first
+  [1/26] 布政-张家潭 -> 3 states
+  [2/26] 张家潭-同德路 -> 12 states
+  [3/26] 同德路-石碶 -> 27 states
+  [4/26] 石碶-雅渡 -> 61 states
+  [5/26] 雅渡-庙堰 -> 136 states
+  [6/26] 庙堰-钟公庙 -> 157 states
+  [7/26] 钟公庙-鄞州区政府 -> 185 states
+  [8/26] 鄞州区政府-钱湖南路 -> 289 states
+  [9/26] 钱湖南路-南高教园区 -> 309 states
+  [10/26] 南高教园区-下应路 -> 353 states
+  [11/26] 下应路-大洋江 -> 417 states
+  [12/26] 大洋江-泗港 -> 433 states
+  [13/26] 泗港-曹隘 -> 433 states
+  [14/26] 曹隘-柳隘 -> 485 states
+  [15/26] 柳隘-海晏北路 -> 501 states
+  [16/26] 海晏北路-民安东路 -> 517 states
+  [17/26] 民安东路-会展中心 -> 550 states
+  [18/26] 会展中心-院士路 -> 574 states
+  [19/26] 院士路-盎孟港 -> 594 states
+  [20/26] 盎孟港-三官堂 -> 797 states
+  [21/26] 三官堂-兴庄路 -> 872 states
+  [22/26] 兴庄路-兴海南路 -> 917 states
+  [23/26] 兴海南路-梅堰 -> 937 states
+  [24/26] 梅堰-永茂路 -> 1263 states
+  [25/26] 永茂路-镇海大道 -> 1304 states
+  [26/26] 镇海大道-骆驼桥 -> 492 states
+
+Selected energy-first plan: energy_first
+Feasible states: 1
+Best:  run=3027.3s, energy=394380.1 Wh, extrapolated=4, interpolated=0
+Nominal-dwell best nearby: run=3037.1s, energy=371625.0 Wh
+Dwell trade: +-9.8s run time -> saves -22755.0 Wh (-6.1%)
+
+Energy-first report: Run: 3027.3s | Dwell: 781.0s | Total: 3808.3s (target: 3808.3s)
+Energy: 394380.1 Wh | Saving: 1.48%
+Skipping DP plot outputs because ENERGY_SKIP_PLOTS=1.
+Done. Energy: 397.084 kWh, Time: 3808.3s (strict = 3808.3s)
+Step finished with code 0. Log: D:\energy_conservation\output\pipeline_logs\20260905_143015\dp_schedule.log
+
+Pipeline finished successfully.

@@ -117,7 +117,12 @@ def evaluate_historical_trip(sp):
 
     # 3. 重新运行物理仿真 (获取模型需要的 e_phy 特征)
     sim_model = TrainTheoreticalEnergyModel()
-    e_phy_steps = sim_model.run_batch_simulation(t_seq, v_seq, mass_val)
+    e_phy_steps = sim_model.run_batch_simulation(
+        t_seq,
+        v_seq,
+        mass_val,
+        section_name=sp,
+    )
 
     # 4. 加载 AI 模型
     model_dir = RES_MODEL_BASE / sp

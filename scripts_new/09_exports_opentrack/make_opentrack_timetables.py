@@ -44,6 +44,11 @@ def parse_args() -> argparse.Namespace:
         help="Optional real-priority, dwell +/-5%% comparison CSV.",
     )
     parser.add_argument(
+        "--real-priority-minus3-csv",
+        default=None,
+        help="Optional real-priority comparison CSV with at most 3 seconds less dwell per station.",
+    )
+    parser.add_argument(
         "--template",
         default=str(DEFAULT_TEMPLATE),
         help="Example OpenTrack XML. Used only to mirror the basic root attributes.",
@@ -404,6 +409,25 @@ def main() -> int:
                     (
                         "real_priority_dwell_5pct_history_timetable.xml",
                         "real_priority_dwell_5pct_history",
+                        HISTORY_RUN_COL,
+                    ),
+                ],
+            )
+        )
+    if args.real_priority_minus3_csv:
+        jobs.append(
+            (
+                Path(args.real_priority_minus3_csv),
+                "real_priority_dwell_minus3s",
+                [
+                    (
+                        "real_priority_dwell_minus3s_dp_planned_timetable.xml",
+                        "real_priority_dwell_minus3s_dp",
+                        PLAN_RUN_COL,
+                    ),
+                    (
+                        "real_priority_dwell_minus3s_history_timetable.xml",
+                        "real_priority_dwell_minus3s_history",
                         HISTORY_RUN_COL,
                     ),
                 ],

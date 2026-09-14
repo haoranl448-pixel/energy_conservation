@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import csv
 import hashlib
+import math
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -146,6 +147,55 @@ def require_file(path: Path, label: str) -> None:
         raise FileNotFoundError(f"{label} not found: {path}")
 
 
+def read_max_mass_t(plan_path: Path) -> float:
+    """Return the largest positive section MASS value in tonnes."""
+    with plan_path.open("r", encoding="utf-8-sig", newline="") as f:
+        reader = csv.DictReader(f)
+        if not reader.fieldnames or "MASS" not in reader.fieldnames:
+            raise ValueError(f"Plan CSV has no MASS column: {plan_path}")
+
+        masses: list[float] = []
+        for row in reader:
+            raw_value = (row.get("MASS") or "").strip()
+            try:
+                mass = float(raw_value)
+            except ValueError:
+                continue
+            if math.isfinite(mass) and mass > 0:
+                masses.append(mass)
+
+    if not masses:
+        raise ValueError(f"Plan CSV has no positive MASS values: {plan_path}")
+    return max(masses)
+
+
+def read_target_time_components(plan_path: Path) -> tuple[float, float]:
+    """Return historical full-line running and dwell time in seconds."""
+    with plan_path.open("r", encoding="utf-8-sig", newline="") as f:
+        rows = list(csv.DictReader(f))
+
+    run_total = 0.0
+    dwell_total = 0.0
+    detail_count = 0
+    for row in rows:
+        if (row.get("站间区间") or "").strip() == "--- 总计 ---":
+            continue
+        try:
+            run_time = float(row.get("历史用时(s)") or "")
+            dwell_time = float(row.get("历史停站时间(s)") or 0)
+        except ValueError:
+            continue
+        if not math.isfinite(run_time) or not math.isfinite(dwell_time):
+            continue
+        run_total += run_time
+        dwell_total += dwell_time
+        detail_count += 1
+
+    if detail_count == 0 or run_total + dwell_total <= 0:
+        raise ValueError(f"Plan CSV has no historical target time: {plan_path}")
+    return round(run_total, 2), round(dwell_total, 2)
+
+
 def source_paths(tsvp_dir: Path, args: argparse.Namespace, trip: int) -> dict[str, Path]:
     return {
         "standard": tsvp_dir / args.standard_template.format(trip=trip),
@@ -230,6 +280,9 @@ def main() -> int:
 
         plan_path = plan_files[trip]
         require_file(plan_path, f"Trip {trip:03d} plan CSV")
+        max_mass_t = read_max_mass_t(plan_path)
+        target_run_time_s, target_dwell_time_s = read_target_time_components(plan_path)
+        target_time_s = round(target_run_time_s + target_dwell_time_s, 2)
 
         standard_curve = read_tsvp(paths["standard"])
         flex5_curve = read_tsvp(paths["flex5"])
@@ -274,6 +327,12 @@ def main() -> int:
         print(f"  Standard DP: {paths['standard']}", flush=True)
         print(f"  Dwell 5% DP: {paths['flex5']}", flush=True)
         print(f"  OT history:  {paths['ot_history']}", flush=True)
+        print(f"  Max load:    {max_mass_t:.2f} t", flush=True)
+        print(
+            f"  Target time (run/dwell): "
+            f"{target_run_time_s:.1f} / {target_dwell_time_s:.1f} s",
+            flush=True,
+        )
         print(
             f"  Real history: traceability {len(segment_by_section)}/{len(sections)} sections; "
             f"dwell profile {len(history_dwell_by_section)} stations; "
@@ -340,24 +399,32 @@ def main() -> int:
                 reference=reference,
                 primary_label=primary_label,
                 reference_label=reference_label,
-                title=f"Trip {trip:03d} | {title_text} | {len(sections)} sections",
+                title=(
+                    f"Trip {trip:03d} | Target time (run/dwell): "
+                    f"{target_run_time_s:.1f} / {target_dwell_time_s:.1f} s | "
+                    f"Max load: {max_mass_t:.2f} t | "
+                    f"{title_text} | {len(sections)} sections"
+                ),
                 output_path=plot_path,
                 dpi=args.dpi,
                 show=args.show,
             )
-            summary_rows.append(
-                comparison_row(
-                    trip,
-                    comparison,
-                    primary_label,
-                    reference_label,
-                    primary,
-                    reference,
-                    diff_kwh,
-                    diff_pct,
-                    plot_path,
-                )
+            summary_row = comparison_row(
+                trip,
+                comparison,
+                primary_label,
+                reference_label,
+                primary,
+                reference,
+                diff_kwh,
+                diff_pct,
+                plot_path,
             )
+            summary_row["max_mass_t"] = max_mass_t
+            summary_row["target_time_s"] = target_time_s
+            summary_row["target_run_time_s"] = target_run_time_s
+            summary_row["target_dwell_time_s"] = target_dwell_time_s
+            summary_rows.append(summary_row)
             pct_text = "N/A" if diff_pct is None else f"{diff_pct:+.2f}%"
             print(f"  {comparison}: {pct_text} -> {plot_path}", flush=True)
 

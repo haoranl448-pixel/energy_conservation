@@ -1,0 +1,12 @@
+﻿trip_no,trip_label,return_code,elapsed_s,menu_exists,menu_path,log_path
+19,trip019,0,4452.8,True,D:\energy_conservation\output\analysis\ato_class_energy_menu19_new_v3.csv,D:\energy_conservation\output\schedule\batch_trip_reports_complete25_new12\trip019\logs\01_prep_energy_menu_and_history.log
+21,trip021,0,4481.4,True,D:\energy_conservation\output\analysis\ato_class_energy_menu21_new_v3.csv,D:\energy_conservation\output\schedule\batch_trip_reports_complete25_new12\trip021\logs\01_prep_energy_menu_and_history.log
+23,trip023,0,4471.2,True,D:\energy_conservation\output\analysis\ato_class_energy_menu23_new_v3.csv,D:\energy_conservation\output\schedule\batch_trip_reports_complete25_new12\trip023\logs\01_prep_energy_menu_and_history.log
+35,trip035,0,5238.0,True,D:\energy_conservation\output\analysis\ato_class_energy_menu35_new_v3.csv,D:\energy_conservation\output\schedule\batch_trip_reports_complete25_new12\trip035\logs\01_prep_energy_menu_and_history.log
+40,trip040,0,5215.7,True,D:\energy_conservation\output\analysis\ato_class_energy_menu40_new_v3.csv,D:\energy_conservation\output\schedule\batch_trip_reports_complete25_new12\trip040\logs\01_prep_energy_menu_and_history.log
+44,trip044,0,5244.3,True,D:\energy_conservation\output\analysis\ato_class_energy_menu44_new_v3.csv,D:\energy_conservation\output\schedule\batch_trip_reports_complete25_new12\trip044\logs\01_prep_energy_menu_and_history.log
+49,trip049,0,14980.7,True,D:\energy_conservation\output\analysis\ato_class_energy_menu49_new_v3.csv,D:\energy_conservation\output\schedule\batch_trip_reports_complete25_new12\trip049\logs\01_prep_energy_menu_and_history.log
+50,trip050,0,14954.4,True,D:\energy_conservation\output\analysis\ato_class_energy_menu50_new_v3.csv,D:\energy_conservation\output\schedule\batch_trip_reports_complete25_new12\trip050\logs\01_prep_energy_menu_and_history.log
+57,trip057,0,14974.0,True,D:\energy_conservation\output\analysis\ato_class_energy_menu57_new_v3.csv,D:\energy_conservation\output\schedule\batch_trip_reports_complete25_new12\trip057\logs\01_prep_energy_menu_and_history.log
+60,trip060,0,3351.5,True,D:\energy_conservation\output\analysis\ato_class_energy_menu60_new_v3.csv,D:\energy_conservation\output\schedule\batch_trip_reports_complete25_new12\trip060\logs\01_prep_energy_menu_and_history.log
+66,trip066,0,3363.1,True,D:\energy_conservation\output\analysis\ato_class_energy_menu66_new_v3.csv,D:\energy_conservation\output\schedule\batch_trip_reports_complete25_new12\trip066\logs\01_prep_energy_menu_and_history.log

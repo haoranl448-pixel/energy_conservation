@@ -1,0 +1,10 @@
+Loaded priority: D:\energy_conservation\output\schedule\batch_trip_reports_complete25_new12\trip066\Final_Planning_Comparison.csv (26 sections)
+  wrote D:\energy_conservation\output\schedule\batch_trip_reports_complete25_new12\trip066\timetables\priority_dp_planned_timetable_trip066.xml
+  wrote D:\energy_conservation\output\schedule\batch_trip_reports_complete25_new12\trip066\timetables\priority_history_timetable_trip066.xml
+Loaded energy_first: D:\energy_conservation\output\schedule\batch_trip_reports_complete25_new12\trip066\Final_Planning_Comparison_Energy_First.csv (26 sections)
+  wrote D:\energy_conservation\output\schedule\batch_trip_reports_complete25_new12\trip066\timetables\energy_first_dp_planned_timetable_trip066.xml
+  wrote D:\energy_conservation\output\schedule\batch_trip_reports_complete25_new12\trip066\timetables\energy_first_history_timetable_trip066.xml
+Loaded real_priority_dwell_5pct: D:\energy_conservation\output\schedule\batch_trip_reports_complete25_new12\trip066\Final_Planning_Comparison_Real_Priority_Dwell_5pct.csv (26 sections)
+  wrote D:\energy_conservation\output\schedule\batch_trip_reports_complete25_new12\trip066\timetables\real_priority_dwell_5pct_dp_planned_timetable_trip066.xml
+  wrote D:\energy_conservation\output\schedule\batch_trip_reports_complete25_new12\trip066\timetables\real_priority_dwell_5pct_history_timetable_trip066.xml
+  wrote D:\energy_conservation\output\schedule\batch_trip_reports_complete25_new12\trip066\timetables\station_id_mapping.csv

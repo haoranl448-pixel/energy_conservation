@@ -1,0 +1,7 @@
+Loaded priority: D:\energy_conservation\output\schedule\batch_trip_reports_full\trip006\Final_Planning_Comparison.csv (26 sections)
+  wrote D:\energy_conservation\output\schedule\batch_trip_reports_full\trip006\timetables\priority_dp_planned_timetable_trip006.xml
+  wrote D:\energy_conservation\output\schedule\batch_trip_reports_full\trip006\timetables\priority_history_timetable_trip006.xml
+Loaded energy_first: D:\energy_conservation\output\schedule\batch_trip_reports_full\trip006\Final_Planning_Comparison_Energy_First.csv (26 sections)
+  wrote D:\energy_conservation\output\schedule\batch_trip_reports_full\trip006\timetables\energy_first_dp_planned_timetable_trip006.xml
+  wrote D:\energy_conservation\output\schedule\batch_trip_reports_full\trip006\timetables\energy_first_history_timetable_trip006.xml
+  wrote D:\energy_conservation\output\schedule\batch_trip_reports_full\trip006\timetables\station_id_mapping.csv

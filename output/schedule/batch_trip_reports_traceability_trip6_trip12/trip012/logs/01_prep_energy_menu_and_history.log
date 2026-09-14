@@ -1,0 +1,305 @@
+Project root: D:\energy_conservation
+Python:       C:\Users\bit11\AppData\Local\Programs\Python\Python311\python.exe
+Log dir:      D:\energy_conservation\output\pipeline_logs\20260720_190716
+Dry run:      False
+Trip no:      12 (global trip; legacy local index 11)
+Target time:  script default
+Results dir:  D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality_traceability
+ATO dir:      D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality_traceability
+Line scope:   full
+Traceability: D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality_traceability\trip_traceability_manifest_v1.csv
+
+Selected steps:
+01. energy_menu
+    title: Energy menu calculation
+    script: scripts_new/00_main_pipeline/06_ato_generated_results_energy.py
+    desc:  Calculate physical + residual-AI energy for generated curves.
+02. historical_baseline
+    title: Historical baseline calculation
+    script: scripts_new/00_main_pipeline/07_full_line_validation_results.py
+    desc:  Generate historical time/energy baseline used by the DP comparison report.
+
+=== energy_menu: Energy menu calculation ===
+Calculate physical + residual-AI energy for generated curves.
+Command: C:\Users\bit11\AppData\Local\Programs\Python\Python311\python.exe D:\energy_conservation\scripts_new\00_main_pipeline\06_ato_generated_results_energy.py
+Trip:    12 (global 1-based trip; legacy local index 11)
+Target:  script default
+Results: D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality_traceability
+ATO:     D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality_traceability
+Scope:   full
+Trace:   D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality_traceability\trip_traceability_manifest_v1.csv
+已删除旧能耗菜单: D:\energy_conservation\output\analysis\ato_class_energy_menu12_new_v3.csv
+按测试数据目录筛选能耗菜单区间: 26 个
+按 line scope 筛选后能耗菜单区间: 26 个
+趟次选择方式: 全局运行链追溯
+全局趟次ID:   UP012_20240702_141702_R603
+追溯表:       D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality_traceability\trip_traceability_manifest_v1.csv
+映射区间数:   26
+   读取重量: 布政-张家潭 trip 12
+      选中 segment=11, run_id=603 [traceability]
+   读取重量: 张家潭-同德路 trip 12
+      选中 segment=11, run_id=604 [traceability]
+   读取重量: 同德路-石碶 trip 12
+      选中 segment=11, run_id=605 [traceability]
+   读取重量: 石碶-雅渡 trip 12
+      选中 segment=11, run_id=606 [traceability]
+   读取重量: 雅渡-庙堰 trip 12
+      选中 segment=11, run_id=607 [traceability]
+   读取重量: 庙堰-钟公庙 trip 12
+      选中 segment=11, run_id=608 [traceability]
+   读取重量: 钟公庙-鄞州区政府 trip 12
+      选中 segment=11, run_id=609 [traceability]
+   读取重量: 鄞州区政府-钱湖南路 trip 12
+      选中 segment=11, run_id=610 [traceability]
+   读取重量: 钱湖南路-南高教园区 trip 12
+      选中 segment=11, run_id=611 [traceability]
+   读取重量: 南高教园区-下应路 trip 12
+      选中 segment=11, run_id=612 [traceability]
+   读取重量: 下应路-大洋江 trip 12
+      选中 segment=11, run_id=613 [traceability]
+   读取重量: 大洋江-泗港 trip 12
+      选中 segment=11, run_id=614 [traceability]
+   读取重量: 泗港-曹隘 trip 12
+      选中 segment=11, run_id=615 [traceability]
+   读取重量: 曹隘-柳隘 trip 12
+      选中 segment=11, run_id=616 [traceability]
+   读取重量: 柳隘-海晏北路 trip 12
+      选中 segment=11, run_id=617 [traceability]
+   读取重量: 海晏北路-民安东路 trip 12
+      选中 segment=11, run_id=618 [traceability]
+   读取重量: 民安东路-会展中心 trip 12
+      选中 segment=11, run_id=619 [traceability]
+   读取重量: 会展中心-院士路 trip 12
+      选中 segment=11, run_id=620 [traceability]
+   读取重量: 院士路-盎孟港 trip 12
+      选中 segment=11, run_id=621 [traceability]
+   读取重量: 盎孟港-三官堂 trip 12
+      选中 segment=11, run_id=622 [traceability]
+   读取重量: 三官堂-兴庄路 trip 12
+      选中 segment=11, run_id=623 [traceability]
+   读取重量: 兴庄路-兴海南路 trip 12
+      选中 segment=11, run_id=624 [traceability]
+   读取重量: 兴海南路-梅堰 trip 12
+      选中 segment=11, run_id=625 [traceability]
+   读取重量: 梅堰-永茂路 trip 12
+      选中 segment=7, run_id=626 [traceability]
+   读取重量: 永茂路-镇海大道 trip 12
+      选中 segment=11, run_id=627 [traceability]
+   读取重量: 镇海大道-骆驼桥 trip 12
+      选中 segment=11, run_id=628 [traceability]
+已生成区间参数表: D:\energy_conservation\data\static\section_params_trip12.csv | 更新 MASS: 26 | 跳过非本次区间: 0 | 沿用旧值: 0 | 保留模板值: 0
+? 开始批量评估 26 个区间的 ATO 轨迹能耗：第 12 趟车...
+地图/历史数据目录: D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality_traceability
+   加载残差模型: 布政-张家潭
+   读取坡度曲率: 布政-张家潭
+   ? 布政-张家潭 | class3 | 115.0s -> 总:12947.6Wh (物理:12911.0Wh + 残差:36.6Wh)
+   ? 布政-张家潭 | class4 | 121.0s -> 总:14024.2Wh (物理:14131.4Wh + 残差:-107.2Wh)
+   ? 布政-张家潭 | class5 | 127.05s -> 总:12627.7Wh (物理:13231.8Wh + 残差:-604.1Wh)
+   加载残差模型: 张家潭-同德路
+   读取坡度曲率: 张家潭-同德路
+   ? 张家潭-同德路 | class1 | 141.0s -> 总:17890.7Wh (物理:18567.4Wh + 残差:-676.7Wh)
+   ? 张家潭-同德路 | class2 | 148.0s -> 总:17599.2Wh (物理:18097.3Wh + 残差:-498.1Wh)
+   ? 张家潭-同德路 | class3 | 151.0s -> 总:17915.9Wh (物理:17164.4Wh + 残差:751.4Wh)
+   ? 张家潭-同德路 | class4 | 158.95s -> 总:16531.8Wh (物理:15798.0Wh + 残差:733.9Wh)
+   加载残差模型: 同德路-石碶
+   读取坡度曲率: 同德路-石碶
+   ? 同德路-石碶 | class3 | 108.95s -> 总:13094.4Wh (物理:13065.8Wh + 残差:28.6Wh)
+   ? 同德路-石碶 | class4 | 114.0s -> 总:13318.0Wh (物理:13507.4Wh + 残差:-189.4Wh)
+   ? 同德路-石碶 | class5 | 120.0s -> 总:11776.2Wh (物理:12121.4Wh + 残差:-345.1Wh)
+   加载残差模型: 石碶-雅渡
+   读取坡度曲率: 石碶-雅渡
+   ? 石碶-雅渡 | class2 | 80.0s -> 总:11046.1Wh (物理:10284.6Wh + 残差:761.5Wh)
+   ? 石碶-雅渡 | class3 | 82.0s -> 总:11462.5Wh (物理:12101.4Wh + 残差:-638.9Wh)
+   ? 石碶-雅渡 | class4 | 85.95s -> 总:11572.2Wh (物理:9944.8Wh + 残差:1627.5Wh)
+   ? 石碶-雅渡 | class5 | 90.0s -> 总:8864.9Wh (物理:7436.5Wh + 残差:1428.5Wh)
+   加载残差模型: 雅渡-庙堰
+   读取坡度曲率: 雅渡-庙堰
+   ? 雅渡-庙堰 | class2 | 129.0s -> 总:20522.5Wh (物理:20628.5Wh + 残差:-106.0Wh)
+   ? 雅渡-庙堰 | class3 | 131.95s -> 总:19845.5Wh (物理:19580.6Wh + 残差:264.9Wh)
+   ? 雅渡-庙堰 | class4 | 139.0s -> 总:18173.8Wh (物理:18238.1Wh + 残差:-64.3Wh)
+   ? 雅渡-庙堰 | class5 | 146.0s -> 总:15961.9Wh (物理:16658.3Wh + 残差:-696.4Wh)
+   加载残差模型: 庙堰-钟公庙
+   读取坡度曲率: 庙堰-钟公庙
+   ? 庙堰-钟公庙 | class3 | 95.95s -> 总:12482.5Wh (物理:11648.1Wh + 残差:834.5Wh)
+   ? 庙堰-钟公庙 | class4 | 101.0s -> 总:10856.1Wh (物理:9416.6Wh + 残差:1439.4Wh)
+   加载残差模型: 钟公庙-鄞州区政府
+   读取坡度曲率: 钟公庙-鄞州区政府
+   ? 钟公庙-鄞州区政府 | class3 | 90.0s -> 总:10332.2Wh (物理:11504.1Wh + 残差:-1171.9Wh)
+   ? 钟公庙-鄞州区政府 | class4 | 94.95s -> 总:7971.6Wh (物理:9745.4Wh + 残差:-1773.7Wh)
+   ? 钟公庙-鄞州区政府 | class5 | 99.0s -> 总:6122.4Wh (物理:8411.8Wh + 残差:-2289.4Wh)
+   加载残差模型: 鄞州区政府-钱湖南路
+   读取坡度曲率: 鄞州区政府-钱湖南路
+   ? 鄞州区政府-钱湖南路 | class2 | 127.95s -> 总:18495.2Wh (物理:20249.2Wh + 残差:-1754.0Wh)
+   ? 鄞州区政府-钱湖南路 | class3 | 132.05s -> 总:16051.3Wh (物理:18382.5Wh + 残差:-2331.2Wh)
+   ? 鄞州区政府-钱湖南路 | class4 | 139.0s -> 总:15233.6Wh (物理:16860.1Wh + 残差:-1626.6Wh)
+   加载残差模型: 钱湖南路-南高教园区
+   读取坡度曲率: 钱湖南路-南高教园区
+   ? 钱湖南路-南高教园区 | class3 | 100.05s -> 总:13575.2Wh (物理:12502.6Wh + 残差:1072.6Wh)
+   ? 钱湖南路-南高教园区 | class4 | 104.95s -> 总:11774.5Wh (物理:10225.4Wh + 残差:1549.1Wh)
+   加载残差模型: 南高教园区-下应路
+   读取坡度曲率: 南高教园区-下应路
+   ? 南高教园区-下应路 | class2 | 110.0s -> 总:20814.5Wh (物理:16246.7Wh + 残差:4567.8Wh)
+   ? 南高教园区-下应路 | class3 | 114.0s -> 总:18386.6Wh (物理:14491.1Wh + 残差:3895.6Wh)
+   ? 南高教园区-下应路 | class4 | 119.95s -> 总:16567.0Wh (物理:13584.9Wh + 残差:2982.1Wh)
+   加载残差模型: 下应路-大洋江
+   读取坡度曲率: 下应路-大洋江
+   ? 下应路-大洋江 | class2 | 101.0s -> 总:13283.1Wh (物理:13107.4Wh + 残差:175.7Wh)
+   ? 下应路-大洋江 | class3 | 106.0s -> 总:11247.3Wh (物理:10932.6Wh + 残差:314.7Wh)
+   ? 下应路-大洋江 | class4 | 110.95s -> 总:11645.5Wh (物理:11329.4Wh + 残差:316.1Wh)
+   ? 下应路-大洋江 | class5 | 117.0s -> 总:10641.5Wh (物理:9864.1Wh + 残差:777.3Wh)
+   加载残差模型: 大洋江-泗港
+   读取坡度曲率: 大洋江-泗港
+   ? 大洋江-泗港 | class3 | 92.0s -> 总:10720.5Wh (物理:9499.9Wh + 残差:1220.7Wh)
+   ? 大洋江-泗港 | class4 | 96.0s -> 总:9521.5Wh (物理:7904.0Wh + 残差:1617.6Wh)
+   加载残差模型: 泗港-曹隘
+   读取坡度曲率: 泗港-曹隘
+   ? 泗港-曹隘 | class2 | 128.05s -> 总:20177.4Wh (物理:19643.2Wh + 残差:534.2Wh)
+   ? 泗港-曹隘 | class4 | 137.0s -> 总:22926.8Wh (物理:22041.9Wh + 残差:884.9Wh)
+   ? 泗港-曹隘 | class5 | 143.0s -> 总:21138.7Wh (物理:19615.1Wh + 残差:1523.6Wh)
+   加载残差模型: 曹隘-柳隘
+   读取坡度曲率: 曹隘-柳隘
+   ? 曹隘-柳隘 | class2 | 106.05s -> 总:21384.4Wh (物理:14706.7Wh + 残差:6677.7Wh)
+   ? 曹隘-柳隘 | class3 | 108.0s -> 总:19821.5Wh (物理:12680.7Wh + 残差:7140.7Wh)
+   ? 曹隘-柳隘 | class4 | 112.95s -> 总:15929.9Wh (物理:10615.3Wh + 残差:5314.5Wh)
+   ? 曹隘-柳隘 | class5 | 119.0s -> 总:13499.2Wh (物理:9609.8Wh + 残差:3889.5Wh)
+   加载残差模型: 柳隘-海晏北路
+   读取坡度曲率: 柳隘-海晏北路
+   ? 柳隘-海晏北路 | class3 | 91.95s -> 总:11441.6Wh (物理:10727.8Wh + 残差:713.8Wh)
+   ? 柳隘-海晏北路 | class4 | 96.0s -> 总:10234.6Wh (物理:8665.5Wh + 残差:1569.1Wh)
+   加载残差模型: 海晏北路-民安东路
+   读取坡度曲率: 海晏北路-民安东路
+   ? 海晏北路-民安东路 | class3 | 85.0s -> 总:14760.3Wh (物理:11062.1Wh + 残差:3698.2Wh)
+   ? 海晏北路-民安东路 | class4 | 88.95s -> 总:12381.2Wh (物理:8162.4Wh + 残差:4218.8Wh)
+   加载残差模型: 民安东路-会展中心
+   读取坡度曲率: 民安东路-会展中心
+   ? 民安东路-会展中心 | class2 | 76.0s -> 总:15157.5Wh (物理:15367.7Wh + 残差:-210.2Wh)
+   ? 民安东路-会展中心 | class3 | 78.95s -> 总:11612.3Wh (物理:10053.7Wh + 残差:1558.7Wh)
+   ? 民安东路-会展中心 | class4 | 83.0s -> 总:6889.9Wh (物理:7183.6Wh + 残差:-293.7Wh)
+   加载残差模型: 会展中心-院士路
+   读取坡度曲率: 会展中心-院士路
+   ? 会展中心-院士路 | class3 | 115.0s -> 总:14930.3Wh (物理:17606.9Wh + 残差:-2676.6Wh)
+   ? 会展中心-院士路 | class4 | 121.0s -> 总:13311.6Wh (物理:16043.6Wh + 残差:-2732.0Wh)
+   加载残差模型: 院士路-盎孟港
+   读取坡度曲率: 院士路-盎孟港
+   ? 院士路-盎孟港 | class3 | 90.95s -> 总:17872.8Wh (物理:11616.9Wh + 残差:6255.9Wh)
+   ? 院士路-盎孟港 | class4 | 95.95s -> 总:14076.9Wh (物理:8366.5Wh + 残差:5710.4Wh)
+   加载残差模型: 盎孟港-三官堂
+   读取坡度曲率: 盎孟港-三官堂
+   ? 盎孟港-三官堂 | class2 | 132.0s -> 总:17648.8Wh (物理:20657.3Wh + 残差:-3008.5Wh)
+   ? 盎孟港-三官堂 | class3 | 138.95s -> 总:17144.9Wh (物理:17969.8Wh + 残差:-824.8Wh)
+   ? 盎孟港-三官堂 | class4 | 146.0s -> 总:16505.7Wh (物理:16901.6Wh + 残差:-395.9Wh)
+   加载残差模型: 三官堂-兴庄路
+   读取坡度曲率: 三官堂-兴庄路
+   ? 三官堂-兴庄路 | class1 | 94.05s -> 总:13128.2Wh (物理:13272.5Wh + 残差:-144.3Wh)
+   ? 三官堂-兴庄路 | class2 | 99.0s -> 总:11575.0Wh (物理:9894.2Wh + 残差:1680.8Wh)
+   ? 三官堂-兴庄路 | class3 | 104.05s -> 总:10525.4Wh (物理:8310.4Wh + 残差:2215.0Wh)
+   ? 三官堂-兴庄路 | class4 | 109.0s -> 总:9982.6Wh (物理:7525.3Wh + 残差:2457.3Wh)
+   加载残差模型: 兴庄路-兴海南路
+   读取坡度曲率: 兴庄路-兴海南路
+   ? 兴庄路-兴海南路 | class2 | 86.95s -> 总:15846.1Wh (物理:14625.7Wh + 残差:1220.3Wh)
+   ? 兴庄路-兴海南路 | class4 | 95.95s -> 总:9478.6Wh (物理:7942.5Wh + 残差:1536.0Wh)
+   加载残差模型: 兴海南路-梅堰
+   读取坡度曲率: 兴海南路-梅堰
+   ? 兴海南路-梅堰 | class3 | 81.95s -> 总:11320.4Wh (物理:11890.3Wh + 残差:-569.9Wh)
+   ? 兴海南路-梅堰 | class4 | 86.0s -> 总:9599.3Wh (物理:8066.9Wh + 残差:1532.5Wh)
+   加载残差模型: 梅堰-永茂路
+   读取坡度曲率: 梅堰-永茂路
+   ? 梅堰-永茂路 | class3 | 313.0s -> 总:29934.4Wh (物理:26918.3Wh + 残差:3016.1Wh)
+   ? 梅堰-永茂路 | class4 | 329.0s -> 总:26433.1Wh (物理:25790.4Wh + 残差:642.7Wh)
+   ? 梅堰-永茂路 | class5 | 345.05s -> 总:23496.7Wh (物理:25343.6Wh + 残差:-1847.0Wh)
+   加载残差模型: 永茂路-镇海大道
+   读取坡度曲率: 永茂路-镇海大道
+   ? 永茂路-镇海大道 | class2 | 141.0s -> 总:17129.6Wh (物理:21387.4Wh + 残差:-4257.8Wh)
+   ? 永茂路-镇海大道 | class3 | 148.0s -> 总:17150.9Wh (物理:19361.4Wh + 残差:-2210.6Wh)
+   ? 永茂路-镇海大道 | class4 | 156.0s -> 总:15613.8Wh (物理:17484.9Wh + 残差:-1871.1Wh)
+   ? 永茂路-镇海大道 | class5 | 164.05s -> 总:15097.5Wh (物理:16067.8Wh + 残差:-970.4Wh)
+   加载残差模型: 镇海大道-骆驼桥
+   读取坡度曲率: 镇海大道-骆驼桥
+   ? 镇海大道-骆驼桥 | class2 | 116.0s -> 总:20051.6Wh (物理:17787.4Wh + 残差:2264.2Wh)
+   ? 镇海大道-骆驼桥 | class3 | 122.0s -> 总:19266.0Wh (物理:17731.2Wh + 残差:1534.8Wh)
+   ? 镇海大道-骆驼桥 | class4 | 128.0s -> 总:17274.2Wh (物理:16303.0Wh + 残差:971.2Wh)
+   ? 镇海大道-骆驼桥 | class5 | 134.0s -> 总:15832.3Wh (物理:15189.6Wh + 残差:642.7Wh)
+
+? 评估完成！能耗菜单已生成：D:\energy_conservation\output\analysis\ato_class_energy_menu12_new_v3.csv
+? 现在你可以运行 DP 调度算法来选择最优 Class 组合了。
+Step finished with code 0. Log: D:\energy_conservation\output\pipeline_logs\20260720_190716\energy_menu.log
+
+=== historical_baseline: Historical baseline calculation ===
+Generate historical time/energy baseline used by the DP comparison report.
+Command: C:\Users\bit11\AppData\Local\Programs\Python\Python311\python.exe D:\energy_conservation\scripts_new\00_main_pipeline\07_full_line_validation_results.py
+Trip:    12 (global 1-based trip; legacy local index 11)
+Target:  script default
+Results: D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality_traceability
+ATO:     D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality_traceability
+Scope:   full
+Trace:   D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality_traceability\trip_traceability_manifest_v1.csv
+已删除旧历史基准: D:\energy_conservation\full_line12_validation_results.csv
+? 开始全线 26 个区间的历史数据验证：第 12 趟车...
+历史数据目录: D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality_traceability
+趟次选择方式: 全局运行链追溯
+全局趟次ID:   UP012_20240702_141702_R603
+追溯表:       D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality_traceability\trip_traceability_manifest_v1.csv
+映射区间数:   26
+[01/26] 正在处理: 布政-张家潭 ...
+[02/26] 正在处理: 张家潭-同德路 ...
+[03/26] 正在处理: 同德路-石碶 ...
+[04/26] 正在处理: 石碶-雅渡 ...
+[05/26] 正在处理: 雅渡-庙堰 ...
+[06/26] 正在处理: 庙堰-钟公庙 ...
+[07/26] 正在处理: 钟公庙-鄞州区政府 ...
+[08/26] 正在处理: 鄞州区政府-钱湖南路 ...
+[09/26] 正在处理: 钱湖南路-南高教园区 ...
+[10/26] 正在处理: 南高教园区-下应路 ...
+[11/26] 正在处理: 下应路-大洋江 ...
+[12/26] 正在处理: 大洋江-泗港 ...
+[13/26] 正在处理: 泗港-曹隘 ...
+[14/26] 正在处理: 曹隘-柳隘 ...
+[15/26] 正在处理: 柳隘-海晏北路 ...
+[16/26] 正在处理: 海晏北路-民安东路 ...
+[17/26] 正在处理: 民安东路-会展中心 ...
+[18/26] 正在处理: 会展中心-院士路 ...
+[19/26] 正在处理: 院士路-盎孟港 ...
+[20/26] 正在处理: 盎孟港-三官堂 ...
+[21/26] 正在处理: 三官堂-兴庄路 ...
+[22/26] 正在处理: 兴庄路-兴海南路 ...
+[23/26] 正在处理: 兴海南路-梅堰 ...
+[24/26] 正在处理: 梅堰-永茂路 ...
+[25/26] 正在处理: 永茂路-镇海大道 ...
+[26/26] 正在处理: 镇海大道-骆驼桥 ...
+
+
+============================================================
+? 5号线全线 26 区间验证结果汇总
+============================================================
+      站间区间  历史运行时间(s)  历史实测能耗(Wh)  历史能耗(Wh)     物理占比         残差占比  误差(%)                     全局趟次ID 历史segment 历史来源run_id       趟次选择方式
+    布政-张家潭     116.30    12741.01  12627.01 12715.12   -88.110001  -0.89 UP012_20240702_141702_R603        11        603 traceability
+   张家潭-同德路     151.50    17587.78  17616.87 16678.71   938.169983   0.17 UP012_20240702_141702_R603        11        604 traceability
+    同德路-石碶     110.95    11959.92  11699.46 11442.00   257.459991  -2.18 UP012_20240702_141702_R603        11        605 traceability
+     石碶-雅渡      81.25    11841.74  11740.73 12301.71  -560.979980  -0.85 UP012_20240702_141702_R603        11        606 traceability
+     雅渡-庙堰     132.75    20254.03  19413.82 19354.15    59.669998  -4.15 UP012_20240702_141702_R603        11        607 traceability
+    庙堰-钟公庙      96.70    13489.83  13479.27 12001.02  1478.250000  -0.08 UP012_20240702_141702_R603        11        608 traceability
+ 钟公庙-鄞州区政府      90.65    10015.27   9966.49 11137.24 -1170.739990  -0.49 UP012_20240702_141702_R603        11        609 traceability
+鄞州区政府-钱湖南路     131.65    16319.98  15768.05 18090.41 -2322.360107  -3.38 UP012_20240702_141702_R603        11        610 traceability
+钱湖南路-南高教园区      99.95    13765.64  13411.53 12267.21  1144.319946  -2.57 UP012_20240702_141702_R603        11        611 traceability
+ 南高教园区-下应路     113.70    19336.95  19005.81 14907.11  4098.700195  -1.71 UP012_20240702_141702_R603        11        612 traceability
+   下应路-大洋江     105.30    11500.42  11257.44 10909.54   347.899994  -2.11 UP012_20240702_141702_R603        11        613 traceability
+    大洋江-泗港      92.30    10862.25  10596.89  9402.45  1194.439941  -2.44 UP012_20240702_141702_R603        11        614 traceability
+     泗港-曹隘     134.70    23679.39  23511.75 22220.08  1291.670044  -0.71 UP012_20240702_141702_R603        11        615 traceability
+     曹隘-柳隘     106.65    20893.22  20680.80 13379.63  7301.169922  -1.02 UP012_20240702_141702_R603        11        616 traceability
+   柳隘-海晏北路      90.30    14567.07  14554.41 13355.48  1198.939941  -0.09 UP012_20240702_141702_R603        11        617 traceability
+ 海晏北路-民安东路      83.80    15742.86  15519.16 12137.88  3381.280029  -1.42 UP012_20240702_141702_R603        11        618 traceability
+ 民安东路-会展中心      76.65    12947.32  12913.89 11116.82  1797.079956  -0.26 UP012_20240702_141702_R603        11        619 traceability
+  会展中心-院士路     114.35    14921.66  14726.63 17339.46 -2612.830078  -1.31 UP012_20240702_141702_R603        11        620 traceability
+   院士路-盎孟港      90.70    19839.46  19763.01 13245.73  6517.279785  -0.39 UP012_20240702_141702_R603        11        621 traceability
+   盎孟港-三官堂     137.50    16559.61  16249.08 18080.27 -1831.189941  -1.88 UP012_20240702_141702_R603        11        622 traceability
+   三官堂-兴庄路     104.05    10432.47  10279.45  7910.48  2368.969971  -1.47 UP012_20240702_141702_R603        11        623 traceability
+  兴庄路-兴海南路      91.40    12238.06  12122.25 10084.37  2037.880005  -0.95 UP012_20240702_141702_R603        11        624 traceability
+   兴海南路-梅堰      82.00    13140.81  13045.14 12703.56   341.589996  -0.73 UP012_20240702_141702_R603        11        625 traceability
+    梅堰-永茂路     329.25    26139.14  26339.12 25928.45   410.670013   0.77 UP012_20240702_141702_R603         7        626 traceability
+  永茂路-镇海大道     142.35    17949.13  17534.85 20943.32 -3408.469971  -2.31 UP012_20240702_141702_R603        11        627 traceability
+  镇海大道-骆驼桥     116.45    20165.48  19886.09 17912.33  1973.760010  -1.39 UP012_20240702_141702_R603        11        628 traceability
+
+? 结果已保存至: D:\energy_conservation\full_line12_validation_results.csv
+Step finished with code 0. Log: D:\energy_conservation\output\pipeline_logs\20260720_190716\historical_baseline.log
+
+Pipeline finished successfully.

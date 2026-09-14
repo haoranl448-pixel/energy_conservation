@@ -58,6 +58,9 @@ MIN_DWELL = 24.0              # default min dwell for elastic stations
 HISTORICAL_DWELL_TOLERANCE = float(os.environ.get("ENERGY_DWELL_TOLERANCE", "0.02"))
 if not 0.0 <= HISTORICAL_DWELL_TOLERANCE <= 0.20:
     raise ValueError("ENERGY_DWELL_TOLERANCE must be between 0 and 0.20.")
+HISTORICAL_DWELL_MINUS_SECONDS = float(os.environ.get("ENERGY_DWELL_MINUS_SECONDS", "0"))
+if not 0.0 <= HISTORICAL_DWELL_MINUS_SECONDS <= 30.0:
+    raise ValueError("ENERGY_DWELL_MINUS_SECONDS must be between 0 and 30 seconds.")
 REAL_PRIORITY_DWELL_TOLERANCE = 0.05
 TOTAL_TIME_TOLERANCE = float(os.environ.get("ENERGY_TOTAL_TIME_TOLERANCE", "0"))
 if not 0.0 <= TOTAL_TIME_TOLERANCE <= 10.0:
@@ -84,7 +87,7 @@ MANUAL_CONSTRAINTS = {
     "泗港-曹隘": "class4"
 }
 
-GLOBAL_ALLOWED_CLASSES = ["class1","class2", "class3","class4", "class4"]
+GLOBAL_ALLOWED_CLASSES = ["class1", "class2", "class3", "class4", "class5"]
 CURVE_SOURCE_COL = "曲线来源"
 PARENT_REF_COL = "父等级"
 SUPPORTING_REFS_COL = "支持等级"
@@ -349,27 +352,33 @@ def distribute_historical_dwell(
 ) -> tuple[bool, list[float] | None]:
     """Fit the required dwell total while keeping every station within tolerance."""
 
+    # DP rounds to 0.1 s; include float noise at the 0.05 s half-step boundary.
+    rounding_limit = 0.05 + 1e-9
     if not historical_dwells:
-        return abs(run_time_sum - T_TOTAL_TARGET) <= 0.05, []
+        return abs(run_time_sum - T_TOTAL_TARGET) <= rounding_limit, []
 
     history = np.asarray(historical_dwells, dtype=float)
     target_total = T_TOTAL_TARGET - run_time_sum
     history_total = float(history.sum())
-    lower = history * (1.0 - tolerance)
-    upper = history * (1.0 + tolerance)
+    if tolerance < 0:
+        lower = np.maximum(0.0, history + tolerance)
+        upper = history.copy()
+    else:
+        lower = history * (1.0 - tolerance)
+        upper = history * (1.0 + tolerance)
     lower_total = float(lower.sum())
     upper_total = float(upper.sum())
     if target_total < lower_total:
-        if lower_total - target_total > TOTAL_TIME_TOLERANCE + 0.05:
+        if lower_total - target_total > TOTAL_TIME_TOLERANCE + rounding_limit:
             return False, None
         target_total = lower_total
     elif target_total > upper_total:
-        if target_total - upper_total > TOTAL_TIME_TOLERANCE + 0.05:
+        if target_total - upper_total > TOTAL_TIME_TOLERANCE + rounding_limit:
             return False, None
         target_total = upper_total
 
     if history_total <= 0:
-        return abs(target_total) <= 0.05, [0.0] * len(historical_dwells)
+        return abs(target_total) <= rounding_limit, [0.0] * len(historical_dwells)
 
     dwell = history * (target_total / history_total)
     dwell = np.clip(dwell, lower, upper)
@@ -646,8 +655,23 @@ def run_optimization():
     # running-time combination exists do we allow a small per-station tolerance.
     historical_dwells, historical_dwell_sources = load_historical_dwell_profile()
     historical_total_dwell = sum(historical_dwells[:-1])
-    tolerance_min_total = historical_total_dwell * (1.0 - HISTORICAL_DWELL_TOLERANCE)
-    tolerance_max_total = historical_total_dwell * (1.0 + HISTORICAL_DWELL_TOLERANCE)
+    if HISTORICAL_DWELL_MINUS_SECONDS > 0:
+        fallback_dwell_tolerance = -HISTORICAL_DWELL_MINUS_SECONDS
+        tolerance_min_total = sum(
+            max(0.0, dwell - HISTORICAL_DWELL_MINUS_SECONDS)
+            for dwell in historical_dwells[:-1]
+        )
+        tolerance_max_total = historical_total_dwell
+        fallback_dwell_name = f"historical_minus_{HISTORICAL_DWELL_MINUS_SECONDS:g}s"
+        fallback_dwell_description = (
+            f"each station [{HISTORICAL_DWELL_MINUS_SECONDS:g}s below history, history]"
+        )
+    else:
+        fallback_dwell_tolerance = HISTORICAL_DWELL_TOLERANCE
+        tolerance_min_total = historical_total_dwell * (1.0 - HISTORICAL_DWELL_TOLERANCE)
+        tolerance_max_total = historical_total_dwell * (1.0 + HISTORICAL_DWELL_TOLERANCE)
+        fallback_dwell_name = f"historical_tolerance_{HISTORICAL_DWELL_TOLERANCE * 100:.1f}pct"
+        fallback_dwell_description = f"±{HISTORICAL_DWELL_TOLERANCE * 100:.1f}%"
     max_run_time = T_TOTAL_TARGET - tolerance_min_total
     nom_run_time = T_TOTAL_TARGET - historical_total_dwell
 
@@ -658,7 +682,7 @@ def run_optimization():
     print(f"Exact-dwell target run:  {nom_run_time:.1f}s")
     print(
         f"Fallback dwell band:     {tolerance_min_total:.1f}-{tolerance_max_total:.1f}s "
-        f"(±{HISTORICAL_DWELL_TOLERANCE * 100:.1f}%)"
+        f"({fallback_dwell_description})"
     )
     print_input_diagnostics(
         df_menu,
@@ -764,6 +788,12 @@ def run_optimization():
             dwell_deviation = abs((T_TOTAL_TARGET - t_int / 10.0) - historical_total_dwell)
             ext_count, int_count, energy_wh = score
             if score_mode == "energy_first":
+                # Exact historical dwell keeps energy as the first objective. If the
+                # exact stage is infeasible and the tolerance fallback is opened,
+                # use only the minimum dwell adjustment required for feasibility,
+                # then minimize energy among equally close candidates.
+                if dwell_tolerance > 0:
+                    return dwell_deviation, energy_wh, ext_count, int_count
                 return energy_wh, ext_count, int_count, dwell_deviation
             if score_mode == "real_priority_energy":
                 return ext_count, int_count, energy_wh, dwell_deviation
@@ -786,6 +816,15 @@ def run_optimization():
         }
 
     def build_dwell_stages(total_time_tolerance: float):
+        if HISTORICAL_DWELL_MINUS_SECONDS > 0:
+            return [
+                (
+                    fallback_dwell_name,
+                    fallback_dwell_tolerance,
+                    T_TOTAL_TARGET - tolerance_max_total - total_time_tolerance,
+                    T_TOTAL_TARGET - tolerance_min_total + total_time_tolerance,
+                ),
+            ]
         return [
             (
                 "historical_exact",
@@ -794,8 +833,8 @@ def run_optimization():
                 nom_run_time + total_time_tolerance,
             ),
             (
-                f"historical_tolerance_{HISTORICAL_DWELL_TOLERANCE * 100:.1f}pct",
-                HISTORICAL_DWELL_TOLERANCE,
+                fallback_dwell_name,
+                fallback_dwell_tolerance,
                 T_TOTAL_TARGET - tolerance_max_total - total_time_tolerance,
                 T_TOTAL_TARGET - tolerance_min_total + total_time_tolerance,
             ),
@@ -811,6 +850,11 @@ def run_optimization():
                     max_run_for_stage,
                     dwell_mode,
                     dwell_tolerance,
+                    score_mode=(
+                        "real_priority_energy"
+                        if HISTORICAL_DWELL_MINUS_SECONDS > 0
+                        else "priority_first"
+                    ),
                 )
                 if candidate is not None:
                     return candidate

@@ -1,0 +1,13 @@
+﻿"trip_no","trip_label","status","target_time_s","run_time_s","dwell_time_s","section_count","dwell_actual_count","dwell_fallback_count","trip_dir","error"
+"16","trip016","ok","3739.55","2964.55","775.0","26","25","0","D:\energy_conservation\output\schedule\batch_trip_reports_complete25_new12\trip016",""
+"19","trip019","ok","3802.1","3024.1","778.0","26","25","0","D:\energy_conservation\output\schedule\batch_trip_reports_complete25_new12\trip019",""
+"21","trip021","ok","3737.25","2963.25","774.0","26","25","0","D:\energy_conservation\output\schedule\batch_trip_reports_complete25_new12\trip021",""
+"23","trip023","failed","","","","","","","","trip023 dp_schedule failed with code 1."
+"35","trip035","ok","3814.25","3023.25","791.0","26","25","0","D:\energy_conservation\output\schedule\batch_trip_reports_complete25_new12\trip035",
+"40","trip040","ok","3813.05","3025.05","788.0","26","25","0","D:\energy_conservation\output\schedule\batch_trip_reports_complete25_new12\trip040",
+"44","trip044","ok","3810.2000000000003","3035.2000000000003","775.0","26","25","0","D:\energy_conservation\output\schedule\batch_trip_reports_complete25_new12\trip044",""
+"49","trip049","ok","3740.75","2965.75","775.0","26","25","0","D:\energy_conservation\output\schedule\batch_trip_reports_complete25_new12\trip049",""
+"50","trip050","ok","3736.9","2965.9","771.0","26","25","0","D:\energy_conservation\output\schedule\batch_trip_reports_complete25_new12\trip050",""
+"57","trip057","ok","3735.9500000000003","2967.9500000000003","768.0","26","25","0","D:\energy_conservation\output\schedule\batch_trip_reports_complete25_new12\trip057",
+"60","trip060","ok","3815.3500000000004","3068.3500000000004","747.0","26","25","0","D:\energy_conservation\output\schedule\batch_trip_reports_complete25_new12\trip060",""
+"66","trip066","ok","3738.9","2965.9","773.0","26","25","0","D:\energy_conservation\output\schedule\batch_trip_reports_complete25_new12\trip066",""

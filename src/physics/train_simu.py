@@ -1,6 +1,14 @@
 # -*- coding: utf-8 -*-
-"""
-train_sim.py (最终修正版：参数严格保留 + 自动均分载重)
+"""Train theoretical traction energy model.
+
+Version 2 keeps the original Simulink line coordinates when a single section
+is simulated.  Callers should pass ``section_name`` (or ``start_dist_m``) so
+that gradient and curve resistance are looked up at the section's actual
+position instead of restarting at the first station for every section.
+
+The returned energy is positive wheel-side mechanical traction energy.  It
+does not include traction efficiency, auxiliary electricity, or regenerative
+braking energy.
 """
 import numpy as np
 import pandas as pd
@@ -25,6 +33,21 @@ class SimulinkDiscreteDerivative:
 # 2. 理论能耗仿真模型类
 # ---------------------------------------------------------
 class TrainTheoreticalEnergyModel:
+    STATION_PAIRS = (
+        "布政-张家潭", "张家潭-同德路", "同德路-石碶", "石碶-雅渡", "雅渡-庙堰",
+        "庙堰-钟公庙", "钟公庙-鄞州区政府", "鄞州区政府-钱湖南路", "钱湖南路-南高教园区",
+        "南高教园区-下应路", "下应路-大洋江", "大洋江-泗港", "泗港-曹隘", "曹隘-柳隘",
+        "柳隘-海晏北路", "海晏北路-民安东路", "民安东路-会展中心", "会展中心-院士路",
+        "院士路-盎孟港", "盎孟港-三官堂", "三官堂-兴庄路", "兴庄路-兴海南路",
+        "兴海南路-梅堰", "梅堰-永茂路", "永茂路-镇海大道", "镇海大道-骆驼桥",
+    )
+    SECTION_START_DISTANCES_M = np.array([
+        0, 1428, 3445, 4777, 5604, 7464, 8550, 9534, 11345, 12500,
+        13952, 15166, 16123, 17921, 19228, 20208, 21073, 21797,
+        23359, 24353, 26230, 27311, 28269, 29102, 32778, 34909,
+    ], dtype=float)
+    SECTION_START_BY_NAME = dict(zip(STATION_PAIRS, SECTION_START_DISTANCES_M))
+
     def __init__(self):
         # === ⚠️ 严格保留原参数，未做任何修改 ===
         self.P_a, self.P_b = 1.65, 0.0247
@@ -68,6 +91,22 @@ class TrainTheoreticalEnergyModel:
 
     # === 核心物理计算逻辑 (严格复刻) ===
     
+    @classmethod
+    def resolve_start_distance(cls, section_name=None, start_dist_m=None):
+        """Resolve the absolute line coordinate used by the Simulink model."""
+        if start_dist_m is not None:
+            value = float(start_dist_m)
+            if not math.isfinite(value) or value < 0:
+                raise ValueError(f"start_dist_m must be a finite non-negative value, got {start_dist_m!r}")
+            return value
+        if section_name is None:
+            return 0.0
+        try:
+            return float(cls.SECTION_START_BY_NAME[str(section_name).strip()])
+        except KeyError as exc:
+            known = ", ".join(cls.STATION_PAIRS)
+            raise ValueError(f"Unknown section_name {section_name!r}. Known sections: {known}") from exc
+
     def _calc_gradient_distributed(self, current_dist, loads):
         # 分布式坡度阻力
         F_G_total = 0.0
@@ -78,7 +117,8 @@ class TrainTheoreticalEnergyModel:
             for car_idx in range(self.num_cars):
                 Mk = loads[car_idx]
                 car_head_pos = current_dist - car_idx * self.car_length
-                slice_pos = car_head_pos - (i + 0.5) * step_len
+                # Simulink uses offsets 0:19, 20:39, ..., 100:119 m.
+                slice_pos = car_head_pos - i * step_len
                 grad = self._interp_gradient(slice_pos)
                 theta = math.atan(grad / 1000.0)
                 term_sum += (Mk * math.sin(theta)) / float(steps)
@@ -95,7 +135,7 @@ class TrainTheoreticalEnergyModel:
             car_fr_sum = 0.0
             for a in range(steps):
                 car_head_pos = current_dist - car_idx * self.car_length
-                slice_pos = car_head_pos - (a + 0.5) * step_len
+                slice_pos = car_head_pos - a * step_len
                 R = self._interp_curve(slice_pos)
                 if 0 < R < 2000:
                     f_slice = (600.0 * self.g * Mk) / R / 1000.0 / float(steps)
@@ -104,12 +144,24 @@ class TrainTheoreticalEnergyModel:
         return F_C_total * 1000.0
 
     # === 外部接口：批处理 ===
-    def run_batch_simulation(self, time_seq, vel_seq, mass_total_ton):
+    def run_batch_simulation(
+        self,
+        time_seq,
+        vel_seq,
+        mass_total_ton,
+        *,
+        section_name=None,
+        start_dist_m=None,
+        car_masses_ton=None,
+    ):
         """
         输入: 
             time_seq (s): 时间序列
             vel_seq (m/s): 速度序列
-            mass_total_ton (t): 整车总质量 (我们的数据里只有这个)
+            mass_total_ton (t): 整车总质量
+            section_name: 正向区间名，用于查找该区间的全线起始里程
+            start_dist_m: 显式全线起始里程，优先级高于 section_name
+            car_masses_ton: 可选的六节车质量；缺省时才均分总质量
         输出:
             energy_wh_seq: 每一步的能耗 (Wh)
         """
@@ -117,13 +169,25 @@ class TrainTheoreticalEnergyModel:
         self.derivative_module = SimulinkDiscreteDerivative(Ts=self.dt, K=1.0, IC=0.0)
         self.last_raw_acc = 0.0
         self.last_filt_acc = 0.0
-        self.current_dist = 0.0 # 假设从0开始，或者根据数据校准
+        self.current_dist = self.resolve_start_distance(section_name, start_dist_m)
         self.total_theoretical_energy_kwh = 0.0
         
-        # 2. 将总质量均分给6节车 (这是唯一的适配点)
-        # 必须这样做才能跑得通 _calc_gradient_distributed
-        single_car_mass = mass_total_ton / 6.0
-        loads = np.array([single_car_mass] * 6)
+        # 2. 优先使用六节车质量；只有总质量时保持旧版的均分兼容行为。
+        if car_masses_ton is None:
+            single_car_mass = float(mass_total_ton) / self.num_cars
+            loads = np.full(self.num_cars, single_car_mass, dtype=float)
+        else:
+            loads = np.asarray(car_masses_ton, dtype=float)
+            if loads.shape != (self.num_cars,):
+                raise ValueError(f"car_masses_ton must contain exactly {self.num_cars} values")
+            if not np.all(np.isfinite(loads)) or np.any(loads < 0):
+                raise ValueError("car_masses_ton must contain finite non-negative values")
+            provided_total = float(mass_total_ton)
+            if not math.isclose(float(np.sum(loads)), provided_total, rel_tol=1e-4, abs_tol=1e-3):
+                raise ValueError(
+                    f"car_masses_ton sums to {np.sum(loads):.6g} t, "
+                    f"but mass_total_ton is {provided_total:.6g} t"
+                )
         
         mass_ends = loads[0] + loads[5]
         mass_mids = np.sum(loads[1:5])
@@ -144,10 +208,8 @@ class TrainTheoreticalEnergyModel:
             self.last_raw_acc = raw_acc
             self.last_filt_acc = current_filtered_acc
             
-            # B. 积分更新位置
-            self.current_dist += v_ms * self.dt
-            
-            # C. 启动阻力逻辑 (MATLAB复刻)
+            # B. 当前采样点使用当前绝对里程计算线路阻力。
+            # C. 启动阻力逻辑
             F_start_N = 0.0
             if v_ms > self.eps and v_ms < 0.05:
                 F_start_N = (mass_total * 49.0 / 1000.0) * 1000.0
@@ -182,5 +244,8 @@ class TrainTheoreticalEnergyModel:
             E_step_wh = (P_kw * self.dt / 3600.0) * 1000.0
             
             energy_results_wh.append(E_step_wh)
+
+            # 与 Simulink 的积分器一致，在完成当前采样点计算后推进里程。
+            self.current_dist += v_ms * self.dt
             
         return np.array(energy_results_wh)

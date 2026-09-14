@@ -57,6 +57,15 @@ def parse_args() -> argparse.Namespace:
         help="Per-station historical dwell tolerance used only when exact dwell is infeasible.",
     )
     parser.add_argument(
+        "--dwell-minus-seconds",
+        type=float,
+        default=0.0,
+        help=(
+            "Legacy dwell mode: each station may shorten its historical dwell by at most "
+            "this many seconds, and may not exceed history. Zero keeps percentage mode."
+        ),
+    )
+    parser.add_argument(
         "--total-time-tolerance-s",
         type=float,
         default=0.0,
@@ -391,6 +400,7 @@ def process_trip(args: argparse.Namespace, trip_no: int, output_dir: Path) -> di
     if not args.skip_dp:
         env_extra = {
             "ENERGY_DWELL_TOLERANCE": f"{args.dwell_tolerance_pct / 100.0:.8f}",
+            "ENERGY_DWELL_MINUS_SECONDS": f"{args.dwell_minus_seconds:.8f}",
             "ENERGY_TOTAL_TIME_TOLERANCE": f"{args.total_time_tolerance_s:.8f}",
         }
         if args.no_plots:

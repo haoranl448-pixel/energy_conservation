@@ -1,0 +1,39 @@
+Project root: D:\energy_conservation
+Python:       C:\Users\bit11\AppData\Local\Programs\Python\Python311\python.exe
+Log dir:      D:\energy_conservation\output\pipeline_logs\20260704_130402
+Dry run:      False
+Trip no:      11 (segment index 10)
+Target time:  script default
+Results dir:  D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality
+ATO dir:      D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality
+Line scope:   full
+
+Selected steps:
+01. energy_menu
+    title: Energy menu calculation
+    script: scripts_new/00_main_pipeline/06_ato_generated_results_energy.py
+    desc:  Calculate physical + residual-AI energy for generated curves.
+02. historical_baseline
+    title: Historical baseline calculation
+    script: scripts_new/00_main_pipeline/07_full_line_validation_results.py
+    desc:  Generate historical time/energy baseline used by the DP comparison report.
+
+=== energy_menu: Energy menu calculation ===
+Calculate physical + residual-AI energy for generated curves.
+Command: C:\Users\bit11\AppData\Local\Programs\Python\Python311\python.exe D:\energy_conservation\scripts_new\00_main_pipeline\06_ato_generated_results_energy.py
+Trip:    11 (segment index 10)
+Target:  script default
+Results: D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality
+ATO:     D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality
+Scope:   full
+Traceback (most recent call last):
+  File "D:\energy_conservation\scripts_new\main.py", line 628, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "D:\energy_conservation\scripts_new\main.py", line 591, in main
+    code = run_step(
+           ^^^^^^^^^
+  File "D:\energy_conservation\scripts_new\main.py", line 348, in run_step
+    for line in process.stdout:
+  File "<frozen codecs>", line 319, in decode
+KeyboardInterrupt

@@ -51,6 +51,14 @@ output/analysis/*.7z
 output/analysis/*.png
 output/validation_all_trips/
 output/pipeline_logs/
+output/cache/
+
+# Local OpenTrack communication logs (derived route maps are kept)
+output/opentrack_otd_logs*/
+output/opentrack_otd_listener_*.log
+
+# Large pointwise replay tables; section summaries remain versioned
+output/analysis/trip_real_vs_simu_physics/**/*_points.csv
 
 # Local exported/reference artifacts
 ppt/*.png
