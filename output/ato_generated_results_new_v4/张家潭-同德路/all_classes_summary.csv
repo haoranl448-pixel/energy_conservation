@@ -1,0 +1,6 @@
+﻿station_pair,class_name,status,reason,curve_source,parent_ref,supporting_refs,real_sample_count,parent_real_sample_count,sample_reliability,dp_candidate_stage,target_time_s,sim_time_s,peak_speed_kmh,total_dist_m,curve_csv
+张家潭-同德路,class1,generated,最终生成曲线后验检查通过，峰值 73.600720 km/h,extrapolated_adjacent,class2,class2,0,8,generated,allow_extrapolated,141.0,141.0,73.6007,2020.5708,D:\energy_conservation\output\ato_generated_results_new_v4\张家潭-同德路\class1_generated_curve.csv
+张家潭-同德路,class2,generated,最终生成曲线后验检查通过，峰值 66.761926 km/h,real,class2,class2,8,8,strong,real_only,148.0,148.0,66.7619,2020.5708,D:\energy_conservation\output\ato_generated_results_new_v4\张家潭-同德路\class2_generated_curve.csv
+张家潭-同德路,class3,generated,最终生成曲线后验检查通过，峰值 65.368386 km/h,real,class3,class3,54,54,strong,real_only,151.0,151.0,65.3684,2021.4603,D:\energy_conservation\output\ato_generated_results_new_v4\张家潭-同德路\class3_generated_curve.csv
+张家潭-同德路,class4,generated,最终生成曲线后验检查通过，峰值 59.593061 km/h,extrapolated_adjacent,class3,class3,0,54,generated,allow_extrapolated,159.0,158.95,59.5931,2021.4603,D:\energy_conservation\output\ato_generated_results_new_v4\张家潭-同德路\class4_generated_curve.csv
+张家潭-同德路,class5,missing_source,no adjacent real template,missing,,,0,0,,not_allowed,166.0,,,,

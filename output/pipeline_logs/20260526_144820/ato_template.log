@@ -1,0 +1,43 @@
+# step: ato_template
+# command: C:\Users\bit11\AppData\Local\Programs\Python\Python311\python.exe D:\energy_conservation\scripts\train_ATO_v8.py
+# ENERGY_TRIP_NO: 1
+# ENERGY_TRIP_INDEX: 0
+# ENERGY_TARGET_TIME: 692.65
+# ENERGY_DATA_DIR: C:\Users\bit11\Desktop\数据测试代码\data_processed_step2_v3_first5
+# PYTHONIOENCODING: utf-8:replace
+# started: 2026-05-26T14:48:20
+
+按测试数据目录筛选区间: 5 个，跳过标准时间表中未提供数据的 21 个区间。
+========================================================================
+批量训练 class3 三相位模板
+时间表: D:\energy_conservation\output\analysis\class_tables_strict\standard_class_times.csv
+数据目录: C:\Users\bit11\Desktop\数据测试代码\data_processed_step2_v3_first5
+输出目录: D:\energy_conservation\output\ato_phase_results_v3
+待处理区间数: 5
+========================================================================
+
+[1/5] 开始训练区间: 布政-张家潭
+  ❌ 失败 | missing_columns | 缺少必要列: ['运行等级']
+
+[2/5] 开始训练区间: 张家潭-同德路
+  ❌ 失败 | missing_columns | 缺少必要列: ['运行等级']
+
+[3/5] 开始训练区间: 同德路-石碶
+  ❌ 失败 | missing_columns | 缺少必要列: ['运行等级']
+
+[4/5] 开始训练区间: 石碶-雅渡
+  ❌ 失败 | missing_columns | 缺少必要列: ['运行等级']
+
+[5/5] 开始训练区间: 雅渡-庙堰
+  ❌ 失败 | missing_columns | 缺少必要列: ['运行等级']
+
+========================================================================
+批量训练结束
+成功区间数: 0
+失败区间数: 5
+汇总文件: D:\energy_conservation\output\ato_phase_results_v3\batch_train_summary.csv
+========================================================================
+
+# finished: 2026-05-26T14:53:49
+# return_code: 0
+# elapsed_seconds: 328.7

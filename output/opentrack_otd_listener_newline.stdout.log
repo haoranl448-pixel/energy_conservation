@@ -1,0 +1,3 @@
+Listening for OpenTrack OTD messages on http://127.0.0.1:9004/otd
+JSONL log: D:\energy_conservation\output\opentrack_otd_logs_newline\otd_messages_2026-07-14T122029.jsonl
+Press Ctrl+C to stop.

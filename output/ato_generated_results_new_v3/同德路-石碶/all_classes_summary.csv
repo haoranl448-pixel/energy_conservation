@@ -1,0 +1,6 @@
+﻿station_pair,class_name,status,reason,parent_ref,target_time_s,curve_csv,sim_time_s,peak_speed_kmh,total_dist_m
+同德路-石碶,class1,overspeed,最终生成曲线最高速度为 139.828422 km/h，超过 80.0 km/h，删除该等级,class2,99.0,,,,
+同德路-石碶,class2,generated,原生数据高保真镜像,class2,104.0,D:\energy_conservation\output\ato_generated_results_new_v3\同德路-石碶\class2_generated_curve.csv,103.5,77.8448,1350.1327
+同德路-石碶,class3,generated,最终生成曲线后验检查通过，峰值 66.290240 km/h,class3,109.0,D:\energy_conservation\output\ato_generated_results_new_v3\同德路-石碶\class3_generated_curve.csv,109.05,66.2902,1351.878
+同德路-石碶,class4,generated,最终生成曲线后验检查通过，峰值 59.948882 km/h,class3,114.0,D:\energy_conservation\output\ato_generated_results_new_v3\同德路-石碶\class4_generated_curve.csv,113.95,59.9489,1352.3327
+同德路-石碶,class5,generated,最终生成曲线后验检查通过，峰值 54.102467 km/h,class3,120.0,D:\energy_conservation\output\ato_generated_results_new_v3\同德路-石碶\class5_generated_curve.csv,120.0,54.1025,1352.6073

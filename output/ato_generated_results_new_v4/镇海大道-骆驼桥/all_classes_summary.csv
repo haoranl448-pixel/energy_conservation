@@ -1,0 +1,6 @@
+﻿station_pair,class_name,status,reason,curve_source,parent_ref,supporting_refs,real_sample_count,parent_real_sample_count,sample_reliability,dp_candidate_stage,target_time_s,curve_csv,sim_time_s,peak_speed_kmh,total_dist_m
+镇海大道-骆驼桥,class1,overspeed,最终生成曲线最高速度为 96.199545 km/h，超过 80.0 km/h，删除该等级,extrapolated_adjacent,class2,class2,0,101,generated,allow_extrapolated,111.0,,,,
+镇海大道-骆驼桥,class2,generated,最终生成曲线后验检查通过，峰值 79.693860 km/h,real,class2,class2,101,101,strong,real_only,116.0,D:\energy_conservation\output\ato_generated_results_new_v4\镇海大道-骆驼桥\class2_generated_curve.csv,116.0,79.6939,1597.7749
+镇海大道-骆驼桥,class3,generated,最终生成曲线后验检查通过，峰值 71.816579 km/h,real,class3,class3,1,1,weak,real_only,122.0,D:\energy_conservation\output\ato_generated_results_new_v4\镇海大道-骆驼桥\class3_generated_curve.csv,122.0,71.8166,1620.9775
+镇海大道-骆驼桥,class4,generated,最终生成曲线后验检查通过，峰值 65.002375 km/h,real,class4,class4,1,1,weak,real_only,128.0,D:\energy_conservation\output\ato_generated_results_new_v4\镇海大道-骆驼桥\class4_generated_curve.csv,128.0,65.0024,1620.9367
+镇海大道-骆驼桥,class5,generated,最终生成曲线后验检查通过，峰值 59.131025 km/h,extrapolated_adjacent,class4,class4,0,1,generated,allow_extrapolated,134.0,D:\energy_conservation\output\ato_generated_results_new_v4\镇海大道-骆驼桥\class5_generated_curve.csv,134.0,59.131,1620.9367

@@ -1,0 +1,6 @@
+﻿station_pair,class_name,status,reason,curve_source,parent_ref,supporting_refs,real_sample_count,parent_real_sample_count,sample_reliability,dp_candidate_stage,target_time_s,curve_csv,sim_time_s,peak_speed_kmh,total_dist_m
+院士路-盎孟港,class1,overspeed,最终生成曲线最高速度为 131.738818 km/h，超过 80.0 km/h，删除该等级,extrapolated_adjacent,class2,class2,0,5,generated,allow_extrapolated,84.0,,,,
+院士路-盎孟港,class2,overspeed,最终生成曲线最高速度为 107.515116 km/h，超过 80.0 km/h，删除该等级,real,class2,class2,5,5,strong,real_only,88.0,,,,
+院士路-盎孟港,class3,generated,最终生成曲线后验检查通过，峰值 72.213869 km/h,real,class3,class3,99,99,strong,real_only,91.0,D:\energy_conservation\output\ato_generated_results_new_v4\院士路-盎孟港\class3_generated_curve.csv,90.95,72.2139,996.422
+院士路-盎孟港,class4,generated,最终生成曲线后验检查通过，峰值 56.536201 km/h,extrapolated_adjacent,class3,class3,0,99,generated,allow_extrapolated,96.0,D:\energy_conservation\output\ato_generated_results_new_v4\院士路-盎孟港\class4_generated_curve.csv,95.95,56.5362,996.1489
+院士路-盎孟港,class5,missing_source,no adjacent real template,missing,,,0,0,,not_allowed,100.0,,,,

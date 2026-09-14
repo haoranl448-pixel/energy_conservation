@@ -1,0 +1,2 @@
+station_pair,v_peak_opt(m/s),t_arrival_opt(s),E_opt(Wh),params
+兴海南路-梅堰,0.1,75.0,1838519250.0,"L=846.0, V_UPPER=22.22, V_MID=12.5, A1=0.55, A2=0.8, A_DEC=-0.5, MASS=215.34, REACH_TOL=0.5, WINDOW=[75.0,91.0]"

@@ -1,0 +1,38 @@
+# step: energy_menu
+# command: C:\Users\bit11\AppData\Local\Programs\Python\Python311\python.exe D:\energy_conservation\scripts\ato_generated_results_energy.py
+# ENERGY_TRIP_NO: 1
+# ENERGY_TRIP_INDEX: 0
+# ENERGY_TARGET_TIME: script default
+# ENERGY_DATA_DIR: D:\energy_conservation\data\data_processed_step2_v3_first5_with_class
+# PYTHONIOENCODING: utf-8:replace
+# started: 2026-05-27T20:01:02
+
+按测试数据目录筛选能耗菜单区间: 5 个。
+🚀 开始批量评估 5 个区间的 ATO 轨迹能耗：第 1 趟车...
+地图/历史数据目录: D:\energy_conservation\data\data_processed_step2_v3_first5_with_class
+   ✅ 同德路-石碶 | class3 | 109.0s -> 总:12407.7Wh (物理:12361.7Wh + 残差:46.0Wh)
+   ✅ 同德路-石碶 | class4 | 114.0s -> 总:12150.6Wh (物理:11863.3Wh + 残差:287.3Wh)
+   ✅ 同德路-石碶 | class5 | 120.0s -> 总:11050.9Wh (物理:11038.2Wh + 残差:12.7Wh)
+   ✅ 布政-张家潭 | class2 | 112.0s -> 总:13690.5Wh (物理:13552.3Wh + 残差:138.2Wh)
+   ✅ 布政-张家潭 | class3 | 114.95s -> 总:13487.1Wh (物理:13140.2Wh + 残差:346.9Wh)
+   ✅ 布政-张家潭 | class4 | 121.0s -> 总:12855.5Wh (物理:13313.2Wh + 残差:-457.7Wh)
+   ✅ 布政-张家潭 | class5 | 127.0s -> 总:11376.3Wh (物理:12525.4Wh + 残差:-1149.1Wh)
+   ✅ 张家潭-同德路 | class1 | 141.05s -> 总:18369.4Wh (物理:18802.5Wh + 残差:-433.0Wh)
+   ✅ 张家潭-同德路 | class2 | 148.0s -> 总:18539.0Wh (物理:17334.3Wh + 残差:1204.7Wh)
+   ✅ 张家潭-同德路 | class3 | 151.0s -> 总:17894.0Wh (物理:17045.8Wh + 残差:848.2Wh)
+   ✅ 张家潭-同德路 | class4 | 159.0s -> 总:16140.2Wh (物理:15975.4Wh + 残差:164.8Wh)
+   ✅ 张家潭-同德路 | class5 | 166.0s -> 总:13711.5Wh (物理:14785.2Wh + 残差:-1073.6Wh)
+   ✅ 石碶-雅渡 | class2 | 80.0s -> 总:11308.6Wh (物理:11213.9Wh + 残差:94.7Wh)
+   ✅ 石碶-雅渡 | class4 | 86.0s -> 总:9240.0Wh (物理:8738.7Wh + 残差:501.3Wh)
+   ✅ 石碶-雅渡 | class5 | 90.0s -> 总:7264.9Wh (物理:6937.4Wh + 残差:327.6Wh)
+   ✅ 雅渡-庙堰 | class2 | 129.55s -> 总:22291.6Wh (物理:21424.0Wh + 残差:867.7Wh)
+   ✅ 雅渡-庙堰 | class3 | 132.0s -> 总:21565.9Wh (物理:20503.9Wh + 残差:1062.0Wh)
+   ✅ 雅渡-庙堰 | class4 | 139.0s -> 总:19694.1Wh (物理:18755.0Wh + 残差:939.1Wh)
+   ✅ 雅渡-庙堰 | class5 | 146.0s -> 总:17418.9Wh (物理:17098.0Wh + 残差:320.9Wh)
+
+✨ 评估完成！能耗菜单已生成：D:\energy_conservation\output\analysis\ato_class_energy_menu1_new_v3.csv
+👉 现在你可以运行 DP 调度算法来选择最优 Class 组合了。
+
+# finished: 2026-05-27T20:10:34
+# return_code: 0
+# elapsed_seconds: 572.6

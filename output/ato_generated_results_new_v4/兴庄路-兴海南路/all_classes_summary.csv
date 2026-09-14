@@ -1,0 +1,6 @@
+﻿station_pair,class_name,status,reason,curve_source,parent_ref,supporting_refs,real_sample_count,parent_real_sample_count,sample_reliability,dp_candidate_stage,target_time_s,curve_csv,sim_time_s,peak_speed_kmh,total_dist_m
+兴庄路-兴海南路,class1,overspeed,最终生成曲线最高速度为 138.571967 km/h，超过 80.0 km/h，删除该等级,extrapolated_adjacent,class2,class2,0,30,generated,allow_extrapolated,83.0,,,,
+兴庄路-兴海南路,class2,generated,最终生成曲线后验检查通过，峰值 79.846876 km/h,real,class2,class2,30,30,strong,real_only,87.0,D:\energy_conservation\output\ato_generated_results_new_v4\兴庄路-兴海南路\class2_generated_curve.csv,86.95,79.8469,959.3987
+兴庄路-兴海南路,class3,overspeed,最终生成曲线最高速度为 88.137136 km/h，超过 80.0 km/h，删除该等级,real,class3,class3,72,72,strong,real_only,91.0,,,,
+兴庄路-兴海南路,class4,generated,最终生成曲线后验检查通过，峰值 53.817959 km/h,extrapolated_adjacent,class3,class3,0,72,generated,allow_extrapolated,96.0,D:\energy_conservation\output\ato_generated_results_new_v4\兴庄路-兴海南路\class4_generated_curve.csv,95.95,53.818,974.0081
+兴庄路-兴海南路,class5,missing_source,no adjacent real template,missing,,,0,0,,not_allowed,100.0,,,,

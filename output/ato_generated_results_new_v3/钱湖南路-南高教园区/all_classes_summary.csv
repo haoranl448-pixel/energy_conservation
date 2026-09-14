@@ -1,0 +1,6 @@
+﻿station_pair,class_name,status,reason,parent_ref,target_time_s,curve_csv,sim_time_s,peak_speed_kmh,total_dist_m
+钱湖南路-南高教园区,class1,overspeed,最终生成曲线最高速度为 102.318354 km/h，超过 80.0 km/h，删除该等级,class2,91.0,,,,
+钱湖南路-南高教园区,class2,generated,最终生成曲线后验检查通过，峰值 73.876789 km/h,class2,96.0,D:\energy_conservation\output\ato_generated_results_new_v3\钱湖南路-南高教园区\class2_generated_curve.csv,96.0,73.8768,1188.1056
+钱湖南路-南高教园区,class3,generated,最终生成曲线后验检查通过，峰值 66.426877 km/h,class3,100.0,D:\energy_conservation\output\ato_generated_results_new_v3\钱湖南路-南高教园区\class3_generated_curve.csv,100.0,66.4269,1187.8331
+钱湖南路-南高教园区,class4,generated,最终生成曲线后验检查通过，峰值 58.691236 km/h,class3,105.0,D:\energy_conservation\output\ato_generated_results_new_v3\钱湖南路-南高教园区\class4_generated_curve.csv,105.0,58.6912,1188.617
+钱湖南路-南高教园区,class5,generated,最终生成曲线后验检查通过，峰值 52.293449 km/h,class3,111.0,D:\energy_conservation\output\ato_generated_results_new_v3\钱湖南路-南高教园区\class5_generated_curve.csv,111.0,52.2934,1187.917

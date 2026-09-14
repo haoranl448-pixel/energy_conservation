@@ -1,0 +1,30 @@
+# step: class_lookup
+# command: C:\Users\bit11\AppData\Local\Programs\Python\Python311\python.exe D:\energy_conservation\scripts_new\00_main_pipeline\03_build_class_lookup_tables.py
+# ENERGY_TRIP_NO: 1
+# ENERGY_TRIP_INDEX: 0
+# ENERGY_TARGET_TIME: 706.7
+# ENERGY_RESULTS_DATA_DIR: D:\energy_conservation\data\data_processed_step2_v3_first5_curve_quality
+# ENERGY_ATO_DATA_DIR: D:\energy_conservation\data\data_processed_step2_v3_first5_curve_quality
+# ENERGY_LINE_SCOPE: 5
+# PYTHONIOENCODING: utf-8:replace
+# started: 2026-06-04T17:52:51
+
+📅 正在全量扫描日期文件夹: ['05012-2024-07-08', '05012-2024-07-09', '05012-2024-07-10', '05012-2024-07-11', '05012-2024-07-12', '05012-2024-07-13']
+
+================================================================================
+✅ 统计完成！
+结果文件: D:\energy_conservation\output\analysis\class_tables_strict\historical_class_frequency_and_time_limits.csv
+================================================================================
+预览结果 (部分列):
+         class3  历史最小时间(s)  历史最大时间(s)
+区段                                   
+布政-张家潭       26     111.20     117.55
+张家潭-同德路      27     144.10     155.70
+同德路-石碶       17      99.35     109.45
+石碶-雅渡        27      73.80      84.85
+雅渡-庙堰        17     125.00     134.40
+================================================================================
+
+# finished: 2026-06-04T17:53:27
+# return_code: 0
+# elapsed_seconds: 36.7

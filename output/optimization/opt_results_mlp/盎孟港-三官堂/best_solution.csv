@@ -1,0 +1,2 @@
+station_pair,v_peak_opt(m/s),t_arrival_opt(s),E_opt(Wh),params
+盎孟港-三官堂,0.1,126.0,2893419249.9999995,"L=1906.0, V_UPPER=22.22, V_MID=12.5, A1=0.55, A2=0.8, A_DEC=-0.5, MASS=215.54, REACH_TOL=0.5, WINDOW=[126.0,153.0]"

@@ -1,0 +1,54 @@
+# step: dp_schedule
+# command: C:\Users\bit11\AppData\Local\Programs\Python\Python311\python.exe D:\energy_conservation\scripts_new\00_main_pipeline\08_ato_class_globall_v2.py
+# ENERGY_TRIP_NO: 1
+# ENERGY_TRIP_INDEX: 0
+# ENERGY_TARGET_TIME: 706.7
+# ENERGY_RESULTS_DATA_DIR: D:\energy_conservation\data\data_processed_step2_v3_first5_curve_quality
+# ENERGY_ATO_DATA_DIR: D:\energy_conservation\data\data_processed_step2_v3_first5_curve_quality
+# ENERGY_LINE_SCOPE: 5
+# PYTHONIOENCODING: utf-8:replace
+# started: 2026-06-03T15:49:50
+
+Trip: 1 (segment index 0)
+Target total time: 706.70s
+Line scope: 5 (5 sections)
+Menu file: D:\energy_conservation\output\analysis\ato_class_energy_menu1_new_v3.csv
+History file: D:\energy_conservation\full_line1_validation_results.csv
+Historical curve data dir: D:\energy_conservation\data\data_processed_step2_v3_first5_curve_quality
+Max run (at min dwell): 614.7s
+Nom run (at nominal):   586.7s
+Dwell budget to trade:   28s
+Dwell config (4 intervals):
+  布政-张家潭: nominal=30s, min=23s [elastic (23-30s)]
+  张家潭-同德路: nominal=30s, min=23s [elastic (23-30s)]
+  同德路-石碶: nominal=30s, min=23s [elastic (23-30s)]
+  石碶-雅渡: nominal=30s, min=23s [elastic (23-30s)]
+  雅渡-庙堰: nominal=30s, min=23s [elastic (23-30s)]
+
+DP stage: real_only | sources=['real']
+  [1/5] 布政-张家潭 -> 2 states
+  [2/5] 张家潭-同德路 -> 4 states
+  [3/5] 同德路-石碶 -> 8 states
+  [4/5] 石碶-雅渡 -> 20 states
+  [5/5] 雅渡-庙堰 -> 37 states
+
+Selected DP stage: real_only
+Feasible states: 37
+Best:  run=600.6s, energy=74129.7 Wh, extrapolated=0, interpolated=0
+Nominal-dwell best nearby: run=594.6s, energy=74600.3 Wh
+Dwell trade: +6.0s run time -> saves 470.5 Wh (0.6%)
+
+Run: 601.0s | Dwell: 106.0s | Total: 707.0s (target: 706.7s)
+Energy: 74129.7 Wh | Saving: 7.92%
+  Dwell after 布政-张家潭: 26.5s
+  Dwell after 张家潭-同德路: 26.5s
+  Dwell after 同德路-石碶: 26.5s
+  Dwell after 石碶-雅渡: 26.5s
+
+Plotting full-line comparison ...
+Saved: D:\energy_conservation\output\schedule\final_plan_report_v2\Optimized_Full_Line_Report.png
+Done. Energy: 74.130 kWh, Time: 707.0s (strict = 706.7s)
+
+# finished: 2026-06-03T15:51:36
+# return_code: 0
+# elapsed_seconds: 105.7

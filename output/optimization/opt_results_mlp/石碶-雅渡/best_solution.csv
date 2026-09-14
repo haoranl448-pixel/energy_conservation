@@ -1,0 +1,2 @@
+station_pair,v_peak_opt(m/s),t_arrival_opt(s),E_opt(Wh),params
+石碶-雅渡,15.080714812790218,84.37725064013631,,"L=840.0, V_UPPER=22.22, V_MID=12.5, A1=0.55, A2=0.8, A_DEC=-0.5, MASS=215.24, REACH_TOL=0.5, WINDOW=[76.0,90.0]"

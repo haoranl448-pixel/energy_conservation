@@ -1,0 +1,48 @@
+# step: dp_schedule
+# command: C:\Users\bit11\AppData\Local\Programs\Python\Python311\python.exe D:\energy_conservation\scripts\ato_class_globall_v2.py
+# ENERGY_TRIP_NO: 1
+# ENERGY_TRIP_INDEX: 0
+# ENERGY_TARGET_TIME: script default
+# ENERGY_DATA_DIR: D:\energy_conservation\data\data_processed_step2_v3_first5_with_class
+# PYTHONIOENCODING: utf-8:replace
+# started: 2026-05-27T20:13:03
+
+Trip: 1 (segment index 0)
+Target total time: 692.65s
+Menu file: D:\energy_conservation\output\analysis\ato_class_energy_menu1_new_v3.csv
+History file: D:\energy_conservation\full_line1_validation_results.csv
+Historical curve data dir: D:\energy_conservation\data\data_processed_step2_v3_first5_with_class
+Max run (at min dwell): 600.6s
+Nom run (at nominal):   572.6s
+Dwell budget to trade:   28s
+Dwell config (4 intervals):
+  布政-张家潭: nominal=30s, min=23s [elastic (23-30s)]
+  张家潭-同德路: nominal=30s, min=23s [elastic (23-30s)]
+  同德路-石碶: nominal=30s, min=23s [elastic (23-30s)]
+  石碶-雅渡: nominal=30s, min=23s [elastic (23-30s)]
+  雅渡-庙堰: nominal=30s, min=23s [elastic (23-30s)]
+  [1/5] 布政-张家潭 -> 4 states
+  [2/5] 张家潭-同德路 -> 14 states
+  [3/5] 同德路-石碶 -> 28 states
+  [4/5] 石碶-雅渡 -> 43 states
+  [5/5] 雅渡-庙堰 -> 74 states
+
+Feasible states: 36
+Best:  run=598.0s, energy=71596.3 Wh
+Nominal-dwell best nearby: run=581.0s, energy=77511.8 Wh
+Dwell trade: +17.0s run time -> saves 5915.5 Wh (7.6%)
+
+Run: 598.0s | Dwell: 94.8s | Total: 692.8s (target: 692.65s)
+Energy: 71596.3 Wh | Saving: 11.86%
+  Dwell after 布政-张家潭: 23.7s
+  Dwell after 张家潭-同德路: 23.7s
+  Dwell after 同德路-石碶: 23.7s
+  Dwell after 石碶-雅渡: 23.7s
+
+Plotting full-line comparison ...
+Saved: D:\energy_conservation\output\schedule\final_plan_report_v2\Optimized_Full_Line_Report.png
+Done. Energy: 71.596 kWh, Time: 692.8s (strict = 692.65s)
+
+# finished: 2026-05-27T20:15:19
+# return_code: 0
+# elapsed_seconds: 136.2

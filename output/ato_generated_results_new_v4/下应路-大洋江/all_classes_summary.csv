@@ -1,0 +1,6 @@
+﻿station_pair,class_name,status,reason,curve_source,parent_ref,supporting_refs,real_sample_count,parent_real_sample_count,sample_reliability,dp_candidate_stage,target_time_s,curve_csv,sim_time_s,peak_speed_kmh,total_dist_m
+下应路-大洋江,class1,overspeed,最终生成曲线最高速度为 96.434278 km/h，超过 80.0 km/h，删除该等级,extrapolated_adjacent,class2,class2,0,41,generated,allow_extrapolated,96.0,,,,
+下应路-大洋江,class2,generated,最终生成曲线后验检查通过，峰值 73.000477 km/h,real,class2,class2,41,41,strong,real_only,101.0,D:\energy_conservation\output\ato_generated_results_new_v4\下应路-大洋江\class2_generated_curve.csv,101.0,73.0005,1214.0969
+下应路-大洋江,class3,generated,最终生成曲线后验检查通过，峰值 62.671671 km/h,real,class3,class3,65,65,strong,real_only,106.0,D:\energy_conservation\output\ato_generated_results_new_v4\下应路-大洋江\class3_generated_curve.csv,106.0,62.6717,1214.5011
+下应路-大洋江,class4,generated,最终生成曲线后验检查通过，峰值 58.949734 km/h,real,class4,class4,1,1,weak,real_only,111.0,D:\energy_conservation\output\ato_generated_results_new_v4\下应路-大洋江\class4_generated_curve.csv,110.95,58.9497,1232.9134
+下应路-大洋江,class5,generated,最终生成曲线后验检查通过，峰值 52.235000 km/h,extrapolated_adjacent,class4,class4,0,1,generated,allow_extrapolated,117.0,D:\energy_conservation\output\ato_generated_results_new_v4\下应路-大洋江\class5_generated_curve.csv,117.0,52.235,1233.617

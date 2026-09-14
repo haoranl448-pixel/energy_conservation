@@ -1,0 +1,6 @@
+﻿station_pair,class_name,status,reason,curve_source,parent_ref,supporting_refs,real_sample_count,parent_real_sample_count,sample_reliability,dp_candidate_stage,target_time_s,curve_csv,sim_time_s,peak_speed_kmh,total_dist_m
+石碶-雅渡,class1,overspeed,最终生成曲线最高速度为 117.426964 km/h，超过 80.0 km/h，删除该等级,extrapolated_adjacent,class2,class2,0,38,generated,allow_extrapolated,76.0,,,,
+石碶-雅渡,class2,generated,最终生成曲线后验检查通过，峰值 64.028017 km/h,real,class2,class2,38,38,strong,real_only,80.0,D:\energy_conservation\output\ato_generated_results_new_v4\石碶-雅渡\class2_generated_curve.csv,80.0,64.028,830.0819
+石碶-雅渡,class3,generated,最终生成曲线后验检查通过，峰值 71.400055 km/h,real,class3,class3,63,63,strong,real_only,82.0,D:\energy_conservation\output\ato_generated_results_new_v4\石碶-雅渡\class3_generated_curve.csv,82.0,71.4001,827.8212
+石碶-雅渡,class4,generated,最终生成曲线后验检查通过，峰值 61.450037 km/h,real,class4,class4,8,8,strong,real_only,86.0,D:\energy_conservation\output\ato_generated_results_new_v4\石碶-雅渡\class4_generated_curve.csv,85.95,61.45,841.534
+石碶-雅渡,class5,generated,最终生成曲线后验检查通过，峰值 50.895838 km/h,extrapolated_adjacent,class4,class4,0,8,generated,allow_extrapolated,90.0,D:\energy_conservation\output\ato_generated_results_new_v4\石碶-雅渡\class5_generated_curve.csv,90.0,50.8958,841.7078

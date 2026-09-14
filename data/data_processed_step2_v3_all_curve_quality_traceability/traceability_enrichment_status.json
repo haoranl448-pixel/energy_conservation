@@ -1,0 +1,7 @@
+{
+  "complete": true,
+  "input_file_count": 52,
+  "completed_file_count": 52,
+  "missing_files": [],
+  "note": "complete=false 时，这个目录只是试写/增量结果，不能作为完整主流程输入。"
+}

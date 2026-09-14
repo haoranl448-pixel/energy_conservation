@@ -1,0 +1,44 @@
+# step: dp_schedule
+# command: C:\Users\bit11\AppData\Local\Programs\Python\Python311\python.exe D:\energy_conservation\scripts\ato_class_globall_v2.py
+# ENERGY_TRIP_NO: 1
+# ENERGY_TRIP_INDEX: 0
+# PYTHONIOENCODING: utf-8:replace
+# started: 2026-05-25T16:11:00
+
+Trip: 1 (segment index 0)
+Menu file: D:\energy_conservation\output\analysis\ato_class_energy_menu1_new_v3.csv
+History file: D:\energy_conservation\full_line1_validation_results.csv
+Max run (at min dwell): 600.6s
+Nom run (at nominal):   572.6s
+Dwell budget to trade:   28s
+Dwell config (4 intervals):
+  布政-张家潭: nominal=30s, min=23s [elastic (23-30s)]
+  张家潭-同德路: nominal=30s, min=23s [elastic (23-30s)]
+  同德路-石碶: nominal=30s, min=23s [elastic (23-30s)]
+  石碶-雅渡: nominal=30s, min=23s [elastic (23-30s)]
+  雅渡-庙堰: nominal=30s, min=23s [elastic (23-30s)]
+  [1/5] 布政-张家潭 -> 4 states
+  [2/5] 张家潭-同德路 -> 16 states
+  [3/5] 同德路-石碶 -> 52 states
+  [4/5] 石碶-雅渡 -> 116 states
+  [5/5] 雅渡-庙堰 -> 141 states
+
+Feasible states: 62
+Best:  run=599.0s, energy=68360.0 Wh
+Nominal-dwell best nearby: run=582.5s, energy=73352.2 Wh
+Dwell trade: +16.5s run time -> saves 4992.2 Wh (6.8%)
+
+Run: 599.0s | Dwell: 93.6s | Total: 692.6s (target: 692.65s)
+Energy: 68360.0 Wh | Saving: 15.00%
+  Dwell after 布政-张家潭: 23.4s -> min=23s
+  Dwell after 张家潭-同德路: 23.4s -> min=23s
+  Dwell after 同德路-石碶: 23.4s -> min=23s
+  Dwell after 石碶-雅渡: 23.4s -> min=23s
+
+Plotting full-line comparison ...
+Saved: D:\energy_conservation\output\schedule\final_plan_report_v2\Optimized_Full_Line_Report.png
+Done. Energy: 68.360 kWh, Time: 692.6s (strict = 692.65s)
+
+# finished: 2026-05-25T16:12:34
+# return_code: 0
+# elapsed_seconds: 93.6

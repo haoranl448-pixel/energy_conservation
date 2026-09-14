@@ -1,0 +1,6 @@
+﻿station_pair,class_name,status,reason,curve_source,parent_ref,supporting_refs,real_sample_count,parent_real_sample_count,sample_reliability,dp_candidate_stage,target_time_s,curve_csv,sim_time_s,peak_speed_kmh,total_dist_m
+雅渡-庙堰,class1,overspeed,最终生成曲线最高速度为 93.231005 km/h，超过 80.0 km/h，删除该等级,extrapolated_adjacent,class2,class2,0,32,generated,allow_extrapolated,123.0,,,,
+雅渡-庙堰,class2,generated,最终生成曲线后验检查通过，峰值 79.011456 km/h,real,class2,class2,32,32,strong,real_only,129.0,D:\energy_conservation\output\ato_generated_results_new_v4\雅渡-庙堰\class2_generated_curve.csv,129.0,79.0115,1861.0402
+雅渡-庙堰,class3,generated,最终生成曲线后验检查通过，峰值 75.511386 km/h,real,class3,class3,67,67,strong,real_only,132.0,D:\energy_conservation\output\ato_generated_results_new_v4\雅渡-庙堰\class3_generated_curve.csv,131.95,75.5114,1862.6803
+雅渡-庙堰,class4,generated,最终生成曲线后验检查通过，峰值 69.002641 km/h,real,class4,class4,10,10,strong,real_only,139.0,D:\energy_conservation\output\ato_generated_results_new_v4\雅渡-庙堰\class4_generated_curve.csv,139.0,69.0026,1889.8107
+雅渡-庙堰,class5,generated,最终生成曲线后验检查通过，峰值 62.593560 km/h,extrapolated_adjacent,class4,class4,0,10,generated,allow_extrapolated,146.0,D:\energy_conservation\output\ato_generated_results_new_v4\雅渡-庙堰\class5_generated_curve.csv,146.0,62.5936,1890.2584

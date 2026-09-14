@@ -1,0 +1,2 @@
+﻿station_pair,target_l_from_data_m,class3_time_median_s,class3_target_time_s,class3_peak_speed_ref_mps,class3_peak_speed_ref_kmh,T_acc_ref_s,T_mid_ref_s,T_br_ref_s,D_acc_ref_m,D_mid_ref_m,D_br_ref_m,ref_curve_distance_m,mass_median,n_runs_class3
+兴海南路-梅堰,846.3192708333333,79.75,82.0,20.380128702672007,73.36846332961923,30.900000000000002,11.150000000000002,37.699999999999996,276.4278161287542,223.3330761497019,348.58003497244033,848.3409272508954,215.34,13

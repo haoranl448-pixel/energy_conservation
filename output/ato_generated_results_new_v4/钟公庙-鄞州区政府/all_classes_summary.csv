@@ -1,0 +1,6 @@
+﻿station_pair,class_name,status,reason,curve_source,parent_ref,supporting_refs,real_sample_count,parent_real_sample_count,sample_reliability,dp_candidate_stage,target_time_s,curve_csv,sim_time_s,peak_speed_kmh,total_dist_m
+钟公庙-鄞州区政府,class1,missing_source,no adjacent real template,missing,,,0,0,,not_allowed,82.0,,,,
+钟公庙-鄞州区政府,class2,overspeed,最终生成曲线最高速度为 92.443458 km/h，超过 80.0 km/h，删除该等级,extrapolated_adjacent,class3,class3,0,108,generated,allow_extrapolated,86.0,,,,
+钟公庙-鄞州区政府,class3,generated,最终生成曲线后验检查通过，峰值 68.618317 km/h,real,class3,class3,108,108,strong,real_only,90.0,D:\energy_conservation\output\ato_generated_results_new_v4\钟公庙-鄞州区政府\class3_generated_curve.csv,90.0,68.6183,985.1251
+钟公庙-鄞州区政府,class4,generated,最终生成曲线后验检查通过，峰值 59.864507 km/h,real,class4,class4,1,1,weak,real_only,95.0,D:\energy_conservation\output\ato_generated_results_new_v4\钟公庙-鄞州区政府\class4_generated_curve.csv,94.95,59.8645,1001.0457
+钟公庙-鄞州区政府,class5,generated,最终生成曲线后验检查通过，峰值 53.292012 km/h,extrapolated_adjacent,class4,class4,0,1,generated,allow_extrapolated,99.0,D:\energy_conservation\output\ato_generated_results_new_v4\钟公庙-鄞州区政府\class5_generated_curve.csv,99.0,53.292,1000.9724

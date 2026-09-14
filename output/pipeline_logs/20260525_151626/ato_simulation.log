@@ -1,0 +1,390 @@
+# step: ato_simulation
+# command: C:\Users\bit11\AppData\Local\Programs\Python\Python311\python.exe D:\energy_conservation\scripts\simulate_ATO_v8.py
+# ENERGY_TRIP_NO: 1
+# ENERGY_TRIP_INDEX: 0
+# PYTHONIOENCODING: utf-8:replace
+# started: 2026-05-25T15:22:01
+
+========================================================================
+批量生成 class1-class5 速度曲线
+时间表: D:\energy_conservation\output\analysis\class_tables_strict\standard_class_times.csv
+模板目录: D:\energy_conservation\output\ato_phase_results_v3
+输出目录: D:\energy_conservation\output\ato_generated_results_new_v4
+硬限速: 80.0 km/h
+待处理区间数: 26
+========================================================================
+
+[1/26] 开始生成区间: 布政-张家潭
+   ⚓ class1 以 class3 为基准进行外推
+   ⚓ class2 以 class3 为基准进行外推
+   🎯 class3 使用原生数据镜像 (Time Diff: 0.45s)
+   ⚓ class4 以 class3 为基准进行外推
+   ⚓ class5 以 class3 为基准进行外推
+  ✅ 完成 | generated=4 | overspeed=1 | infeasible=0
+  class2对比: no_real_runs | 未找到真实样本
+      - class1: 超速跳过 | 最终生成曲线最高速度为 81.057747 km/h，超过 80.0 km/h，删除该等级
+      - class2: 生成成功 | peak=69.232000 km/h
+      - class3: 生成成功 | peak=66.221900 km/h
+      - class4: 生成成功 | peak=58.998700 km/h
+      - class5: 生成成功 | peak=53.910600 km/h
+
+[2/26] 开始生成区间: 张家潭-同德路
+   ⚓ class1 以 class3 为基准进行外推
+   ⚓ class2 以 class3 为基准进行外推
+   ⚓ class3 以 class3 为基准进行外推
+   ⚓ class4 以 class3 为基准进行外推
+   ⚓ class5 以 class3 为基准进行外推
+  ✅ 完成 | generated=5 | overspeed=0 | infeasible=0
+  class2对比: no_real_runs | 未找到真实样本
+      - class1: 生成成功 | peak=73.030800 km/h
+      - class2: 生成成功 | peak=65.697300 km/h
+      - class3: 生成成功 | peak=63.869600 km/h
+      - class4: 生成成功 | peak=58.515800 km/h
+      - class5: 生成成功 | peak=55.013500 km/h
+
+[3/26] 开始生成区间: 同德路-石碶
+   ⚓ class1 以 class2 为基准进行外推
+   🎯 class2 使用原生数据镜像 (Time Diff: 0.50s)
+   ⚓ class3 以 class3 为基准进行外推
+   ⚓ class4 以 class3 为基准进行外推
+   ⚓ class5 以 class3 为基准进行外推
+  ✅ 完成 | generated=4 | overspeed=1 | infeasible=0
+  class2对比: success | none
+      - class1: 超速跳过 | 最终生成曲线最高速度为 139.828422 km/h，超过 80.0 km/h，删除该等级
+      - class2: 生成成功 | peak=77.844800 km/h
+      - class3: 生成成功 | peak=66.290200 km/h
+      - class4: 生成成功 | peak=59.948900 km/h
+      - class5: 生成成功 | peak=54.102500 km/h
+
+[4/26] 开始生成区间: 石碶-雅渡
+   ⚓ class1 以 class3 为基准进行外推
+   ⚓ class2 以 class3 为基准进行外推
+   ⚓ class3 以 class3 为基准进行外推
+   ⚓ class4 以 class3 为基准进行外推
+   ⚓ class5 以 class3 为基准进行外推
+  ✅ 完成 | generated=4 | overspeed=1 | infeasible=0
+  class2对比: no_real_runs | 未找到真实样本
+      - class1: 超速跳过 | 最终生成曲线最高速度为 137.743714 km/h，超过 80.0 km/h，删除该等级
+      - class2: 生成成功 | peak=65.696900 km/h
+      - class3: 生成成功 | peak=58.972200 km/h
+      - class4: 生成成功 | peak=51.293100 km/h
+      - class5: 生成成功 | peak=46.260400 km/h
+
+[5/26] 开始生成区间: 雅渡-庙堰
+   ⚓ class1 以 class2 为基准进行外推
+   ⚓ class2 以 class2 为基准进行外推
+   ⚓ class3 以 class3 为基准进行外推
+   ⚓ class4 以 class3 为基准进行外推
+   ⚓ class5 以 class3 为基准进行外推
+  ✅ 完成 | generated=4 | overspeed=1 | infeasible=0
+  class2对比: success | none
+      - class1: 超速跳过 | 最终生成曲线最高速度为 89.337008 km/h，超过 80.0 km/h，删除该等级
+      - class2: 生成成功 | peak=76.807100 km/h
+      - class3: 生成成功 | peak=73.326200 km/h
+      - class4: 生成成功 | peak=65.703400 km/h
+      - class5: 生成成功 | peak=60.143300 km/h
+
+[6/26] 开始生成区间: 庙堰-钟公庙
+   ⚓ class1 以 class2 为基准进行外推
+   ⚓ class2 以 class2 为基准进行外推
+   ⚓ class3 以 class3 为基准进行外推
+   ⚓ class4 以 class3 为基准进行外推
+   ⚓ class5 以 class3 为基准进行外推
+  ✅ 完成 | generated=4 | overspeed=1 | infeasible=0
+  class2对比: success | none
+      - class1: 超速跳过 | 最终生成曲线最高速度为 139.278711 km/h，超过 80.0 km/h，删除该等级
+      - class2: 生成成功 | peak=71.765300 km/h
+      - class3: 生成成功 | peak=64.257000 km/h
+      - class4: 生成成功 | peak=56.141500 km/h
+      - class5: 生成成功 | peak=50.704300 km/h
+
+[7/26] 开始生成区间: 钟公庙-鄞州区政府
+   ⚓ class1 以 class3 为基准进行外推
+   ⚓ class2 以 class3 为基准进行外推
+   ⚓ class3 以 class3 为基准进行外推
+   ⚓ class4 以 class3 为基准进行外推
+   ⚓ class5 以 class3 为基准进行外推
+  ✅ 完成 | generated=4 | overspeed=1 | infeasible=0
+  class2对比: no_real_runs | 未找到真实样本
+      - class1: 超速跳过 | 最终生成曲线最高速度为 115.128064 km/h，超过 80.0 km/h，删除该等级
+      - class2: 生成成功 | peak=78.372300 km/h
+      - class3: 生成成功 | peak=63.824900 km/h
+      - class4: 生成成功 | peak=54.534600 km/h
+      - class5: 生成成功 | peak=49.727500 km/h
+
+[8/26] 开始生成区间: 鄞州区政府-钱湖南路
+   ⚓ class1 以 class2 为基准进行外推
+   ⚓ class2 以 class2 为基准进行外推
+   ⚓ class3 以 class3 为基准进行外推
+   ⚓ class4 以 class3 为基准进行外推
+   ⚓ class5 以 class3 为基准进行外推
+  ✅ 完成 | generated=4 | overspeed=1 | infeasible=0
+  class2对比: success | none
+      - class1: 超速跳过 | 最终生成曲线最高速度为 84.463861 km/h，超过 80.0 km/h，删除该等级
+      - class2: 生成成功 | peak=75.265400 km/h
+      - class3: 生成成功 | peak=70.364200 km/h
+      - class4: 生成成功 | peak=63.346500 km/h
+      - class5: 生成成功 | peak=58.193300 km/h
+
+[9/26] 开始生成区间: 钱湖南路-南高教园区
+   ⚓ class1 以 class2 为基准进行外推
+   ⚓ class2 以 class2 为基准进行外推
+   ⚓ class3 以 class3 为基准进行外推
+   ⚓ class4 以 class3 为基准进行外推
+   ⚓ class5 以 class3 为基准进行外推
+  ✅ 完成 | generated=4 | overspeed=1 | infeasible=0
+  class2对比: success | none
+      - class1: 超速跳过 | 最终生成曲线最高速度为 102.318354 km/h，超过 80.0 km/h，删除该等级
+      - class2: 生成成功 | peak=73.876800 km/h
+      - class3: 生成成功 | peak=66.426900 km/h
+      - class4: 生成成功 | peak=58.691200 km/h
+      - class5: 生成成功 | peak=52.293400 km/h
+
+[10/26] 开始生成区间: 南高教园区-下应路
+   ⚓ class1 以 class2 为基准进行外推
+   ⚓ class2 以 class2 为基准进行外推
+   ⚓ class3 以 class3 为基准进行外推
+   ⚓ class4 以 class3 为基准进行外推
+   ⚓ class5 以 class3 为基准进行外推
+  ✅ 完成 | generated=4 | overspeed=1 | infeasible=0
+  class2对比: success | none
+      - class1: 超速跳过 | 最终生成曲线最高速度为 89.949043 km/h，超过 80.0 km/h，删除该等级
+      - class2: 生成成功 | peak=75.838900 km/h
+      - class3: 生成成功 | peak=69.370900 km/h
+      - class4: 生成成功 | peak=61.557000 km/h
+      - class5: 生成成功 | peak=55.922700 km/h
+
+[11/26] 开始生成区间: 下应路-大洋江
+   ⚓ class1 以 class2 为基准进行外推
+   ⚓ class2 以 class2 为基准进行外推
+   ⚓ class3 以 class3 为基准进行外推
+   ⚓ class4 以 class3 为基准进行外推
+   ⚓ class5 以 class3 为基准进行外推
+  ✅ 完成 | generated=4 | overspeed=1 | infeasible=0
+  class2对比: success | none
+      - class1: 超速跳过 | 最终生成曲线最高速度为 85.266992 km/h，超过 80.0 km/h，删除该等级
+      - class2: 生成成功 | peak=69.760400 km/h
+      - class3: 生成成功 | peak=60.456200 km/h
+      - class4: 生成成功 | peak=54.564100 km/h
+      - class5: 生成成功 | peak=49.316600 km/h
+
+[12/26] 开始生成区间: 大洋江-泗港
+   ⚓ class1 以 class3 为基准进行外推
+   ⚓ class2 以 class3 为基准进行外推
+   ⚓ class3 以 class3 为基准进行外推
+   ⚓ class4 以 class3 为基准进行外推
+   ⚓ class5 以 class3 为基准进行外推
+  ✅ 完成 | generated=4 | overspeed=1 | infeasible=0
+  class2对比: no_real_runs | 未找到真实样本
+      - class1: 超速跳过 | 最终生成曲线最高速度为 108.343490 km/h，超过 80.0 km/h，删除该等级
+      - class2: 生成成功 | peak=70.402100 km/h
+      - class3: 生成成功 | peak=57.610500 km/h
+      - class4: 生成成功 | peak=51.987900 km/h
+      - class5: 生成成功 | peak=46.790600 km/h
+
+[13/26] 开始生成区间: 泗港-曹隘
+   ⚓ class1 以 class2 为基准进行外推
+   ⚓ class2 以 class2 为基准进行外推
+   ⚓ class3 以 class3 为基准进行外推
+   ⚓ class4 以 class3 为基准进行外推
+   ⚓ class5 以 class3 为基准进行外推
+  ✅ 完成 | generated=2 | overspeed=3 | infeasible=0
+  class2对比: skipped | 未找到样本
+      - class1: 超速跳过 | 最终生成曲线最高速度为 110.656394 km/h，超过 80.0 km/h，删除该等级
+      - class2: 超速跳过 | 最终生成曲线最高速度为 87.657239 km/h，超过 80.0 km/h，删除该等级
+      - class3: 超速跳过 | 最终生成曲线最高速度为 84.868654 km/h，超过 80.0 km/h，删除该等级
+      - class4: 生成成功 | peak=72.064700 km/h
+      - class5: 生成成功 | peak=64.955900 km/h
+
+[14/26] 开始生成区间: 曹隘-柳隘
+   ⚓ class1 以 class2 为基准进行外推
+   ⚓ class2 以 class2 为基准进行外推
+   ⚓ class3 以 class3 为基准进行外推
+   ⚓ class4 以 class3 为基准进行外推
+   ⚓ class5 以 class3 为基准进行外推
+  ✅ 完成 | generated=4 | overspeed=1 | infeasible=0
+  class2对比: success | none
+      - class1: 超速跳过 | 最终生成曲线最高速度为 99.470003 km/h，超过 80.0 km/h，删除该等级
+      - class2: 生成成功 | peak=72.032600 km/h
+      - class3: 生成成功 | peak=67.430300 km/h
+      - class4: 生成成功 | peak=60.006200 km/h
+      - class5: 生成成功 | peak=53.831500 km/h
+
+[15/26] 开始生成区间: 柳隘-海晏北路
+   ⚓ class1 以 class2 为基准进行外推
+   🎯 class2 使用原生数据镜像 (Time Diff: 0.55s)
+   ⚓ class3 以 class3 为基准进行外推
+   ⚓ class4 以 class3 为基准进行外推
+   ⚓ class5 以 class3 为基准进行外推
+  ✅ 完成 | generated=4 | overspeed=1 | infeasible=0
+  class2对比: success | none
+      - class1: 超速跳过 | 最终生成曲线最高速度为 149.566211 km/h，超过 80.0 km/h，删除该等级
+      - class2: 生成成功 | peak=78.902700 km/h
+      - class3: 生成成功 | peak=58.290700 km/h
+      - class4: 生成成功 | peak=52.302800 km/h
+      - class5: 生成成功 | peak=46.931600 km/h
+
+[16/26] 开始生成区间: 海晏北路-民安东路
+   ⚓ class1 以 class2 为基准进行外推
+   ⚓ class2 以 class2 为基准进行外推
+   ⚓ class3 以 class3 为基准进行外推
+   ⚓ class4 以 class3 为基准进行外推
+   ⚓ class5 以 class3 为基准进行外推
+  ✅ 完成 | generated=4 | overspeed=1 | infeasible=0
+  class2对比: success | none
+      - class1: 超速跳过 | 最终生成曲线最高速度为 140.306409 km/h，超过 80.0 km/h，删除该等级
+      - class2: 生成成功 | peak=64.005900 km/h
+      - class3: 生成成功 | peak=58.574600 km/h
+      - class4: 生成成功 | peak=51.225100 km/h
+      - class5: 生成成功 | peak=45.469500 km/h
+
+[17/26] 开始生成区间: 民安东路-会展中心
+   ⚓ class1 以 class2 为基准进行外推
+   ⚓ class2 以 class2 为基准进行外推
+   ⚓ class3 以 class3 为基准进行外推
+   ⚓ class4 以 class3 为基准进行外推
+   ⚓ class5 以 class3 为基准进行外推
+  ✅ 完成 | generated=4 | overspeed=1 | infeasible=0
+  class2对比: success | none
+      - class1: 超速跳过 | 最终生成曲线最高速度为 130.823563 km/h，超过 80.0 km/h，删除该等级
+      - class2: 生成成功 | peak=58.959800 km/h
+      - class3: 生成成功 | peak=50.822800 km/h
+      - class4: 生成成功 | peak=44.639000 km/h
+      - class5: 生成成功 | peak=39.663900 km/h
+
+[18/26] 开始生成区间: 会展中心-院士路
+   ⚓ class1 以 class2 为基准进行外推
+   ⚓ class2 以 class2 为基准进行外推
+   ⚓ class3 以 class3 为基准进行外推
+   ⚓ class4 以 class3 为基准进行外推
+   ⚓ class5 以 class3 为基准进行外推
+  ✅ 完成 | generated=3 | overspeed=2 | infeasible=0
+  class2对比: skipped | 未找到样本
+      - class1: 超速跳过 | 最终生成曲线最高速度为 97.834376 km/h，超过 80.0 km/h，删除该等级
+      - class2: 超速跳过 | 最终生成曲线最高速度为 80.640153 km/h，超过 80.0 km/h，删除该等级
+      - class3: 生成成功 | peak=75.060600 km/h
+      - class4: 生成成功 | peak=65.783100 km/h
+      - class5: 生成成功 | peak=59.552400 km/h
+
+[19/26] 开始生成区间: 院士路-盎孟港
+   ⚓ class1 以 class2 为基准进行外推
+   🎯 class2 使用原生数据镜像 (Time Diff: 0.22s)
+   ⚓ class3 以 class3 为基准进行外推
+   ⚓ class4 以 class3 为基准进行外推
+   ⚓ class5 以 class3 为基准进行外推
+  ✅ 完成 | generated=4 | overspeed=1 | infeasible=0
+  class2对比: success | none
+      - class1: 超速跳过 | 最终生成曲线最高速度为 141.481134 km/h，超过 80.0 km/h，删除该等级
+      - class2: 生成成功 | peak=78.809800 km/h
+      - class3: 生成成功 | peak=63.515500 km/h
+      - class4: 生成成功 | peak=54.343100 km/h
+      - class5: 生成成功 | peak=49.477500 km/h
+
+[20/26] 开始生成区间: 盎孟港-三官堂
+   ⚓ class1 以 class2 为基准进行外推
+   ⚓ class2 以 class2 为基准进行外推
+   ⚓ class3 以 class3 为基准进行外推
+   ⚓ class4 以 class3 为基准进行外推
+   ⚓ class5 以 class3 为基准进行外推
+  ✅ 完成 | generated=4 | overspeed=1 | infeasible=0
+  class2对比: success | none
+      - class1: 超速跳过 | 最终生成曲线最高速度为 82.235390 km/h，超过 80.0 km/h，删除该等级
+      - class2: 生成成功 | peak=74.580900 km/h
+      - class3: 生成成功 | peak=67.222700 km/h
+      - class4: 生成成功 | peak=61.339900 km/h
+      - class5: 生成成功 | peak=56.879100 km/h
+
+[21/26] 开始生成区间: 三官堂-兴庄路
+   ⚓ class1 以 class3 为基准进行外推
+   ⚓ class2 以 class3 为基准进行外推
+   ⚓ class3 以 class3 为基准进行外推
+   ⚓ class4 以 class3 为基准进行外推
+   ⚓ class5 以 class3 为基准进行外推
+  ✅ 完成 | generated=5 | overspeed=0 | infeasible=0
+  class2对比: no_real_runs | 未找到真实样本
+      - class1: 生成成功 | peak=70.130300 km/h
+      - class2: 生成成功 | peak=58.759500 km/h
+      - class3: 生成成功 | peak=52.709400 km/h
+      - class4: 生成成功 | peak=48.055000 km/h
+      - class5: 生成成功 | peak=44.407900 km/h
+
+[22/26] 开始生成区间: 兴庄路-兴海南路
+   ⚓ class1 以 class3 为基准进行外推
+   ⚓ class2 以 class3 为基准进行外推
+   ⚓ class3 以 class3 为基准进行外推
+   ⚓ class4 以 class3 为基准进行外推
+   ⚓ class5 以 class3 为基准进行外推
+  ✅ 完成 | generated=4 | overspeed=1 | infeasible=0
+  class2对比: no_real_runs | 未找到真实样本
+      - class1: 超速跳过 | 最终生成曲线最高速度为 91.253592 km/h，超过 80.0 km/h，删除该等级
+      - class2: 生成成功 | peak=68.846400 km/h
+      - class3: 生成成功 | peak=59.353900 km/h
+      - class4: 生成成功 | peak=51.844100 km/h
+      - class5: 生成成功 | peak=47.598900 km/h
+
+[23/26] 开始生成区间: 兴海南路-梅堰
+   ⚓ class1 以 class2 为基准进行外推
+   ⚓ class2 以 class2 为基准进行外推
+   ⚓ class3 以 class3 为基准进行外推
+   ⚓ class4 以 class3 为基准进行外推
+   ⚓ class5 以 class3 为基准进行外推
+  ✅ 完成 | generated=3 | overspeed=2 | infeasible=0
+  class2对比: skipped | 未找到样本
+      - class1: 超速跳过 | 最终生成曲线最高速度为 136.237212 km/h，超过 80.0 km/h，删除该等级
+      - class2: 超速跳过 | 最终生成曲线最高速度为 104.057315 km/h，超过 80.0 km/h，删除该等级
+      - class3: 生成成功 | peak=61.214000 km/h
+      - class4: 生成成功 | peak=52.406400 km/h
+      - class5: 生成成功 | peak=45.911800 km/h
+
+[24/26] 开始生成区间: 梅堰-永茂路
+   ⚓ class1 以 class2 为基准进行外推
+   ⚓ class2 以 class2 为基准进行外推
+   ⚓ class3 以 class3 为基准进行外推
+   ⚓ class4 以 class3 为基准进行外推
+   ⚓ class5 以 class3 为基准进行外推
+  ✅ 完成 | generated=3 | overspeed=2 | infeasible=0
+  class2对比: skipped | 未找到样本
+      - class1: 超速跳过 | 最终生成曲线最高速度为 130.178028 km/h，超过 80.0 km/h，删除该等级
+      - class2: 超速跳过 | 最终生成曲线最高速度为 85.564803 km/h，超过 80.0 km/h，删除该等级
+      - class3: 生成成功 | peak=66.555900 km/h
+      - class4: 生成成功 | peak=57.462200 km/h
+      - class5: 生成成功 | peak=52.280700 km/h
+
+[25/26] 开始生成区间: 永茂路-镇海大道
+   ⚓ class1 以 class2 为基准进行外推
+   ⚓ class2 以 class2 为基准进行外推
+   ⚓ class3 以 class3 为基准进行外推
+   ⚓ class4 以 class3 为基准进行外推
+   ⚓ class5 以 class3 为基准进行外推
+  ✅ 完成 | generated=4 | overspeed=1 | infeasible=0
+  class2对比: success | none
+      - class1: 超速跳过 | 最终生成曲线最高速度为 86.198028 km/h，超过 80.0 km/h，删除该等级
+      - class2: 生成成功 | peak=77.948900 km/h
+      - class3: 生成成功 | peak=71.107800 km/h
+      - class4: 生成成功 | peak=64.453100 km/h
+      - class5: 生成成功 | peak=59.294700 km/h
+
+[26/26] 开始生成区间: 镇海大道-骆驼桥
+   ⚓ class1 以 class3 为基准进行外推
+   ⚓ class2 以 class3 为基准进行外推
+   ⚓ class3 以 class3 为基准进行外推
+   ⚓ class4 以 class3 为基准进行外推
+   ⚓ class5 以 class3 为基准进行外推
+  ✅ 完成 | generated=4 | overspeed=1 | infeasible=0
+  class2对比: no_real_runs | 未找到真实样本
+      - class1: 超速跳过 | 最终生成曲线最高速度为 88.322604 km/h，超过 80.0 km/h，删除该等级
+      - class2: 生成成功 | peak=77.313400 km/h
+      - class3: 生成成功 | peak=67.774200 km/h
+      - class4: 生成成功 | peak=61.280300 km/h
+      - class5: 生成成功 | peak=56.392500 km/h
+
+========================================================================
+批量生成结束
+成功区间数: 26
+失败区间数: 0
+汇总文件: D:\energy_conservation\output\ato_generated_results_new_v4\batch_generate_summary.csv
+========================================================================
+
+# finished: 2026-05-25T15:29:59
+# return_code: 0
+# elapsed_seconds: 478.5

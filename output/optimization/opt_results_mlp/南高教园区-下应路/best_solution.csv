@@ -1,0 +1,2 @@
+station_pair,v_peak_opt(m/s),t_arrival_opt(s),E_opt(Wh),params
+南高教园区-下应路,16.778374673423293,119.57143722670394,,"L=1474.0, V_UPPER=22.22, V_MID=12.5, A1=0.55, A2=0.8, A_DEC=-0.5, MASS=215.94, REACH_TOL=0.5, WINDOW=[105.0,126.0]"

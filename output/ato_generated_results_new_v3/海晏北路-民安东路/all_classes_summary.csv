@@ -1,0 +1,6 @@
+﻿station_pair,class_name,status,reason,parent_ref,target_time_s,curve_csv,sim_time_s,peak_speed_kmh,total_dist_m
+海晏北路-民安东路,class1,overspeed,最终生成曲线最高速度为 140.306409 km/h，超过 80.0 km/h，删除该等级,class2,79.0,,,,
+海晏北路-民安东路,class2,generated,最终生成曲线后验检查通过，峰值 64.005926 km/h,class2,83.0,D:\energy_conservation\output\ato_generated_results_new_v3\海晏北路-民安东路\class2_generated_curve.csv,82.95,64.0059,878.899
+海晏北路-民安东路,class3,generated,最终生成曲线后验检查通过，峰值 58.574596 km/h,class3,85.0,D:\energy_conservation\output\ato_generated_results_new_v3\海晏北路-民安东路\class3_generated_curve.csv,85.0,58.5746,879.9478
+海晏北路-民安东路,class4,generated,最终生成曲线后验检查通过，峰值 51.225146 km/h,class3,89.0,D:\energy_conservation\output\ato_generated_results_new_v3\海晏北路-民安东路\class4_generated_curve.csv,89.0,51.2251,879.2027
+海晏北路-民安东路,class5,generated,最终生成曲线后验检查通过，峰值 45.469523 km/h,class3,94.0,D:\energy_conservation\output\ato_generated_results_new_v3\海晏北路-民安东路\class5_generated_curve.csv,94.0,45.4695,879.9155

@@ -1,0 +1,28 @@
+# step: ato_template
+# command: C:\Users\bit11\AppData\Local\Programs\Python\Python311\python.exe D:\energy_conservation\scripts\train_ATO_v8.py
+# ENERGY_TRIP_NO: 1
+# ENERGY_TRIP_INDEX: 0
+# started: 2026-05-25T14:53:29
+
+========================================================================
+����ѵ�� class3 ����λģ��
+ʱ���: D:\energy_conservation\output\analysis\class_tables_strict\standard_class_times.csv
+����Ŀ¼: D:\energy_conservation\data\data_processed_new_v2
+���Ŀ¼: D:\energy_conservation\output\ato_phase_results_v3
+������������: 26
+========================================================================
+
+[1/26] ��ʼѵ������: ����-�ż�̶
+Traceback (most recent call last):
+  File "D:\energy_conservation\scripts\train_ATO_v8.py", line 578, in <module>
+    main()
+  File "D:\energy_conservation\scripts\train_ATO_v8.py", line 552, in main
+    result = train_one_station_pair(station_pair, level_target_times, data_dir)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\energy_conservation\scripts\train_ATO_v8.py", line 398, in train_one_station_pair
+    print(f"   \U0001f4ca ���� {station_pair} ���ֵȼ�: {available_classes}")
+UnicodeEncodeError: 'gbk' codec can't encode character '\U0001f4ca' in position 3: illegal multibyte sequence
+
+# finished: 2026-05-25T14:53:40
+# return_code: 1
+# elapsed_seconds: 11.7

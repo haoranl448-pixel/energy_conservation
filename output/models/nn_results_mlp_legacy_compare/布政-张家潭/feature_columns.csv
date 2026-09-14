@@ -1,0 +1,9 @@
+feature
+time
+velocity
+acceleration
+prev_velocity
+prev_acceleration
+curvature
+gradient
+mass

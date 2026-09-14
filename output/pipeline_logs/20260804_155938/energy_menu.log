@@ -1,0 +1,209 @@
+# step: energy_menu
+# command: C:\Users\bit11\AppData\Local\Programs\Python\Python311\python.exe D:\energy_conservation\scripts_new\00_main_pipeline\06_ato_generated_results_energy.py
+# ENERGY_TRIP_NO: 62
+# ENERGY_TRIP_INDEX: 61
+# ENERGY_TARGET_TIME: script default
+# ENERGY_RESULTS_DATA_DIR: D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality_traceability
+# ENERGY_ATO_DATA_DIR: D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality_traceability
+# ENERGY_LINE_SCOPE: full
+# ENERGY_TRACEABILITY_MANIFEST: D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality_traceability\trip_traceability_manifest_v1.csv
+# PYTHONIOENCODING: utf-8:replace
+# started: 2026-08-04T15:59:38
+
+按测试数据目录筛选能耗菜单区间: 26 个
+按 line scope 筛选后能耗菜单区间: 26 个
+趟次选择方式: 全局运行链追溯
+全局趟次ID:   UP062_20240715_081635_R3332
+追溯表:       D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality_traceability\trip_traceability_manifest_v1.csv
+映射区间数:   26
+   读取重量: 布政-张家潭 trip 62
+      选中 segment=61, run_id=3332 [traceability]
+   读取重量: 张家潭-同德路 trip 62
+      选中 segment=61, run_id=3333 [traceability]
+   读取重量: 同德路-石碶 trip 62
+      选中 segment=61, run_id=3334 [traceability]
+   读取重量: 石碶-雅渡 trip 62
+      选中 segment=61, run_id=3335 [traceability]
+   读取重量: 雅渡-庙堰 trip 62
+      选中 segment=61, run_id=3336 [traceability]
+   读取重量: 庙堰-钟公庙 trip 62
+      选中 segment=61, run_id=3337 [traceability]
+   读取重量: 钟公庙-鄞州区政府 trip 62
+      选中 segment=61, run_id=3338 [traceability]
+   读取重量: 鄞州区政府-钱湖南路 trip 62
+      选中 segment=61, run_id=3339 [traceability]
+   读取重量: 钱湖南路-南高教园区 trip 62
+      选中 segment=61, run_id=3340 [traceability]
+   读取重量: 南高教园区-下应路 trip 62
+      选中 segment=61, run_id=3341 [traceability]
+   读取重量: 下应路-大洋江 trip 62
+      选中 segment=61, run_id=3342 [traceability]
+   读取重量: 大洋江-泗港 trip 62
+      选中 segment=61, run_id=3343 [traceability]
+   读取重量: 泗港-曹隘 trip 62
+      选中 segment=61, run_id=3344 [traceability]
+   读取重量: 曹隘-柳隘 trip 62
+      选中 segment=61, run_id=3345 [traceability]
+   读取重量: 柳隘-海晏北路 trip 62
+      选中 segment=61, run_id=3346 [traceability]
+   读取重量: 海晏北路-民安东路 trip 62
+      选中 segment=61, run_id=3347 [traceability]
+   读取重量: 民安东路-会展中心 trip 62
+      选中 segment=60, run_id=3348 [traceability]
+   读取重量: 会展中心-院士路 trip 62
+      选中 segment=60, run_id=3349 [traceability]
+   读取重量: 院士路-盎孟港 trip 62
+      选中 segment=60, run_id=3350 [traceability]
+   读取重量: 盎孟港-三官堂 trip 62
+      选中 segment=60, run_id=3351 [traceability]
+   读取重量: 三官堂-兴庄路 trip 62
+      选中 segment=60, run_id=3352 [traceability]
+   读取重量: 兴庄路-兴海南路 trip 62
+      选中 segment=60, run_id=3353 [traceability]
+   读取重量: 兴海南路-梅堰 trip 62
+      选中 segment=60, run_id=3354 [traceability]
+   读取重量: 梅堰-永茂路 trip 62
+      选中 segment=48, run_id=3355 [traceability]
+   读取重量: 永茂路-镇海大道 trip 62
+      选中 segment=60, run_id=3356 [traceability]
+   读取重量: 镇海大道-骆驼桥 trip 62
+      选中 segment=60, run_id=3357 [traceability]
+已生成区间参数表: D:\energy_conservation\data\static\section_params_trip62.csv | 更新 MASS: 26 | 跳过非本次区间: 0 | 沿用旧值: 0 | 保留模板值: 0
+🚀 开始批量评估 26 个区间的 ATO 轨迹能耗：第 62 趟车...
+地图/历史数据目录: D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality_traceability
+   加载残差模型: 布政-张家潭
+   读取坡度曲率: 布政-张家潭
+   ✅ 布政-张家潭 | class3 | 115.0s -> 总:12906.3Wh (物理:12916.8Wh + 残差:-10.5Wh)
+   ✅ 布政-张家潭 | class4 | 121.0s -> 总:14011.7Wh (物理:14137.8Wh + 残差:-126.0Wh)
+   ✅ 布政-张家潭 | class5 | 127.05s -> 总:12660.9Wh (物理:13237.8Wh + 残差:-576.9Wh)
+   加载残差模型: 张家潭-同德路
+   读取坡度曲率: 张家潭-同德路
+   ✅ 张家潭-同德路 | class1 | 141.0s -> 总:18325.9Wh (物理:18599.9Wh + 残差:-274.1Wh)
+   ✅ 张家潭-同德路 | class2 | 148.0s -> 总:18013.5Wh (物理:18129.4Wh + 残差:-115.9Wh)
+   ✅ 张家潭-同德路 | class3 | 151.0s -> 总:18249.9Wh (物理:17194.9Wh + 残差:1055.0Wh)
+   ✅ 张家潭-同德路 | class4 | 158.95s -> 总:16882.4Wh (物理:15826.2Wh + 残差:1056.2Wh)
+   加载残差模型: 同德路-石碶
+   读取坡度曲率: 同德路-石碶
+   ✅ 同德路-石碶 | class3 | 108.95s -> 总:13655.1Wh (物理:13211.9Wh + 残差:443.2Wh)
+   ✅ 同德路-石碶 | class4 | 114.0s -> 总:13513.3Wh (物理:13658.1Wh + 残差:-144.8Wh)
+   ✅ 同德路-石碶 | class5 | 120.0s -> 总:12063.3Wh (物理:12257.1Wh + 残差:-193.8Wh)
+   加载残差模型: 石碶-雅渡
+   读取坡度曲率: 石碶-雅渡
+   ✅ 石碶-雅渡 | class2 | 80.0s -> 总:11030.9Wh (物理:10731.1Wh + 残差:299.7Wh)
+   ✅ 石碶-雅渡 | class3 | 82.0s -> 总:11925.3Wh (物理:12626.4Wh + 残差:-701.1Wh)
+   ✅ 石碶-雅渡 | class4 | 85.95s -> 总:11409.5Wh (物理:10375.8Wh + 残差:1033.7Wh)
+   ✅ 石碶-雅渡 | class5 | 90.0s -> 总:8711.1Wh (物理:7759.4Wh + 残差:951.7Wh)
+   加载残差模型: 雅渡-庙堰
+   读取坡度曲率: 雅渡-庙堰
+   ✅ 雅渡-庙堰 | class2 | 129.0s -> 总:22164.6Wh (物理:21746.7Wh + 残差:417.9Wh)
+   ✅ 雅渡-庙堰 | class3 | 131.95s -> 总:21315.8Wh (物理:20648.3Wh + 残差:667.5Wh)
+   ✅ 雅渡-庙堰 | class4 | 139.0s -> 总:19434.7Wh (物理:19235.3Wh + 残差:199.4Wh)
+   ✅ 雅渡-庙堰 | class5 | 146.0s -> 总:17641.7Wh (物理:17575.2Wh + 残差:66.5Wh)
+   加载残差模型: 庙堰-钟公庙
+   读取坡度曲率: 庙堰-钟公庙
+   ✅ 庙堰-钟公庙 | class3 | 95.95s -> 总:13620.9Wh (物理:12385.8Wh + 残差:1235.1Wh)
+   ✅ 庙堰-钟公庙 | class4 | 101.0s -> 总:11676.5Wh (物理:10015.5Wh + 残差:1661.0Wh)
+   加载残差模型: 钟公庙-鄞州区政府
+   读取坡度曲率: 钟公庙-鄞州区政府
+   ✅ 钟公庙-鄞州区政府 | class3 | 90.0s -> 总:11139.7Wh (物理:12325.1Wh + 残差:-1185.4Wh)
+   ✅ 钟公庙-鄞州区政府 | class4 | 94.95s -> 总:8715.6Wh (物理:10437.4Wh + 残差:-1721.7Wh)
+   ✅ 钟公庙-鄞州区政府 | class5 | 99.0s -> 总:6917.5Wh (物理:9008.9Wh + 残差:-2091.4Wh)
+   加载残差模型: 鄞州区政府-钱湖南路
+   读取坡度曲率: 鄞州区政府-钱湖南路
+   ✅ 鄞州区政府-钱湖南路 | class2 | 127.95s -> 总:19523.2Wh (物理:21039.6Wh + 残差:-1516.5Wh)
+   ✅ 鄞州区政府-钱湖南路 | class3 | 132.05s -> 总:17144.1Wh (物理:19102.2Wh + 残差:-1958.0Wh)
+   ✅ 鄞州区政府-钱湖南路 | class4 | 139.0s -> 总:16356.8Wh (物理:17523.7Wh + 残差:-1166.9Wh)
+   加载残差模型: 钱湖南路-南高教园区
+   读取坡度曲率: 钱湖南路-南高教园区
+   ✅ 钱湖南路-南高教园区 | class3 | 100.05s -> 总:14311.0Wh (物理:12960.5Wh + 残差:1350.5Wh)
+   ✅ 钱湖南路-南高教园区 | class4 | 104.95s -> 总:12460.3Wh (物理:10598.8Wh + 残差:1861.5Wh)
+   加载残差模型: 南高教园区-下应路
+   读取坡度曲率: 南高教园区-下应路
+   ✅ 南高教园区-下应路 | class2 | 110.0s -> 总:21802.0Wh (物理:16934.2Wh + 残差:4867.9Wh)
+   ✅ 南高教园区-下应路 | class3 | 114.0s -> 总:19266.0Wh (物理:15106.9Wh + 残差:4159.0Wh)
+   ✅ 南高教园区-下应路 | class4 | 119.95s -> 总:17454.8Wh (物理:14166.8Wh + 残差:3288.1Wh)
+   加载残差模型: 下应路-大洋江
+   读取坡度曲率: 下应路-大洋江
+   ✅ 下应路-大洋江 | class2 | 101.0s -> 总:14312.2Wh (物理:13748.8Wh + 残差:563.4Wh)
+   ✅ 下应路-大洋江 | class3 | 106.0s -> 总:12310.3Wh (物理:11468.9Wh + 残差:841.4Wh)
+   ✅ 下应路-大洋江 | class4 | 110.95s -> 总:12861.0Wh (物理:11885.5Wh + 残差:975.6Wh)
+   ✅ 下应路-大洋江 | class5 | 117.0s -> 总:11891.2Wh (物理:10348.5Wh + 残差:1542.8Wh)
+   加载残差模型: 大洋江-泗港
+   读取坡度曲率: 大洋江-泗港
+   ✅ 大洋江-泗港 | class3 | 92.0s -> 总:11268.7Wh (物理:9928.1Wh + 残差:1340.6Wh)
+   ✅ 大洋江-泗港 | class4 | 96.0s -> 总:10036.4Wh (物理:8260.1Wh + 残差:1776.3Wh)
+   加载残差模型: 泗港-曹隘
+   读取坡度曲率: 泗港-曹隘
+   ✅ 泗港-曹隘 | class2 | 128.05s -> 总:21145.4Wh (物理:20428.7Wh + 残差:716.7Wh)
+   ✅ 泗港-曹隘 | class4 | 137.0s -> 总:23907.2Wh (物理:22937.2Wh + 残差:970.1Wh)
+   ✅ 泗港-曹隘 | class5 | 143.0s -> 总:22324.1Wh (物理:20416.2Wh + 残差:1907.9Wh)
+   加载残差模型: 曹隘-柳隘
+   读取坡度曲率: 曹隘-柳隘
+   ✅ 曹隘-柳隘 | class2 | 106.05s -> 总:22789.3Wh (物理:15553.4Wh + 残差:7235.9Wh)
+   ✅ 曹隘-柳隘 | class3 | 108.0s -> 总:21235.8Wh (物理:13409.3Wh + 残差:7826.5Wh)
+   ✅ 曹隘-柳隘 | class4 | 112.95s -> 总:16721.5Wh (物理:11225.6Wh + 残差:5495.9Wh)
+   ✅ 曹隘-柳隘 | class5 | 119.0s -> 总:13800.3Wh (物理:10165.0Wh + 残差:3635.3Wh)
+   加载残差模型: 柳隘-海晏北路
+   读取坡度曲率: 柳隘-海晏北路
+   ✅ 柳隘-海晏北路 | class3 | 91.95s -> 总:12159.8Wh (物理:11422.9Wh + 残差:736.8Wh)
+   ✅ 柳隘-海晏北路 | class4 | 96.0s -> 总:10947.0Wh (物理:9227.8Wh + 残差:1719.2Wh)
+   加载残差模型: 海晏北路-民安东路
+   读取坡度曲率: 海晏北路-民安东路
+   ✅ 海晏北路-民安东路 | class3 | 85.0s -> 总:15910.3Wh (物理:11815.6Wh + 残差:4094.7Wh)
+   ✅ 海晏北路-民安东路 | class4 | 88.95s -> 总:13405.2Wh (物理:8720.1Wh + 残差:4685.1Wh)
+   加载残差模型: 民安东路-会展中心
+   读取坡度曲率: 民安东路-会展中心
+   ✅ 民安东路-会展中心 | class2 | 76.0s -> 总:15669.9Wh (物理:15810.4Wh + 残差:-140.5Wh)
+   ✅ 民安东路-会展中心 | class3 | 78.95s -> 总:12092.9Wh (物理:10343.5Wh + 残差:1749.3Wh)
+   ✅ 民安东路-会展中心 | class4 | 83.0s -> 总:7286.8Wh (物理:7391.4Wh + 残差:-104.7Wh)
+   加载残差模型: 会展中心-院士路
+   读取坡度曲率: 会展中心-院士路
+   ✅ 会展中心-院士路 | class3 | 115.0s -> 总:15169.1Wh (物理:17848.2Wh + 残差:-2679.0Wh)
+   ✅ 会展中心-院士路 | class4 | 121.0s -> 总:13532.4Wh (物理:16265.2Wh + 残差:-2732.8Wh)
+   加载残差模型: 院士路-盎孟港
+   读取坡度曲率: 院士路-盎孟港
+   ✅ 院士路-盎孟港 | class3 | 90.95s -> 总:18004.2Wh (物理:11668.4Wh + 残差:6335.8Wh)
+   ✅ 院士路-盎孟港 | class4 | 95.95s -> 总:14200.7Wh (物理:8403.8Wh + 残差:5796.9Wh)
+   加载残差模型: 盎孟港-三官堂
+   读取坡度曲率: 盎孟港-三官堂
+   ✅ 盎孟港-三官堂 | class2 | 132.0s -> 总:17608.0Wh (物理:20630.1Wh + 残差:-3022.1Wh)
+   ✅ 盎孟港-三官堂 | class3 | 138.95s -> 总:17098.4Wh (物理:17946.1Wh + 残差:-847.7Wh)
+   ✅ 盎孟港-三官堂 | class4 | 146.0s -> 总:16447.9Wh (物理:16879.2Wh + 残差:-431.3Wh)
+   加载残差模型: 三官堂-兴庄路
+   读取坡度曲率: 三官堂-兴庄路
+   ✅ 三官堂-兴庄路 | class1 | 94.05s -> 总:13094.9Wh (物理:13242.4Wh + 残差:-147.5Wh)
+   ✅ 三官堂-兴庄路 | class2 | 99.0s -> 总:11531.8Wh (物理:9871.8Wh + 残差:1660.1Wh)
+   ✅ 三官堂-兴庄路 | class3 | 104.05s -> 总:10484.0Wh (物理:8291.6Wh + 残差:2192.5Wh)
+   ✅ 三官堂-兴庄路 | class4 | 109.0s -> 总:9943.9Wh (物理:7508.2Wh + 残差:2435.7Wh)
+   加载残差模型: 兴庄路-兴海南路
+   读取坡度曲率: 兴庄路-兴海南路
+   ✅ 兴庄路-兴海南路 | class2 | 86.95s -> 总:15831.7Wh (物理:14619.0Wh + 残差:1212.7Wh)
+   ✅ 兴庄路-兴海南路 | class4 | 95.95s -> 总:9456.7Wh (物理:7938.9Wh + 残差:1517.8Wh)
+   加载残差模型: 兴海南路-梅堰
+   读取坡度曲率: 兴海南路-梅堰
+   ✅ 兴海南路-梅堰 | class3 | 81.95s -> 总:11310.9Wh (物理:11884.8Wh + 残差:-573.9Wh)
+   ✅ 兴海南路-梅堰 | class4 | 86.0s -> 总:9581.0Wh (物理:8063.1Wh + 残差:1517.8Wh)
+   加载残差模型: 梅堰-永茂路
+   读取坡度曲率: 梅堰-永茂路
+   ✅ 梅堰-永茂路 | class3 | 313.0s -> 总:29926.0Wh (物理:26906.4Wh + 残差:3019.6Wh)
+   ✅ 梅堰-永茂路 | class4 | 329.0s -> 总:26399.6Wh (物理:25778.9Wh + 残差:620.7Wh)
+   ✅ 梅堰-永茂路 | class5 | 345.05s -> 总:23483.2Wh (物理:25332.2Wh + 残差:-1849.1Wh)
+   加载残差模型: 永茂路-镇海大道
+   读取坡度曲率: 永茂路-镇海大道
+   ✅ 永茂路-镇海大道 | class2 | 141.0s -> 总:17124.3Wh (物理:21378.1Wh + 残差:-4253.9Wh)
+   ✅ 永茂路-镇海大道 | class3 | 148.0s -> 总:17114.1Wh (物理:19353.0Wh + 残差:-2238.8Wh)
+   ✅ 永茂路-镇海大道 | class4 | 156.0s -> 总:15542.7Wh (物理:17477.2Wh + 残差:-1934.5Wh)
+   ✅ 永茂路-镇海大道 | class5 | 164.05s -> 总:14995.7Wh (物理:16060.7Wh + 残差:-1065.0Wh)
+   加载残差模型: 镇海大道-骆驼桥
+   读取坡度曲率: 镇海大道-骆驼桥
+   ✅ 镇海大道-骆驼桥 | class2 | 116.0s -> 总:20085.9Wh (物理:17795.2Wh + 残差:2290.6Wh)
+   ✅ 镇海大道-骆驼桥 | class3 | 122.0s -> 总:19289.0Wh (物理:17739.1Wh + 残差:1549.9Wh)
+   ✅ 镇海大道-骆驼桥 | class4 | 128.0s -> 总:17280.4Wh (物理:16310.3Wh + 残差:970.1Wh)
+   ✅ 镇海大道-骆驼桥 | class5 | 134.0s -> 总:15833.7Wh (物理:15196.4Wh + 残差:637.3Wh)
+
+✨ 评估完成！能耗菜单已生成：D:\energy_conservation\output\analysis\ato_class_energy_menu62_new_v3.csv
+👉 现在你可以运行 DP 调度算法来选择最优 Class 组合了。
+
+# finished: 2026-08-04T17:31:46
+# return_code: 0
+# elapsed_seconds: 5527.9

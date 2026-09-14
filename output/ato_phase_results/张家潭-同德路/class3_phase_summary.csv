@@ -1,0 +1,2 @@
+﻿station_pair,target_l_from_data_m,class3_time_median_s,class3_target_time_s,class3_peak_speed_ref_mps,class3_peak_speed_ref_kmh,T_acc_ref_s,T_mid_ref_s,T_br_ref_s,D_acc_ref_m,D_mid_ref_m,D_br_ref_m,ref_curve_distance_m,mass_median,n_runs_class3
+张家潭-同德路,2053.6236689814814,148.95000000000002,151.0,18.014671173219465,64.85281622359008,28.150000000000002,77.95000000000002,42.849999999999994,225.88080853151033,1384.8765383135308,440.68324694490707,2051.440593789951,215.24,22

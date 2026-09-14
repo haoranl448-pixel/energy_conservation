@@ -1,0 +1,2 @@
+station_pair,v_peak_opt(m/s),t_arrival_opt(s),E_opt(Wh),params
+海晏北路-民安东路,14.69133915796836,87.64588586433963,,"L=877.0, V_UPPER=22.22, V_MID=12.5, A1=0.55, A2=0.8, A_DEC=-0.5, MASS=215.92, REACH_TOL=0.5, WINDOW=[79.0,94.0]"

@@ -1,0 +1,6 @@
+﻿station_pair,class_name,status,reason,parent_ref,target_time_s,curve_csv,sim_time_s,peak_speed_kmh,total_dist_m
+大洋江-泗港,class1,overspeed,最终生成曲线最高速度为 108.343490 km/h，超过 80.0 km/h，删除该等级,class3,83.0,,,,
+大洋江-泗港,class2,generated,最终生成曲线后验检查通过，峰值 70.402124 km/h,class3,87.0,D:\energy_conservation\output\ato_generated_results_new_v3\大洋江-泗港\class2_generated_curve.csv,87.0,70.4021,972.801
+大洋江-泗港,class3,generated,最终生成曲线后验检查通过，峰值 57.610545 km/h,class3,92.0,D:\energy_conservation\output\ato_generated_results_new_v3\大洋江-泗港\class3_generated_curve.csv,92.0,57.6105,973.7044
+大洋江-泗港,class4,generated,最终生成曲线后验检查通过，峰值 51.987884 km/h,class3,96.0,D:\energy_conservation\output\ato_generated_results_new_v3\大洋江-泗港\class4_generated_curve.csv,96.0,51.9879,974.0887
+大洋江-泗港,class5,generated,最终生成曲线后验检查通过，峰值 46.790641 km/h,class3,101.0,D:\energy_conservation\output\ato_generated_results_new_v3\大洋江-泗港\class5_generated_curve.csv,101.0,46.7906,972.801

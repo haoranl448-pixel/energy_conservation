@@ -1,0 +1,2 @@
+station_pair,v_peak_opt(m/s),t_arrival_opt(s),E_opt(Wh),params
+三官堂-兴庄路,0.1,94.0,2087619250.0,"L=1097.0, V_UPPER=22.22, V_MID=12.5, A1=0.55, A2=0.8, A_DEC=-0.5, MASS=215.54, REACH_TOL=0.5, WINDOW=[94.0,114.0]"

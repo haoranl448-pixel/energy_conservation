@@ -1,0 +1,2 @@
+﻿station_pair,target_l_from_data_m,class3_time_median_s,class3_target_time_s,class3_peak_speed_ref_mps,class3_peak_speed_ref_kmh,T_acc_ref_s,T_mid_ref_s,T_br_ref_s,D_acc_ref_m,D_mid_ref_m,D_br_ref_m,ref_curve_distance_m,mass_median,n_runs_class3
+大洋江-泗港,972.8009722222223,88.75,92.0,17.76925787464177,63.96932834871038,28.05,19.099999999999998,41.6,222.02336630113967,329.1482341328856,419.89496963733467,971.0665700713586,216.44,23

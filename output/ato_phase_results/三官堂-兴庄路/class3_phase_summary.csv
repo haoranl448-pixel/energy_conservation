@@ -1,0 +1,2 @@
+﻿station_pair,target_l_from_data_m,class3_time_median_s,class3_target_time_s,class3_peak_speed_ref_mps,class3_peak_speed_ref_kmh,T_acc_ref_s,T_mid_ref_s,T_br_ref_s,D_acc_ref_m,D_mid_ref_m,D_br_ref_m,ref_curve_distance_m,mass_median,n_runs_class3
+三官堂-兴庄路,1097.671944444444,100.55000000000001,104.0,15.4878209879781,55.75615555672116,28.3,42.400000000000006,29.85000000000001,220.53423591852672,652.157686571322,224.06406152404367,1096.755984013892,215.84,23

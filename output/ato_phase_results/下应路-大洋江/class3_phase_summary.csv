@@ -1,0 +1,2 @@
+﻿station_pair,target_l_from_data_m,class3_time_median_s,class3_target_time_s,class3_peak_speed_ref_mps,class3_peak_speed_ref_kmh,T_acc_ref_s,T_mid_ref_s,T_br_ref_s,D_acc_ref_m,D_mid_ref_m,D_br_ref_m,ref_curve_distance_m,mass_median,n_runs_class3
+下应路-大洋江,1232.905543981482,103.25,106.0,17.928986216279988,64.54435037860796,29.800000000000004,38.99999999999999,34.45,246.6574147100749,693.3593056539848,297.3539479334574,1237.3706682975162,216.14,13

@@ -1,0 +1,6 @@
+﻿station_pair,class_name,status,reason,parent_ref,target_time_s,curve_csv,sim_time_s,peak_speed_kmh,total_dist_m
+兴海南路-梅堰,class1,overspeed,最终生成曲线最高速度为 136.237212 km/h，超过 80.0 km/h，删除该等级,class2,75.0,,,,
+兴海南路-梅堰,class2,overspeed,最终生成曲线最高速度为 104.057315 km/h，超过 80.0 km/h，删除该等级,class2,78.0,,,,
+兴海南路-梅堰,class3,generated,最终生成曲线后验检查通过，峰值 61.213953 km/h,class3,82.0,D:\energy_conservation\output\ato_generated_results_new_v3\兴海南路-梅堰\class3_generated_curve.csv,82.0,61.214,848.1521
+兴海南路-梅堰,class4,generated,最终生成曲线后验检查通过，峰值 52.406367 km/h,class3,86.0,D:\energy_conservation\output\ato_generated_results_new_v3\兴海南路-梅堰\class4_generated_curve.csv,85.95,52.4064,846.8079
+兴海南路-梅堰,class5,generated,最终生成曲线后验检查通过，峰值 45.911778 km/h,class3,91.0,D:\energy_conservation\output\ato_generated_results_new_v3\兴海南路-梅堰\class5_generated_curve.csv,91.0,45.9118,846.4533

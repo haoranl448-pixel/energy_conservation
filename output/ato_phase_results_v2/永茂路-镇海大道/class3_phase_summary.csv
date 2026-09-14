@@ -1,0 +1,2 @@
+﻿station_pair,target_l_from_data_m,class3_time_median_s,class3_target_time_s,class3_peak_speed_ref_mps,class3_peak_speed_ref_kmh,T_acc_ref_s,T_mid_ref_s,T_br_ref_s,D_acc_ref_m,D_mid_ref_m,D_br_ref_m,ref_curve_distance_m,mass_median,n_runs_class3
+永茂路-镇海大道,2164.367928240741,139.85,148.0,21.884707595927278,78.7849473453382,35.65,63.24999999999999,40.95,368.0838352347982,1379.1084507148503,418.11076794552264,2165.3030538951643,215.34,13

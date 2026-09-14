@@ -1,0 +1,40 @@
+# step: energy_menu
+# command: C:\Users\bit11\AppData\Local\Programs\Python\Python311\python.exe D:\energy_conservation\scripts_new\00_main_pipeline\06_ato_generated_results_energy.py
+# ENERGY_TRIP_NO: 1
+# ENERGY_TRIP_INDEX: 0
+# ENERGY_TARGET_TIME: 706.7
+# ENERGY_RESULTS_DATA_DIR: D:\energy_conservation\data\data_processed_step2_v3_first5_curve_quality
+# ENERGY_ATO_DATA_DIR: D:\energy_conservation\data\data_processed_step2_v3_first5_curve_quality
+# ENERGY_LINE_SCOPE: 5
+# PYTHONIOENCODING: utf-8:replace
+# started: 2026-06-04T17:57:14
+
+已删除旧能耗菜单: D:\energy_conservation\output\analysis\ato_class_energy_menu1_new_v3.csv
+按测试数据目录筛选能耗菜单区间: 5 个。
+🚀 开始批量评估 5 个区间的 ATO 轨迹能耗：第 1 趟车...
+地图/历史数据目录: D:\energy_conservation\data\data_processed_step2_v3_first5_curve_quality
+   ✅ 同德路-石碶 | class3 | 109.0s -> 总:12658.6Wh (物理:12654.0Wh + 残差:4.6Wh)
+   ✅ 同德路-石碶 | class4 | 114.0s -> 总:13309.2Wh (物理:13524.4Wh + 残差:-215.2Wh)
+   ✅ 同德路-石碶 | class5 | 120.0s -> 总:11890.5Wh (物理:12252.0Wh + 残差:-361.5Wh)
+   ✅ 布政-张家潭 | class2 | 112.05s -> 总:13078.5Wh (物理:13843.9Wh + 残差:-765.4Wh)
+   ✅ 布政-张家潭 | class3 | 115.0s -> 总:12912.5Wh (物理:13452.7Wh + 残差:-540.2Wh)
+   ✅ 布政-张家潭 | class4 | 121.0s -> 总:13425.1Wh (物理:14342.2Wh + 残差:-917.1Wh)
+   ✅ 布政-张家潭 | class5 | 126.95s -> 总:11930.8Wh (物理:13291.5Wh + 残差:-1360.8Wh)
+   ✅ 张家潭-同德路 | class1 | 141.0s -> 总:18235.2Wh (物理:19618.9Wh + 残差:-1383.6Wh)
+   ✅ 张家潭-同德路 | class2 | 147.75s -> 总:18181.0Wh (物理:18366.5Wh + 残差:-185.5Wh)
+   ✅ 张家潭-同德路 | class3 | 151.55s -> 总:17925.5Wh (物理:17120.3Wh + 残差:805.2Wh)
+   ✅ 张家潭-同德路 | class4 | 159.0s -> 总:17063.9Wh (物理:16092.4Wh + 残差:971.5Wh)
+   ✅ 石碶-雅渡 | class2 | 79.95s -> 总:11671.2Wh (物理:11393.8Wh + 残差:277.4Wh)
+   ✅ 石碶-雅渡 | class3 | 82.05s -> 总:13481.9Wh (物理:13763.9Wh + 残差:-282.0Wh)
+   ✅ 石碶-雅渡 | class4 | 85.95s -> 总:11191.7Wh (物理:9807.9Wh + 残差:1383.7Wh)
+   ✅ 石碶-雅渡 | class5 | 90.0s -> 总:9191.9Wh (物理:7514.6Wh + 残差:1677.3Wh)
+   ✅ 雅渡-庙堰 | class3 | 132.25s -> 总:21412.0Wh (物理:20415.2Wh + 残差:996.7Wh)
+   ✅ 雅渡-庙堰 | class4 | 139.0s -> 总:19658.1Wh (物理:18666.2Wh + 残差:991.9Wh)
+   ✅ 雅渡-庙堰 | class5 | 146.0s -> 总:17951.3Wh (物理:16994.5Wh + 残差:956.8Wh)
+
+✨ 评估完成！能耗菜单已生成：D:\energy_conservation\output\analysis\ato_class_energy_menu1_new_v3.csv
+👉 现在你可以运行 DP 调度算法来选择最优 Class 组合了。
+
+# finished: 2026-06-04T18:03:57
+# return_code: 0
+# elapsed_seconds: 402.8

@@ -1,0 +1,21 @@
+# Large datasets, trained models, and generated binary artifacts use Git LFS.
+data/**/*.xls filter=lfs diff=lfs merge=lfs -text
+data/**/*.xlsx filter=lfs diff=lfs merge=lfs -text
+output/**/*.xls filter=lfs diff=lfs merge=lfs -text
+output/**/*.xlsx filter=lfs diff=lfs merge=lfs -text
+output/**/*.pkl filter=lfs diff=lfs merge=lfs -text
+output/**/*.pth filter=lfs diff=lfs merge=lfs -text
+output/**/*.pt filter=lfs diff=lfs merge=lfs -text
+output/**/*.npz filter=lfs diff=lfs merge=lfs -text
+output/**/*.png filter=lfs diff=lfs merge=lfs -text
+output/**/*.jpg filter=lfs diff=lfs merge=lfs -text
+output/**/*.jpeg filter=lfs diff=lfs merge=lfs -text
+output/**/*.gif filter=lfs diff=lfs merge=lfs -text
+output/**/*.zip filter=lfs diff=lfs merge=lfs -text
+output/**/*.7z filter=lfs diff=lfs merge=lfs -text
+models/**/*.slx filter=lfs diff=lfs merge=lfs -text
+models/**/*.mat filter=lfs diff=lfs merge=lfs -text
+models/**/*.pth filter=lfs diff=lfs merge=lfs -text
+models/**/*.pkl filter=lfs diff=lfs merge=lfs -text
+*.opentrack binary
+*.otsimcor binary

@@ -1,0 +1,2 @@
+﻿station_pair,target_l_from_data_m,class3_time_median_s,class3_target_time_s,class3_peak_speed_ref_mps,class3_peak_speed_ref_kmh,T_acc_ref_s,T_mid_ref_s,T_br_ref_s,D_acc_ref_m,D_mid_ref_m,D_br_ref_m,ref_curve_distance_m,mass_median,n_runs_class3
+院士路-盎孟港,1010.0275925925926,87.85000000000001,91.0,21.91477973004266,78.89320702815358,38.900000000000006,5.100000000000001,43.85,429.9125281311578,110.64525121631854,472.343991290876,1012.9017706383539,215.84,12

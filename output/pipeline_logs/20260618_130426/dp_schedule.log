@@ -1,0 +1,44 @@
+# step: dp_schedule
+# command: C:\Users\bit11\AppData\Local\Programs\Python\Python311\python.exe D:\energy_conservation\scripts_new\00_main_pipeline\08_ato_class_globall_v2.py
+# ENERGY_TRIP_NO: 2
+# ENERGY_TRIP_INDEX: 1
+# ENERGY_TARGET_TIME: 3700.0
+# ENERGY_RESULTS_DATA_DIR: D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality
+# ENERGY_ATO_DATA_DIR: D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality
+# ENERGY_LINE_SCOPE: full
+# PYTHONIOENCODING: utf-8:replace
+# started: 2026-06-18T13:04:26
+
+Trip: 2 (segment index 1)
+Target total time: 3700.00s
+Line scope: full (26 sections)
+Menu file: D:\energy_conservation\output\analysis\ato_class_energy_menu2_new_v3.csv
+History file: D:\energy_conservation\full_line2_validation_results.csv
+Historical curve data dir: D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality
+Traceback (most recent call last):
+  File "D:\energy_conservation\scripts_new\00_main_pipeline\08_ato_class_globall_v2.py", line 775, in <module>
+    ok = run_optimization()
+         ^^^^^^^^^^^^^^^^^^
+  File "D:\energy_conservation\scripts_new\00_main_pipeline\08_ato_class_globall_v2.py", line 392, in run_optimization
+    df_hist = pd.read_csv(HIST_FILE).set_index('站间区间')
+              ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bit11\AppData\Local\Programs\Python\Python311\Lib\site-packages\pandas\io\parsers\readers.py", line 873, in read_csv
+    return _read(filepath_or_buffer, kwds)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bit11\AppData\Local\Programs\Python\Python311\Lib\site-packages\pandas\io\parsers\readers.py", line 300, in _read
+    parser = TextFileReader(filepath_or_buffer, **kwds)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bit11\AppData\Local\Programs\Python\Python311\Lib\site-packages\pandas\io\parsers\readers.py", line 1645, in __init__
+    self._engine = self._make_engine(f, self.engine)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\bit11\AppData\Local\Programs\Python\Python311\Lib\site-packages\pandas\io\parsers\readers.py", line 1904, in _make_engine
+    self.handles = get_handle(
+                   ^^^^^^^^^^^
+  File "C:\Users\bit11\AppData\Local\Programs\Python\Python311\Lib\site-packages\pandas\io\common.py", line 926, in get_handle
+    handle = open(
+             ^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'D:\\energy_conservation\\full_line2_validation_results.csv'
+
+# finished: 2026-06-18T13:04:27
+# return_code: 1
+# elapsed_seconds: 0.6

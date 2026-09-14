@@ -1,0 +1,6 @@
+﻿station_pair,class_name,status,reason,curve_source,parent_ref,supporting_refs,real_sample_count,parent_real_sample_count,sample_reliability,dp_candidate_stage,target_time_s,curve_csv,sim_time_s,peak_speed_kmh,total_dist_m
+民安东路-会展中心,class1,overspeed,最终生成曲线最高速度为 120.959326 km/h，超过 80.0 km/h，删除该等级,extrapolated_adjacent,class2,class2,0,96,generated,allow_extrapolated,72.0,,,,
+民安东路-会展中心,class2,generated,最终生成曲线后验检查通过，峰值 79.546006 km/h,real,class2,class2,96,96,strong,real_only,76.0,D:\energy_conservation\output\ato_generated_results_new_v4\民安东路-会展中心\class2_generated_curve.csv,76.0,79.546,726.191
+民安东路-会展中心,class3,generated,最终生成曲线后验检查通过，峰值 60.277677 km/h,real,class3,class3,8,8,strong,real_only,79.0,D:\energy_conservation\output\ato_generated_results_new_v4\民安东路-会展中心\class3_generated_curve.csv,78.95,60.2777,738.1369
+民安东路-会展中心,class4,generated,最终生成曲线后验检查通过，峰值 48.551190 km/h,extrapolated_adjacent,class3,class3,0,8,generated,allow_extrapolated,83.0,D:\energy_conservation\output\ato_generated_results_new_v4\民安东路-会展中心\class4_generated_curve.csv,83.0,48.5512,737.783
+民安东路-会展中心,class5,missing_source,no adjacent real template,missing,,,0,0,,not_allowed,88.0,,,,

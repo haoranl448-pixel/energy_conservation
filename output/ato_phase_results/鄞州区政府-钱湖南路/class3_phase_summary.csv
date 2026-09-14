@@ -1,0 +1,2 @@
+﻿station_pair,target_l_from_data_m,class3_time_median_s,class3_target_time_s,class3_peak_speed_ref_mps,class3_peak_speed_ref_kmh,T_acc_ref_s,T_mid_ref_s,T_br_ref_s,D_acc_ref_m,D_mid_ref_m,D_br_ref_m,ref_curve_distance_m,mass_median,n_runs_class3
+鄞州区政府-钱湖南路,1839.665196759259,129.5,132.0,20.173518509591098,72.62466663452796,31.650000000000002,60.94999999999999,36.900000000000006,287.9988323857041,1217.113408647773,340.0541331371774,1845.1663741706593,215.94,13

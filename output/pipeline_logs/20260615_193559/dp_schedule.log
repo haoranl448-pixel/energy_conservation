@@ -1,0 +1,65 @@
+# step: dp_schedule
+# command: C:\Users\bit11\AppData\Local\Programs\Python\Python311\python.exe D:\energy_conservation\scripts_new\00_main_pipeline\08_ato_class_globall_v2.py
+# ENERGY_TRIP_NO: 1
+# ENERGY_TRIP_INDEX: 0
+# ENERGY_TARGET_TIME: script default
+# ENERGY_RESULTS_DATA_DIR: D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality
+# ENERGY_ATO_DATA_DIR: D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality
+# ENERGY_LINE_SCOPE: full
+# PYTHONIOENCODING: utf-8:replace
+# started: 2026-06-16T17:39:50
+
+已删除旧 DP 输出: D:\energy_conservation\output\schedule\final_plan_report_v2\Final_Planning_Comparison.csv
+已删除旧 DP 输出: D:\energy_conservation\output\schedule\final_plan_report_v2\Final_Planning_Comparison_Energy_First.csv
+已删除旧 DP 输出: D:\energy_conservation\output\schedule\final_plan_report_v2\Optimized_Full_Line_Report.png
+已删除旧 DP 输出: D:\energy_conservation\output\schedule\final_plan_report_v2\Optimized_Full_Line_Report_Energy_First.png
+Trip: 1 (segment index 0)
+Target total time: 692.65s
+Line scope: full (26 sections)
+Menu file: D:\energy_conservation\output\analysis\ato_class_energy_menu1_new_v3.csv
+History file: D:\energy_conservation\full_line1_validation_results.csv
+Historical curve data dir: D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality
+Max run (at min dwell): 92.6s
+Nom run (at nominal):   -57.4s
+Dwell budget to trade:   150s
+Dwell config (25 intervals):
+  布政-张家潭: nominal=30s, min=24s [elastic (24-30s)]
+  张家潭-同德路: nominal=30s, min=24s [elastic (24-30s)]
+  同德路-石碶: nominal=30s, min=24s [elastic (24-30s)]
+  石碶-雅渡: nominal=30s, min=24s [elastic (24-30s)]
+  雅渡-庙堰: nominal=30s, min=24s [elastic (24-30s)]
+  庙堰-钟公庙: nominal=30s, min=24s [elastic (24-30s)]
+  钟公庙-鄞州区政府: nominal=30s, min=24s [elastic (24-30s)]
+  鄞州区政府-钱湖南路: nominal=30s, min=24s [elastic (24-30s)]
+  钱湖南路-南高教园区: nominal=30s, min=24s [elastic (24-30s)]
+  南高教园区-下应路: nominal=30s, min=24s [elastic (24-30s)]
+  下应路-大洋江: nominal=30s, min=24s [elastic (24-30s)]
+  大洋江-泗港: nominal=30s, min=24s [elastic (24-30s)]
+  泗港-曹隘: nominal=30s, min=24s [elastic (24-30s)]
+  曹隘-柳隘: nominal=30s, min=24s [elastic (24-30s)]
+  柳隘-海晏北路: nominal=30s, min=24s [elastic (24-30s)]
+  海晏北路-民安东路: nominal=30s, min=24s [elastic (24-30s)]
+  民安东路-会展中心: nominal=30s, min=24s [elastic (24-30s)]
+  会展中心-院士路: nominal=30s, min=24s [elastic (24-30s)]
+  院士路-盎孟港: nominal=30s, min=24s [elastic (24-30s)]
+  盎孟港-三官堂: nominal=30s, min=24s [elastic (24-30s)]
+  三官堂-兴庄路: nominal=30s, min=24s [elastic (24-30s)]
+  兴庄路-兴海南路: nominal=30s, min=24s [elastic (24-30s)]
+  兴海南路-梅堰: nominal=30s, min=24s [elastic (24-30s)]
+  梅堰-永茂路: nominal=30s, min=24s [elastic (24-30s)]
+  永茂路-镇海大道: nominal=30s, min=24s [elastic (24-30s)]
+  镇海大道-骆驼桥: nominal=30s, min=24s [elastic (24-30s)]
+
+DP stage: real_only | sources=['real'] | score=priority_first
+  [1/26] 布政-张家潭 -> 0 states
+
+DP stage: allow_interpolated | sources=['interpolated', 'real'] | score=priority_first
+  [1/26] 布政-张家潭 -> 0 states
+
+DP stage: allow_extrapolated | sources=['extrapolated_adjacent', 'interpolated', 'real'] | score=priority_first
+  [1/26] 布政-张家潭 -> 0 states
+ERROR: No DP stage can fit even with min dwell.
+
+# finished: 2026-06-16T17:39:56
+# return_code: 0
+# elapsed_seconds: 6.1

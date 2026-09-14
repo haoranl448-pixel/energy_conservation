@@ -1,0 +1,2 @@
+﻿station_pair,target_l_from_data_m,class3_time_median_s,class3_target_time_s,class3_peak_speed_ref_mps,class3_peak_speed_ref_kmh,T_acc_ref_s,T_mid_ref_s,T_br_ref_s,D_acc_ref_m,D_mid_ref_m,D_br_ref_m,ref_curve_distance_m,mass_median,n_runs_class3
+石碶-雅渡,840.2422337962962,79.15,82.0,20.259215868637668,72.9331771270956,31.6,4.399999999999999,43.150000000000006,287.44567334916474,88.12761070413387,464.67676286216295,840.250046915462,215.74,23

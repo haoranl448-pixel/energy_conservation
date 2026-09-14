@@ -1,0 +1,194 @@
+# step: dp_schedule
+# command: C:\Users\bit11\AppData\Local\Programs\Python\Python311\python.exe D:\energy_conservation\scripts_new\00_main_pipeline\08_ato_class_globall_v2.py
+# ENERGY_TRIP_NO: 12
+# ENERGY_TRIP_INDEX: 11
+# ENERGY_TARGET_TIME: 3761.25
+# ENERGY_RESULTS_DATA_DIR: D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality
+# ENERGY_ATO_DATA_DIR: D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality
+# ENERGY_LINE_SCOPE: full
+# PYTHONIOENCODING: utf-8:replace
+# started: 2026-07-13T18:36:18
+
+Trip: 12 (segment index 11)
+Target total time: 3761.25s
+Line scope: full (26 sections)
+Menu file: D:\energy_conservation\output\analysis\ato_class_energy_menu12_new_v3.csv
+History file: D:\energy_conservation\full_line12_validation_results.csv
+Historical curve data dir: D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality
+Max run (at min dwell): 3161.2s
+Nom run (at nominal):   3011.2s
+Dwell budget to trade:   150s
+
+DP input diagnostics:
+  Selected trip: 12 (segment index 11)
+  Target total time: 3761.2s
+  Allowed running time: <= 3161.2s with min dwell, nominal target run 3011.2s
+  Dwell totals: nominal=750.0s, min=600.0s
+  Historical selected-trip run time in full_line12_validation_results.csv: 3011.2s (full-line, dwell not included)
+  Historical selected-trip total with nominal dwell: 3761.2s
+  Historical selected-trip total with min dwell:     3611.2s
+  Menu coverage: 26/26 sections
+  History coverage: 26/26 sections
+Dwell config (25 intervals):
+  布政-张家潭: nominal=30s, min=24s [elastic (24-30s)]
+  张家潭-同德路: nominal=30s, min=24s [elastic (24-30s)]
+  同德路-石碶: nominal=30s, min=24s [elastic (24-30s)]
+  石碶-雅渡: nominal=30s, min=24s [elastic (24-30s)]
+  雅渡-庙堰: nominal=30s, min=24s [elastic (24-30s)]
+  庙堰-钟公庙: nominal=30s, min=24s [elastic (24-30s)]
+  钟公庙-鄞州区政府: nominal=30s, min=24s [elastic (24-30s)]
+  鄞州区政府-钱湖南路: nominal=30s, min=24s [elastic (24-30s)]
+  钱湖南路-南高教园区: nominal=30s, min=24s [elastic (24-30s)]
+  南高教园区-下应路: nominal=30s, min=24s [elastic (24-30s)]
+  下应路-大洋江: nominal=30s, min=24s [elastic (24-30s)]
+  大洋江-泗港: nominal=30s, min=24s [elastic (24-30s)]
+  泗港-曹隘: nominal=30s, min=24s [elastic (24-30s)]
+  曹隘-柳隘: nominal=30s, min=24s [elastic (24-30s)]
+  柳隘-海晏北路: nominal=30s, min=24s [elastic (24-30s)]
+  海晏北路-民安东路: nominal=30s, min=24s [elastic (24-30s)]
+  民安东路-会展中心: nominal=30s, min=24s [elastic (24-30s)]
+  会展中心-院士路: nominal=30s, min=24s [elastic (24-30s)]
+  院士路-盎孟港: nominal=30s, min=24s [elastic (24-30s)]
+  盎孟港-三官堂: nominal=30s, min=24s [elastic (24-30s)]
+  三官堂-兴庄路: nominal=30s, min=24s [elastic (24-30s)]
+  兴庄路-兴海南路: nominal=30s, min=24s [elastic (24-30s)]
+  兴海南路-梅堰: nominal=30s, min=24s [elastic (24-30s)]
+  梅堰-永茂路: nominal=30s, min=24s [elastic (24-30s)]
+  永茂路-镇海大道: nominal=30s, min=24s [elastic (24-30s)]
+  镇海大道-骆驼桥: nominal=30s, min=24s [elastic (24-30s)]
+
+DP stage: real_only | sources=['real'] | score=priority_first
+  [1/26] 布政-张家潭 -> 2 states
+  [2/26] 张家潭-同德路 -> 4 states
+  [3/26] 同德路-石碶 -> 8 states
+  [4/26] 石碶-雅渡 -> 17 states
+  [5/26] 雅渡-庙堰 -> 44 states
+  [6/26] 庙堰-钟公庙 -> 44 states
+  [7/26] 钟公庙-鄞州区政府 -> 54 states
+  [8/26] 鄞州区政府-钱湖南路 -> 86 states
+  [9/26] 钱湖南路-南高教园区 -> 86 states
+  [10/26] 南高教园区-下应路 -> 101 states
+  [11/26] 下应路-大洋江 -> 131 states
+  [12/26] 大洋江-泗港 -> 131 states
+  [13/26] 泗港-曹隘 -> 131 states
+  [14/26] 曹隘-柳隘 -> 152 states
+  [15/26] 柳隘-海晏北路 -> 152 states
+  [16/26] 海晏北路-民安东路 -> 152 states
+  [17/26] 民安东路-会展中心 -> 161 states
+  [18/26] 会展中心-院士路 -> 161 states
+  [19/26] 院士路-盎孟港 -> 161 states
+  [20/26] 盎孟港-三官堂 -> 233 states
+  [21/26] 三官堂-兴庄路 -> 253 states
+  [22/26] 兴庄路-兴海南路 -> 253 states
+  [23/26] 兴海南路-梅堰 -> 253 states
+  [24/26] 梅堰-永茂路 -> 317 states
+  [25/26] 永茂路-镇海大道 -> 377 states
+  [26/26] 镇海大道-骆驼桥 -> 425 states
+
+Selected priority-first plan: real_only
+Feasible states: 425
+Best:  run=3063.0s, energy=386838.1 Wh, extrapolated=0, interpolated=0
+Nominal-dwell best nearby: run=3020.1s, energy=393491.8 Wh
+Dwell trade: +42.9s run time -> saves 6653.7 Wh (1.7%)
+
+Priority-first report: Run: 3063.0s | Dwell: 697.5s | Total: 3760.5s (target: 3761.25s)
+Energy: 386838.1 Wh | Saving: 6.13%
+  Dwell after 布政-张家潭: 27.9s
+  Dwell after 张家潭-同德路: 27.9s
+  Dwell after 同德路-石碶: 27.9s
+  Dwell after 石碶-雅渡: 27.9s
+  Dwell after 雅渡-庙堰: 27.9s
+  Dwell after 庙堰-钟公庙: 27.9s
+  Dwell after 钟公庙-鄞州区政府: 27.9s
+  Dwell after 鄞州区政府-钱湖南路: 27.9s
+  Dwell after 钱湖南路-南高教园区: 27.9s
+  Dwell after 南高教园区-下应路: 27.9s
+  Dwell after 下应路-大洋江: 27.9s
+  Dwell after 大洋江-泗港: 27.9s
+  Dwell after 泗港-曹隘: 27.9s
+  Dwell after 曹隘-柳隘: 27.9s
+  Dwell after 柳隘-海晏北路: 27.9s
+  Dwell after 海晏北路-民安东路: 27.9s
+  Dwell after 民安东路-会展中心: 27.9s
+  Dwell after 会展中心-院士路: 27.9s
+  Dwell after 院士路-盎孟港: 27.9s
+  Dwell after 盎孟港-三官堂: 27.9s
+  Dwell after 三官堂-兴庄路: 27.9s
+  Dwell after 兴庄路-兴海南路: 27.9s
+  Dwell after 兴海南路-梅堰: 27.9s
+  Dwell after 梅堰-永茂路: 27.9s
+  Dwell after 永茂路-镇海大道: 27.9s
+
+DP stage: energy_first | sources=['extrapolated_adjacent', 'interpolated', 'real'] | score=energy_first
+  [1/26] 布政-张家潭 -> 2 states
+  [2/26] 张家潭-同德路 -> 8 states
+  [3/26] 同德路-石碶 -> 16 states
+  [4/26] 石碶-雅渡 -> 33 states
+  [5/26] 雅渡-庙堰 -> 77 states
+  [6/26] 庙堰-钟公庙 -> 91 states
+  [7/26] 钟公庙-鄞州区政府 -> 105 states
+  [8/26] 鄞州区政府-钱湖南路 -> 180 states
+  [9/26] 钱湖南路-南高教园区 -> 200 states
+  [10/26] 南高教园区-下应路 -> 247 states
+  [11/26] 下应路-大洋江 -> 287 states
+  [12/26] 大洋江-泗港 -> 307 states
+  [13/26] 泗港-曹隘 -> 307 states
+  [14/26] 曹隘-柳隘 -> 337 states
+  [15/26] 柳隘-海晏北路 -> 353 states
+  [16/26] 海晏北路-民安东路 -> 369 states
+  [17/26] 民安东路-会展中心 -> 401 states
+  [18/26] 会展中心-院士路 -> 425 states
+  [19/26] 院士路-盎孟港 -> 445 states
+  [20/26] 盎孟港-三官堂 -> 609 states
+  [21/26] 三官堂-兴庄路 -> 684 states
+  [22/26] 兴庄路-兴海南路 -> 729 states
+  [23/26] 兴海南路-梅堰 -> 749 states
+  [24/26] 梅堰-永茂路 -> 829 states
+  [25/26] 永茂路-镇海大道 -> 904 states
+  [26/26] 镇海大道-骆驼桥 -> 964 states
+
+Selected energy-first plan: energy_first
+Feasible states: 954
+Best:  run=3148.9s, energy=355513.4 Wh, extrapolated=15, interpolated=0
+Nominal-dwell best nearby: run=3021.1s, energy=378468.9 Wh
+Dwell trade: +127.8s run time -> saves 22955.5 Wh (6.1%)
+
+Energy-first report: Run: 3149.0s | Dwell: 612.5s | Total: 3761.5s (target: 3761.25s)
+Energy: 355513.4 Wh | Saving: 13.73%
+
+Plotting priority-first plan full-line comparison ...
+  Building history curve cache from Excel: 布政-张家潭 trip 12
+  Building history curve cache from Excel: 张家潭-同德路 trip 12
+  Building history curve cache from Excel: 同德路-石碶 trip 12
+  Building history curve cache from Excel: 石碶-雅渡 trip 12
+  Building history curve cache from Excel: 雅渡-庙堰 trip 12
+  Building history curve cache from Excel: 庙堰-钟公庙 trip 12
+  Building history curve cache from Excel: 钟公庙-鄞州区政府 trip 12
+  Building history curve cache from Excel: 鄞州区政府-钱湖南路 trip 12
+  Building history curve cache from Excel: 钱湖南路-南高教园区 trip 12
+  Building history curve cache from Excel: 南高教园区-下应路 trip 12
+  Building history curve cache from Excel: 下应路-大洋江 trip 12
+  Building history curve cache from Excel: 大洋江-泗港 trip 12
+  Building history curve cache from Excel: 泗港-曹隘 trip 12
+  Building history curve cache from Excel: 曹隘-柳隘 trip 12
+  Building history curve cache from Excel: 柳隘-海晏北路 trip 12
+  Building history curve cache from Excel: 海晏北路-民安东路 trip 12
+  Building history curve cache from Excel: 民安东路-会展中心 trip 12
+  Building history curve cache from Excel: 会展中心-院士路 trip 12
+  Building history curve cache from Excel: 院士路-盎孟港 trip 12
+  Building history curve cache from Excel: 盎孟港-三官堂 trip 12
+  Building history curve cache from Excel: 三官堂-兴庄路 trip 12
+  Building history curve cache from Excel: 兴庄路-兴海南路 trip 12
+  Building history curve cache from Excel: 兴海南路-梅堰 trip 12
+  Building history curve cache from Excel: 梅堰-永茂路 trip 12
+  Building history curve cache from Excel: 永茂路-镇海大道 trip 12
+  Building history curve cache from Excel: 镇海大道-骆驼桥 trip 12
+Saved: D:\energy_conservation\output\schedule\final_plan_report_v2\Optimized_Full_Line_Report.png
+
+Plotting energy-first plan full-line comparison ...
+Saved: D:\energy_conservation\output\schedule\final_plan_report_v2\Optimized_Full_Line_Report_Energy_First.png
+Done. Energy: 386.838 kWh, Time: 3760.5s (strict = 3761.25s)
+
+# finished: 2026-07-13T19:07:12
+# return_code: 0
+# elapsed_seconds: 1854.9

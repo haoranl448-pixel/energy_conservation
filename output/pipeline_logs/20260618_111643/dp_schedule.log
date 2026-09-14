@@ -1,0 +1,76 @@
+# step: dp_schedule
+# command: C:\Users\bit11\AppData\Local\Programs\Python\Python311\python.exe D:\energy_conservation\scripts_new\00_main_pipeline\08_ato_class_globall_v2.py
+# ENERGY_TRIP_NO: 2
+# ENERGY_TRIP_INDEX: 1
+# ENERGY_TARGET_TIME: 3700.0
+# ENERGY_RESULTS_DATA_DIR: D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality
+# ENERGY_ATO_DATA_DIR: D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality
+# ENERGY_LINE_SCOPE: full
+# PYTHONIOENCODING: utf-8:replace
+# started: 2026-06-18T11:16:43
+
+Trip: 2 (segment index 1)
+Target total time: 3700.00s
+Line scope: full (26 sections)
+Menu file: D:\energy_conservation\output\analysis\ato_class_energy_menu2_new_v3.csv
+History file: D:\energy_conservation\full_line2_validation_results.csv
+Historical curve data dir: D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality
+Max run (at min dwell): 3100.0s
+Nom run (at nominal):   2950.0s
+Dwell budget to trade:   150s
+Dwell config (25 intervals):
+  布政-张家潭: nominal=30s, min=24s [elastic (24-30s)]
+  张家潭-同德路: nominal=30s, min=24s [elastic (24-30s)]
+  同德路-石碶: nominal=30s, min=24s [elastic (24-30s)]
+  石碶-雅渡: nominal=30s, min=24s [elastic (24-30s)]
+  雅渡-庙堰: nominal=30s, min=24s [elastic (24-30s)]
+  庙堰-钟公庙: nominal=30s, min=24s [elastic (24-30s)]
+  钟公庙-鄞州区政府: nominal=30s, min=24s [elastic (24-30s)]
+  鄞州区政府-钱湖南路: nominal=30s, min=24s [elastic (24-30s)]
+  钱湖南路-南高教园区: nominal=30s, min=24s [elastic (24-30s)]
+  南高教园区-下应路: nominal=30s, min=24s [elastic (24-30s)]
+  下应路-大洋江: nominal=30s, min=24s [elastic (24-30s)]
+  大洋江-泗港: nominal=30s, min=24s [elastic (24-30s)]
+  泗港-曹隘: nominal=30s, min=24s [elastic (24-30s)]
+  曹隘-柳隘: nominal=30s, min=24s [elastic (24-30s)]
+  柳隘-海晏北路: nominal=30s, min=24s [elastic (24-30s)]
+  海晏北路-民安东路: nominal=30s, min=24s [elastic (24-30s)]
+  民安东路-会展中心: nominal=30s, min=24s [elastic (24-30s)]
+  会展中心-院士路: nominal=30s, min=24s [elastic (24-30s)]
+  院士路-盎孟港: nominal=30s, min=24s [elastic (24-30s)]
+  盎孟港-三官堂: nominal=30s, min=24s [elastic (24-30s)]
+  三官堂-兴庄路: nominal=30s, min=24s [elastic (24-30s)]
+  兴庄路-兴海南路: nominal=30s, min=24s [elastic (24-30s)]
+  兴海南路-梅堰: nominal=30s, min=24s [elastic (24-30s)]
+  梅堰-永茂路: nominal=30s, min=24s [elastic (24-30s)]
+  永茂路-镇海大道: nominal=30s, min=24s [elastic (24-30s)]
+  镇海大道-骆驼桥: nominal=30s, min=24s [elastic (24-30s)]
+
+DP stage: real_only | sources=['real'] | score=priority_first
+  [1/26] 布政-张家潭 -> 2 states
+  [2/26] 张家潭-同德路 -> 4 states
+  [3/26] 同德路-石碶 -> 8 states
+  [4/26] 石碶-雅渡 -> 17 states
+  [5/26] 雅渡-庙堰 -> 44 states
+  [6/26] 庙堰-钟公庙 -> no options in this stage
+
+DP stage: allow_interpolated | sources=['interpolated', 'real'] | score=priority_first
+  [1/26] 布政-张家潭 -> 2 states
+  [2/26] 张家潭-同德路 -> 4 states
+  [3/26] 同德路-石碶 -> 8 states
+  [4/26] 石碶-雅渡 -> 17 states
+  [5/26] 雅渡-庙堰 -> 44 states
+  [6/26] 庙堰-钟公庙 -> no options in this stage
+
+DP stage: allow_extrapolated | sources=['extrapolated_adjacent', 'interpolated', 'real'] | score=priority_first
+  [1/26] 布政-张家潭 -> 2 states
+  [2/26] 张家潭-同德路 -> 8 states
+  [3/26] 同德路-石碶 -> 16 states
+  [4/26] 石碶-雅渡 -> 33 states
+  [5/26] 雅渡-庙堰 -> 77 states
+  [6/26] 庙堰-钟公庙 -> no options in this stage
+ERROR: No DP stage can fit even with min dwell.
+
+# finished: 2026-06-18T11:16:44
+# return_code: 0
+# elapsed_seconds: 0.7

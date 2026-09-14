@@ -1,0 +1,39 @@
+# step: energy_menu
+# command: C:\Users\bit11\AppData\Local\Programs\Python\Python311\python.exe D:\energy_conservation\scripts_new\00_main_pipeline\06_ato_generated_results_energy.py
+# ENERGY_TRIP_NO: 1
+# ENERGY_TRIP_INDEX: 0
+# ENERGY_TARGET_TIME: 706.7
+# ENERGY_RESULTS_DATA_DIR: D:\energy_conservation\data\data_processed_step2_v3_first5_curve_quality
+# ENERGY_ATO_DATA_DIR: D:\energy_conservation\data\data_processed_step2_v3_first5_curve_quality
+# ENERGY_LINE_SCOPE: 5
+# PYTHONIOENCODING: utf-8:replace
+# started: 2026-06-03T16:15:07
+
+按测试数据目录筛选能耗菜单区间: 5 个。
+🚀 开始批量评估 5 个区间的 ATO 轨迹能耗：第 1 趟车...
+地图/历史数据目录: D:\energy_conservation\data\data_processed_step2_v3_first5_curve_quality
+   ✅ 同德路-石碶 | class3 | 109.0s -> 总:12543.1Wh (物理:12654.0Wh + 残差:-110.9Wh)
+   ✅ 同德路-石碶 | class4 | 114.0s -> 总:13297.8Wh (物理:13524.4Wh + 残差:-226.5Wh)
+   ✅ 同德路-石碶 | class5 | 120.0s -> 总:11939.2Wh (物理:12252.0Wh + 残差:-312.8Wh)
+   ✅ 布政-张家潭 | class2 | 112.05s -> 总:13863.2Wh (物理:13843.9Wh + 残差:19.4Wh)
+   ✅ 布政-张家潭 | class3 | 115.0s -> 总:13573.9Wh (物理:13452.7Wh + 残差:121.2Wh)
+   ✅ 布政-张家潭 | class4 | 121.0s -> 总:13948.8Wh (物理:14342.2Wh + 残差:-393.4Wh)
+   ✅ 布政-张家潭 | class5 | 126.95s -> 总:12375.4Wh (物理:13291.5Wh + 残差:-916.1Wh)
+   ✅ 张家潭-同德路 | class1 | 141.0s -> 总:17787.4Wh (物理:19618.9Wh + 残差:-1831.4Wh)
+   ✅ 张家潭-同德路 | class2 | 147.75s -> 总:18205.2Wh (物理:18366.5Wh + 残差:-161.3Wh)
+   ✅ 张家潭-同德路 | class3 | 151.55s -> 总:17760.0Wh (物理:17120.3Wh + 残差:639.6Wh)
+   ✅ 张家潭-同德路 | class4 | 159.0s -> 总:16295.0Wh (物理:16092.4Wh + 残差:202.6Wh)
+   ✅ 石碶-雅渡 | class2 | 79.95s -> 总:11235.6Wh (物理:11393.8Wh + 残差:-158.2Wh)
+   ✅ 石碶-雅渡 | class3 | 82.05s -> 总:13307.6Wh (物理:13763.9Wh + 残差:-456.3Wh)
+   ✅ 石碶-雅渡 | class4 | 85.95s -> 总:10374.7Wh (物理:9807.9Wh + 残差:566.8Wh)
+   ✅ 石碶-雅渡 | class5 | 90.0s -> 总:7891.0Wh (物理:7514.6Wh + 残差:376.4Wh)
+   ✅ 雅渡-庙堰 | class3 | 132.25s -> 总:21542.7Wh (物理:20415.2Wh + 残差:1127.5Wh)
+   ✅ 雅渡-庙堰 | class4 | 139.0s -> 总:19755.4Wh (物理:18666.2Wh + 残差:1089.3Wh)
+   ✅ 雅渡-庙堰 | class5 | 146.0s -> 总:17628.6Wh (物理:16994.5Wh + 残差:634.1Wh)
+
+✨ 评估完成！能耗菜单已生成：D:\energy_conservation\output\analysis\ato_class_energy_menu1_new_v3.csv
+👉 现在你可以运行 DP 调度算法来选择最优 Class 组合了。
+
+# finished: 2026-06-03T16:21:51
+# return_code: 0
+# elapsed_seconds: 404.7

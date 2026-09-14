@@ -1,0 +1,104 @@
+# step: ato_simulation
+# command: C:\Users\bit11\AppData\Local\Programs\Python\Python311\python.exe D:\energy_conservation\scripts\simulate_ATO_v8.py
+# ENERGY_TRIP_NO: 1
+# ENERGY_TRIP_INDEX: 0
+# ENERGY_TARGET_TIME: script default
+# ENERGY_DATA_DIR: D:\energy_conservation\data\data_processed_step2_v3_first5_with_class
+# PYTHONIOENCODING: utf-8:replace
+# started: 2026-05-27T19:58:11
+
+按测试数据目录筛选区间: 5 个，跳过标准时间表中未提供数据的 21 个区间。
+========================================================================
+批量生成 class1-class5 速度曲线
+时间表: D:\energy_conservation\output\analysis\class_tables_strict\standard_class_times.csv
+数据目录: D:\energy_conservation\data\data_processed_step2_v3_first5_with_class
+模板目录: D:\energy_conservation\output\ato_phase_results_v3
+输出目录: D:\energy_conservation\output\ato_generated_results_new_v4
+硬限速: 80.0 km/h
+待处理区间数: 5
+========================================================================
+
+[1/5] 开始生成区间: 布政-张家潭
+   ⚓ class1 以 class3 为基准进行外推
+   ⚓ class2 以 class3 为基准进行外推
+   ⚓ class3 以 class3 为基准进行外推
+   ⚓ class4 以 class3 为基准进行外推
+   ⚓ class5 以 class3 为基准进行外推
+   ⚠️ 布政-张家潭 class2 对比失败: '运行等级'
+  ✅ 完成 | generated=4 | overspeed=1 | infeasible=0
+  class2对比: skipped | 未找到样本
+      - class1: 超速跳过 | 最终生成曲线最高速度为 86.993364 km/h，超过 80.0 km/h，删除该等级
+      - class2: 生成成功 | peak=73.507100 km/h
+      - class3: 生成成功 | peak=67.793600 km/h
+      - class4: 生成成功 | peak=61.289600 km/h
+      - class5: 生成成功 | peak=55.423000 km/h
+
+[2/5] 开始生成区间: 张家潭-同德路
+   ⚓ class1 以 class2 为基准进行外推
+   ⚓ class2 以 class2 为基准进行外推
+   ⚓ class3 以 class3 为基准进行外推
+   ⚓ class4 以 class3 为基准进行外推
+   ⚓ class5 以 class3 为基准进行外推
+   ⚠️ 张家潭-同德路 class2 对比失败: '运行等级'
+  ✅ 完成 | generated=5 | overspeed=0 | infeasible=0
+  class2对比: skipped | 未找到样本
+      - class1: 生成成功 | peak=73.551200 km/h
+      - class2: 生成成功 | peak=66.581200 km/h
+      - class3: 生成成功 | peak=65.250200 km/h
+      - class4: 生成成功 | peak=60.233900 km/h
+      - class5: 生成成功 | peak=55.989500 km/h
+
+[3/5] 开始生成区间: 同德路-石碶
+   ⚓ class1 以 class2 为基准进行外推
+   ⚓ class2 以 class2 为基准进行外推
+   ⚓ class3 以 class3 为基准进行外推
+   ⚓ class4 以 class3 为基准进行外推
+   ⚓ class5 以 class3 为基准进行外推
+  ✅ 完成 | generated=3 | overspeed=2 | infeasible=0
+  class2对比: skipped | 未找到样本
+      - class1: 超速跳过 | 最终生成曲线最高速度为 111.242962 km/h，超过 80.0 km/h，删除该等级
+      - class2: 超速跳过 | 最终生成曲线最高速度为 81.356588 km/h，超过 80.0 km/h，删除该等级
+      - class3: 生成成功 | peak=69.717800 km/h
+      - class4: 生成成功 | peak=62.685900 km/h
+      - class5: 生成成功 | peak=55.970500 km/h
+
+[4/5] 开始生成区间: 石碶-雅渡
+   ⚓ class1 以 class2 为基准进行外推
+   ⚓ class2 以 class2 为基准进行外推
+   ⚓ class3 以 class3 为基准进行外推
+   ⚓ class4 以 class3 为基准进行外推
+   ⚓ class5 以 class3 为基准进行外推
+   ⚠️ 石碶-雅渡 class2 对比失败: '运行等级'
+  ✅ 完成 | generated=3 | overspeed=2 | infeasible=0
+  class2对比: skipped | 未找到样本
+      - class1: 超速跳过 | 最终生成曲线最高速度为 129.628773 km/h，超过 80.0 km/h，删除该等级
+      - class2: 生成成功 | peak=66.219600 km/h
+      - class3: 超速跳过 | 最终生成曲线最高速度为 101.040132 km/h，超过 80.0 km/h，删除该等级
+      - class4: 生成成功 | peak=56.315800 km/h
+      - class5: 生成成功 | peak=48.946000 km/h
+
+[5/5] 开始生成区间: 雅渡-庙堰
+   ⚓ class1 以 class2 为基准进行外推
+   🎯 class2 使用原生数据镜像 (Time Diff: 0.55s)
+   🎯 class3 使用原生数据镜像 (Time Diff: 0.00s)
+   ⚓ class4 以 class3 为基准进行外推
+   ⚓ class5 以 class3 为基准进行外推
+   ⚠️ 雅渡-庙堰 class2 对比失败: '运行等级'
+  ✅ 完成 | generated=4 | overspeed=1 | infeasible=0
+  class2对比: skipped | 未找到样本
+      - class1: 超速跳过 | 最终生成曲线最高速度为 93.298806 km/h，超过 80.0 km/h，删除该等级
+      - class2: 生成成功 | peak=78.218800 km/h
+      - class3: 生成成功 | peak=75.961600 km/h
+      - class4: 生成成功 | peak=68.049800 km/h
+      - class5: 生成成功 | peak=61.778300 km/h
+
+========================================================================
+批量生成结束
+成功区间数: 5
+失败区间数: 0
+汇总文件: D:\energy_conservation\output\ato_generated_results_new_v4\batch_generate_summary.csv
+========================================================================
+
+# finished: 2026-05-27T20:01:02
+# return_code: 0
+# elapsed_seconds: 170.5

@@ -1,0 +1,411 @@
+# step: ato_simulation
+# command: C:\Users\bit11\AppData\Local\Programs\Python\Python311\python.exe D:\energy_conservation\scripts_new\00_main_pipeline\05_simulate_ATO_v8.py
+# ENERGY_TRIP_NO: 1
+# ENERGY_TRIP_INDEX: 0
+# ENERGY_TARGET_TIME: script default
+# ENERGY_RESULTS_DATA_DIR: D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality
+# ENERGY_ATO_DATA_DIR: D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality
+# ENERGY_LINE_SCOPE: full
+# PYTHONIOENCODING: utf-8:replace
+# started: 2026-06-16T15:42:11
+
+已清理 ATO 曲线输出目录: D:\energy_conservation\output\ato_generated_results_new_v4
+按测试数据目录筛选区间: 26 个，跳过标准时间表中未提供数据的 0 个区间。
+========================================================================
+批量生成 class1-class5 速度曲线
+时间表: D:\energy_conservation\output\analysis\class_tables_strict\standard_class_times.csv
+数据目录: D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality
+模板目录: D:\energy_conservation\output\ato_phase_results_v3
+输出目录: D:\energy_conservation\output\ato_generated_results_new_v4
+硬限速: 80.0 km/h
+待处理区间数: 26
+========================================================================
+
+[1/26] 开始生成区间: 布政-张家潭
+   ⚓ class1 | source=extrapolated_adjacent | parent=class2 | support=class2
+   ⚓ class2 | source=real | parent=class2 | support=class2
+   ⚓ class3 | source=real | parent=class3 | support=class3
+   ⚓ class4 | source=real | parent=class4 | support=class4
+   ⚓ class5 | source=extrapolated_adjacent | parent=class4 | support=class4
+  ✅ 完成 | generated=3 | overspeed=2 | infeasible=0
+  class2对比: skipped | 未找到样本
+      - class1: 超速跳过 | 最终生成曲线最高速度为 117.150996 km/h，超过 80.0 km/h，删除该等级
+      - class2: 超速跳过 | 最终生成曲线最高速度为 126.670639 km/h，超过 80.0 km/h，删除该等级
+      - class3: 生成成功 | peak=67.142800 km/h
+      - class4: 生成成功 | peak=63.045900 km/h
+      - class5: 生成成功 | peak=56.873300 km/h
+
+[2/26] 开始生成区间: 张家潭-同德路
+   ⚓ class1 | source=extrapolated_adjacent | parent=class2 | support=class2
+   ⚓ class2 | source=real | parent=class2 | support=class2
+   ⚓ class3 | source=real | parent=class3 | support=class3
+   ⚓ class4 | source=extrapolated_adjacent | parent=class3 | support=class3
+   ⚠️ 张家潭-同德路 class5: 没有相邻真实等级模板，跳过
+   曲线质量过滤: 仅保留 曲线质量标签=0，行数 377196->328707，趟次 125->109
+  ✅ 完成 | generated=4 | overspeed=0 | infeasible=0
+  class2对比: success | none
+      - class1: 生成成功 | peak=73.600700 km/h
+      - class2: 生成成功 | peak=66.761900 km/h
+      - class3: 生成成功 | peak=65.368400 km/h
+      - class4: 生成成功 | peak=59.593100 km/h
+      - class5: 跳过 | no adjacent real template
+
+[3/26] 开始生成区间: 同德路-石碶
+   ⚓ class1 | source=extrapolated_adjacent | parent=class2 | support=class2
+   ⚓ class2 | source=real | parent=class2 | support=class2
+   ⚓ class3 | source=real | parent=class3 | support=class3
+   ⚓ class4 | source=real | parent=class4 | support=class4
+   ⚓ class5 | source=extrapolated_adjacent | parent=class4 | support=class4
+  ✅ 完成 | generated=3 | overspeed=2 | infeasible=0
+  class2对比: skipped | 未找到样本
+      - class1: 超速跳过 | 最终生成曲线最高速度为 112.222987 km/h，超过 80.0 km/h，删除该等级
+      - class2: 超速跳过 | 最终生成曲线最高速度为 81.135800 km/h，超过 80.0 km/h，删除该等级
+      - class3: 生成成功 | peak=69.883200 km/h
+      - class4: 生成成功 | peak=64.398100 km/h
+      - class5: 生成成功 | peak=56.643800 km/h
+
+[4/26] 开始生成区间: 石碶-雅渡
+   ⚓ class1 | source=extrapolated_adjacent | parent=class2 | support=class2
+   ⚓ class2 | source=real | parent=class2 | support=class2
+   ⚓ class3 | source=real | parent=class3 | support=class3
+   ⚓ class4 | source=real | parent=class4 | support=class4
+   ⚓ class5 | source=extrapolated_adjacent | parent=class4 | support=class4
+   曲线质量过滤: 仅保留 曲线质量标签=0，行数 203633->177414，趟次 125->109
+  ✅ 完成 | generated=4 | overspeed=1 | infeasible=0
+  class2对比: success | none
+      - class1: 超速跳过 | 最终生成曲线最高速度为 117.426964 km/h，超过 80.0 km/h，删除该等级
+      - class2: 生成成功 | peak=64.028000 km/h
+      - class3: 生成成功 | peak=71.400100 km/h
+      - class4: 生成成功 | peak=61.450000 km/h
+      - class5: 生成成功 | peak=50.895800 km/h
+
+[5/26] 开始生成区间: 雅渡-庙堰
+   ⚓ class1 | source=extrapolated_adjacent | parent=class2 | support=class2
+   ⚓ class2 | source=real | parent=class2 | support=class2
+   ⚓ class3 | source=real | parent=class3 | support=class3
+   ⚓ class4 | source=real | parent=class4 | support=class4
+   ⚓ class5 | source=extrapolated_adjacent | parent=class4 | support=class4
+   曲线质量过滤: 仅保留 曲线质量标签=0，行数 330277->288239，趟次 125->109
+  ✅ 完成 | generated=4 | overspeed=1 | infeasible=0
+  class2对比: success | none
+      - class1: 超速跳过 | 最终生成曲线最高速度为 93.231005 km/h，超过 80.0 km/h，删除该等级
+      - class2: 生成成功 | peak=79.011500 km/h
+      - class3: 生成成功 | peak=75.511400 km/h
+      - class4: 生成成功 | peak=69.002600 km/h
+      - class5: 生成成功 | peak=62.593600 km/h
+
+[6/26] 开始生成区间: 庙堰-钟公庙
+   ⚓ class1 | source=extrapolated_adjacent | parent=class2 | support=class2
+   ⚓ class2 | source=real | parent=class2 | support=class2
+   ⚓ class3 | source=real | parent=class3 | support=class3
+   ⚓ class4 | source=extrapolated_adjacent | parent=class3 | support=class3
+   ⚠️ 庙堰-钟公庙 class5: 没有相邻真实等级模板，跳过
+  ✅ 完成 | generated=2 | overspeed=2 | infeasible=0
+  class2对比: skipped | 未找到样本
+      - class1: 超速跳过 | 最终生成曲线最高速度为 130.361648 km/h，超过 80.0 km/h，删除该等级
+      - class2: 超速跳过 | 最终生成曲线最高速度为 101.728034 km/h，超过 80.0 km/h，删除该等级
+      - class3: 生成成功 | peak=69.104700 km/h
+      - class4: 生成成功 | peak=58.188300 km/h
+      - class5: 跳过 | no adjacent real template
+
+[7/26] 开始生成区间: 钟公庙-鄞州区政府
+   ⚠️ 钟公庙-鄞州区政府 class1: 没有相邻真实等级模板，跳过
+   ⚓ class2 | source=extrapolated_adjacent | parent=class3 | support=class3
+   ⚓ class3 | source=real | parent=class3 | support=class3
+   ⚓ class4 | source=real | parent=class4 | support=class4
+   ⚓ class5 | source=extrapolated_adjacent | parent=class4 | support=class4
+  ✅ 完成 | generated=3 | overspeed=1 | infeasible=0
+  class2对比: skipped | 未找到样本
+      - class1: 跳过 | no adjacent real template
+      - class2: 超速跳过 | 最终生成曲线最高速度为 92.443458 km/h，超过 80.0 km/h，删除该等级
+      - class3: 生成成功 | peak=68.618300 km/h
+      - class4: 生成成功 | peak=59.864500 km/h
+      - class5: 生成成功 | peak=53.292000 km/h
+
+[8/26] 开始生成区间: 鄞州区政府-钱湖南路
+   ⚓ class1 | source=extrapolated_adjacent | parent=class2 | support=class2
+   ⚓ class2 | source=real | parent=class2 | support=class2
+   ⚓ class3 | source=real | parent=class3 | support=class3
+   ⚓ class4 | source=extrapolated_adjacent | parent=class3 | support=class3
+   ⚠️ 鄞州区政府-钱湖南路 class5: 没有相邻真实等级模板，跳过
+   曲线质量过滤: 仅保留 曲线质量标签=0，行数 326053->278993，趟次 125->107
+  ✅ 完成 | generated=3 | overspeed=1 | infeasible=0
+  class2对比: success | none
+      - class1: 超速跳过 | 最终生成曲线最高速度为 88.822954 km/h，超过 80.0 km/h，删除该等级
+      - class2: 生成成功 | peak=77.106500 km/h
+      - class3: 生成成功 | peak=71.131300 km/h
+      - class4: 生成成功 | peak=64.184500 km/h
+      - class5: 跳过 | no adjacent real template
+
+[9/26] 开始生成区间: 钱湖南路-南高教园区
+   ⚓ class1 | source=extrapolated_adjacent | parent=class2 | support=class2
+   ⚓ class2 | source=real | parent=class2 | support=class2
+   ⚓ class3 | source=real | parent=class3 | support=class3
+   ⚓ class4 | source=extrapolated_adjacent | parent=class3 | support=class3
+   ⚠️ 钱湖南路-南高教园区 class5: 没有相邻真实等级模板，跳过
+  ✅ 完成 | generated=2 | overspeed=2 | infeasible=0
+  class2对比: skipped | 未找到样本
+      - class1: 超速跳过 | 最终生成曲线最高速度为 141.396893 km/h，超过 80.0 km/h，删除该等级
+      - class2: 超速跳过 | 最终生成曲线最高速度为 82.630864 km/h，超过 80.0 km/h，删除该等级
+      - class3: 生成成功 | peak=70.335700 km/h
+      - class4: 生成成功 | peak=60.291300 km/h
+      - class5: 跳过 | no adjacent real template
+
+[10/26] 开始生成区间: 南高教园区-下应路
+   ⚓ class1 | source=extrapolated_adjacent | parent=class2 | support=class2
+   ⚓ class2 | source=real | parent=class2 | support=class2
+   ⚓ class3 | source=real | parent=class3 | support=class3
+   ⚓ class4 | source=extrapolated_adjacent | parent=class3 | support=class3
+   ⚠️ 南高教园区-下应路 class5: 没有相邻真实等级模板，跳过
+   曲线质量过滤: 仅保留 曲线质量标签=0，行数 283340->242276，趟次 125->107
+  ✅ 完成 | generated=3 | overspeed=1 | infeasible=0
+  class2对比: success | none
+      - class1: 超速跳过 | 最终生成曲线最高速度为 100.241535 km/h，超过 80.0 km/h，删除该等级
+      - class2: 生成成功 | peak=78.693700 km/h
+      - class3: 生成成功 | peak=70.831500 km/h
+      - class4: 生成成功 | peak=62.504400 km/h
+      - class5: 跳过 | no adjacent real template
+
+[11/26] 开始生成区间: 下应路-大洋江
+   ⚓ class1 | source=extrapolated_adjacent | parent=class2 | support=class2
+   ⚓ class2 | source=real | parent=class2 | support=class2
+   ⚓ class3 | source=real | parent=class3 | support=class3
+   ⚓ class4 | source=real | parent=class4 | support=class4
+   ⚓ class5 | source=extrapolated_adjacent | parent=class4 | support=class4
+   曲线质量过滤: 仅保留 曲线质量标签=0，行数 261550->223882，趟次 125->107
+  ✅ 完成 | generated=4 | overspeed=1 | infeasible=0
+  class2对比: success | none
+      - class1: 超速跳过 | 最终生成曲线最高速度为 96.434278 km/h，超过 80.0 km/h，删除该等级
+      - class2: 生成成功 | peak=73.000500 km/h
+      - class3: 生成成功 | peak=62.671700 km/h
+      - class4: 生成成功 | peak=58.949700 km/h
+      - class5: 生成成功 | peak=52.235000 km/h
+
+[12/26] 开始生成区间: 大洋江-泗港
+   ⚓ class1 | source=extrapolated_adjacent | parent=class2 | support=class2
+   ⚓ class2 | source=real | parent=class2 | support=class2
+   ⚓ class3 | source=real | parent=class3 | support=class3
+   ⚓ class4 | source=extrapolated_adjacent | parent=class3 | support=class3
+   ⚠️ 大洋江-泗港 class5: 没有相邻真实等级模板，跳过
+  ✅ 完成 | generated=2 | overspeed=2 | infeasible=0
+  class2对比: skipped | 未找到样本
+      - class1: 超速跳过 | 最终生成曲线最高速度为 124.474958 km/h，超过 80.0 km/h，删除该等级
+      - class2: 超速跳过 | 最终生成曲线最高速度为 144.326900 km/h，超过 80.0 km/h，删除该等级
+      - class3: 生成成功 | peak=60.955000 km/h
+      - class4: 生成成功 | peak=53.412700 km/h
+      - class5: 跳过 | no adjacent real template
+
+[13/26] 开始生成区间: 泗港-曹隘
+   ⚓ class1 | source=real | parent=class1 | support=class1
+   ⚓ class2 | source=real | parent=class2 | support=class2
+   ⚓ class3 | source=real | parent=class3 | support=class3
+   ⚓ class4 | source=real | parent=class4 | support=class4
+   ⚓ class5 | source=extrapolated_adjacent | parent=class4 | support=class4
+   曲线质量过滤: 仅保留 曲线质量标签=0，行数 339515->291651，趟次 127->109
+  ✅ 完成 | generated=3 | overspeed=2 | infeasible=0
+  class2对比: success | none
+      - class1: 超速跳过 | 最终生成曲线最高速度为 82.214245 km/h，超过 80.0 km/h，删除该等级
+      - class2: 生成成功 | peak=78.311100 km/h
+      - class3: 超速跳过 | 最终生成曲线最高速度为 80.591241 km/h，超过 80.0 km/h，删除该等级
+      - class4: 生成成功 | peak=75.531600 km/h
+      - class5: 生成成功 | peak=66.482200 km/h
+
+[14/26] 开始生成区间: 曹隘-柳隘
+   ⚓ class1 | source=extrapolated_adjacent | parent=class2 | support=class2
+   ⚓ class2 | source=real | parent=class2 | support=class2
+   ⚓ class3 | source=real | parent=class3 | support=class3
+   ⚓ class4 | source=real | parent=class4 | support=class4
+   ⚓ class5 | source=extrapolated_adjacent | parent=class4 | support=class4
+   曲线质量过滤: 仅保留 曲线质量标签=0，行数 271902->228729，趟次 127->107
+  ✅ 完成 | generated=4 | overspeed=1 | infeasible=0
+  class2对比: success | none
+      - class1: 超速跳过 | 最终生成曲线最高速度为 144.538413 km/h，超过 80.0 km/h，删除该等级
+      - class2: 生成成功 | peak=79.801900 km/h
+      - class3: 生成成功 | peak=73.308600 km/h
+      - class4: 生成成功 | peak=61.633000 km/h
+      - class5: 生成成功 | peak=54.639800 km/h
+
+[15/26] 开始生成区间: 柳隘-海晏北路
+   ⚓ class1 | source=extrapolated_adjacent | parent=class2 | support=class2
+   ⚓ class2 | source=real | parent=class2 | support=class2
+   ⚓ class3 | source=real | parent=class3 | support=class3
+   ⚓ class4 | source=extrapolated_adjacent | parent=class3 | support=class3
+   ⚠️ 柳隘-海晏北路 class5: 没有相邻真实等级模板，跳过
+  ✅ 完成 | generated=2 | overspeed=2 | infeasible=0
+  class2对比: skipped | 未找到样本
+      - class1: 超速跳过 | 最终生成曲线最高速度为 137.227083 km/h，超过 80.0 km/h，删除该等级
+      - class2: 超速跳过 | 最终生成曲线最高速度为 100.152500 km/h，超过 80.0 km/h，删除该等级
+      - class3: 生成成功 | peak=64.812400 km/h
+      - class4: 生成成功 | peak=55.705700 km/h
+      - class5: 跳过 | no adjacent real template
+
+[16/26] 开始生成区间: 海晏北路-民安东路
+   ⚓ class1 | source=extrapolated_adjacent | parent=class2 | support=class2
+   ⚓ class2 | source=real | parent=class2 | support=class2
+   ⚓ class3 | source=real | parent=class3 | support=class3
+   ⚓ class4 | source=extrapolated_adjacent | parent=class3 | support=class3
+   ⚠️ 海晏北路-民安东路 class5: 没有相邻真实等级模板，跳过
+  ✅ 完成 | generated=2 | overspeed=2 | infeasible=0
+  class2对比: skipped | 未找到样本
+      - class1: 超速跳过 | 最终生成曲线最高速度为 128.109956 km/h，超过 80.0 km/h，删除该等级
+      - class2: 超速跳过 | 最终生成曲线最高速度为 84.111097 km/h，超过 80.0 km/h，删除该等级
+      - class3: 生成成功 | peak=67.861700 km/h
+      - class4: 生成成功 | peak=54.640400 km/h
+      - class5: 跳过 | no adjacent real template
+
+[17/26] 开始生成区间: 民安东路-会展中心
+   ⚓ class1 | source=extrapolated_adjacent | parent=class2 | support=class2
+   ⚓ class2 | source=real | parent=class2 | support=class2
+   ⚓ class3 | source=real | parent=class3 | support=class3
+   ⚓ class4 | source=extrapolated_adjacent | parent=class3 | support=class3
+   ⚠️ 民安东路-会展中心 class5: 没有相邻真实等级模板，跳过
+   曲线质量过滤: 仅保留 曲线质量标签=0，行数 194135->160304，趟次 126->104
+  ✅ 完成 | generated=3 | overspeed=1 | infeasible=0
+  class2对比: success | none
+      - class1: 超速跳过 | 最终生成曲线最高速度为 120.959326 km/h，超过 80.0 km/h，删除该等级
+      - class2: 生成成功 | peak=79.546000 km/h
+      - class3: 生成成功 | peak=60.277700 km/h
+      - class4: 生成成功 | peak=48.551200 km/h
+      - class5: 跳过 | no adjacent real template
+
+[18/26] 开始生成区间: 会展中心-院士路
+   ⚠️ 会展中心-院士路 class1: 没有相邻真实等级模板，跳过
+   ⚓ class2 | source=extrapolated_adjacent | parent=class3 | support=class3
+   ⚓ class3 | source=real | parent=class3 | support=class3
+   ⚓ class4 | source=extrapolated_adjacent | parent=class3 | support=class3
+   ⚠️ 会展中心-院士路 class5: 没有相邻真实等级模板，跳过
+  ✅ 完成 | generated=2 | overspeed=1 | infeasible=0
+  class2对比: skipped | 未找到样本
+      - class1: 跳过 | no adjacent real template
+      - class2: 超速跳过 | 最终生成曲线最高速度为 85.532129 km/h，超过 80.0 km/h，删除该等级
+      - class3: 生成成功 | peak=77.632100 km/h
+      - class4: 生成成功 | peak=67.490700 km/h
+      - class5: 跳过 | no adjacent real template
+
+[19/26] 开始生成区间: 院士路-盎孟港
+   ⚓ class1 | source=extrapolated_adjacent | parent=class2 | support=class2
+   ⚓ class2 | source=real | parent=class2 | support=class2
+   ⚓ class3 | source=real | parent=class3 | support=class3
+   ⚓ class4 | source=extrapolated_adjacent | parent=class3 | support=class3
+   ⚠️ 院士路-盎孟港 class5: 没有相邻真实等级模板，跳过
+  ✅ 完成 | generated=2 | overspeed=2 | infeasible=0
+  class2对比: skipped | 未找到样本
+      - class1: 超速跳过 | 最终生成曲线最高速度为 131.738818 km/h，超过 80.0 km/h，删除该等级
+      - class2: 超速跳过 | 最终生成曲线最高速度为 107.515116 km/h，超过 80.0 km/h，删除该等级
+      - class3: 生成成功 | peak=72.213900 km/h
+      - class4: 生成成功 | peak=56.536200 km/h
+      - class5: 跳过 | no adjacent real template
+
+[20/26] 开始生成区间: 盎孟港-三官堂
+   ⚓ class1 | source=extrapolated_adjacent | parent=class2 | support=class2
+   ⚓ class2 | source=real | parent=class2 | support=class2
+   ⚓ class3 | source=real | parent=class3 | support=class3
+   ⚓ class4 | source=extrapolated_adjacent | parent=class3 | support=class3
+   ⚠️ 盎孟港-三官堂 class5: 没有相邻真实等级模板，跳过
+   曲线质量过滤: 仅保留 曲线质量标签=0，行数 341867->281124，趟次 126->104
+  ✅ 完成 | generated=3 | overspeed=1 | infeasible=0
+  class2对比: success | none
+      - class1: 超速跳过 | 最终生成曲线最高速度为 86.221774 km/h，超过 80.0 km/h，删除该等级
+      - class2: 生成成功 | peak=76.317000 km/h
+      - class3: 生成成功 | peak=68.939900 km/h
+      - class4: 生成成功 | peak=63.656300 km/h
+      - class5: 跳过 | no adjacent real template
+
+[21/26] 开始生成区间: 三官堂-兴庄路
+   ⚓ class1 | source=extrapolated_adjacent | parent=class2 | support=class2
+   ⚓ class2 | source=real | parent=class2 | support=class2
+   ⚓ class3 | source=real | parent=class3 | support=class3
+   ⚓ class4 | source=extrapolated_adjacent | parent=class3 | support=class3
+   ⚠️ 三官堂-兴庄路 class5: 没有相邻真实等级模板，跳过
+   曲线质量过滤: 仅保留 曲线质量标签=0，行数 256217->211064，趟次 126->104
+  ✅ 完成 | generated=4 | overspeed=0 | infeasible=0
+  class2对比: success | none
+      - class1: 生成成功 | peak=76.060100 km/h
+      - class2: 生成成功 | peak=61.753300 km/h
+      - class3: 生成成功 | peak=53.728700 km/h
+      - class4: 生成成功 | peak=48.731200 km/h
+      - class5: 跳过 | no adjacent real template
+
+[22/26] 开始生成区间: 兴庄路-兴海南路
+   ⚓ class1 | source=extrapolated_adjacent | parent=class2 | support=class2
+   ⚓ class2 | source=real | parent=class2 | support=class2
+   ⚓ class3 | source=real | parent=class3 | support=class3
+   ⚓ class4 | source=extrapolated_adjacent | parent=class3 | support=class3
+   ⚠️ 兴庄路-兴海南路 class5: 没有相邻真实等级模板，跳过
+   曲线质量过滤: 仅保留 曲线质量标签=0，行数 228584->184846，趟次 126->102
+  ✅ 完成 | generated=2 | overspeed=2 | infeasible=0
+  class2对比: success | none
+      - class1: 超速跳过 | 最终生成曲线最高速度为 138.571967 km/h，超过 80.0 km/h，删除该等级
+      - class2: 生成成功 | peak=79.846900 km/h
+      - class3: 超速跳过 | 最终生成曲线最高速度为 88.137136 km/h，超过 80.0 km/h，删除该等级
+      - class4: 生成成功 | peak=53.818000 km/h
+      - class5: 跳过 | no adjacent real template
+
+[23/26] 开始生成区间: 兴海南路-梅堰
+   ⚠️ 兴海南路-梅堰 class1: 没有相邻真实等级模板，跳过
+   ⚓ class2 | source=extrapolated_adjacent | parent=class3 | support=class3
+   ⚓ class3 | source=real | parent=class3 | support=class3
+   ⚓ class4 | source=extrapolated_adjacent | parent=class3 | support=class3
+   ⚠️ 兴海南路-梅堰 class5: 没有相邻真实等级模板，跳过
+  ✅ 完成 | generated=2 | overspeed=1 | infeasible=0
+  class2对比: skipped | 未找到样本
+      - class1: 跳过 | no adjacent real template
+      - class2: 超速跳过 | 最终生成曲线最高速度为 133.282791 km/h，超过 80.0 km/h，删除该等级
+      - class3: 生成成功 | peak=69.833400 km/h
+      - class4: 生成成功 | peak=53.892700 km/h
+      - class5: 跳过 | no adjacent real template
+
+[24/26] 开始生成区间: 梅堰-永茂路
+   ⚓ class1 | source=extrapolated_adjacent | parent=class2 | support=class2
+   ⚓ class2 | source=real | parent=class2 | support=class2
+   ⚓ class3 | source=real | parent=class3 | support=class3
+   ⚓ class4 | source=real | parent=class4 | support=class4
+   ⚓ class5 | source=extrapolated_adjacent | parent=class4 | support=class4
+  ✅ 完成 | generated=3 | overspeed=2 | infeasible=0
+  class2对比: skipped | 未找到样本
+      - class1: 超速跳过 | 最终生成曲线最高速度为 144.788933 km/h，超过 80.0 km/h，删除该等级
+      - class2: 超速跳过 | 最终生成曲线最高速度为 92.775995 km/h，超过 80.0 km/h，删除该等级
+      - class3: 生成成功 | peak=67.309400 km/h
+      - class4: 生成成功 | peak=57.972200 km/h
+      - class5: 生成成功 | peak=52.756900 km/h
+
+[25/26] 开始生成区间: 永茂路-镇海大道
+   ⚓ class1 | source=extrapolated_adjacent | parent=class2 | support=class2
+   ⚓ class2 | source=real | parent=class2 | support=class2
+   ⚓ class3 | source=interpolated | parent=class2 | support=class2|class4
+   ⚓ class4 | source=real | parent=class4 | support=class4
+   ⚓ class5 | source=extrapolated_adjacent | parent=class4 | support=class4
+   曲线质量过滤: 仅保留 曲线质量标签=0，行数 359266->299371，趟次 126->105
+  ✅ 完成 | generated=4 | overspeed=1 | infeasible=0
+  class2对比: success | none
+      - class1: 超速跳过 | 最终生成曲线最高速度为 90.812403 km/h，超过 80.0 km/h，删除该等级
+      - class2: 生成成功 | peak=79.693400 km/h
+      - class3: 生成成功 | peak=72.562700 km/h
+      - class4: 生成成功 | peak=66.585500 km/h
+      - class5: 生成成功 | peak=61.020600 km/h
+
+[26/26] 开始生成区间: 镇海大道-骆驼桥
+   ⚓ class1 | source=extrapolated_adjacent | parent=class2 | support=class2
+   ⚓ class2 | source=real | parent=class2 | support=class2
+   ⚓ class3 | source=real | parent=class3 | support=class3
+   ⚓ class4 | source=real | parent=class4 | support=class4
+   ⚓ class5 | source=extrapolated_adjacent | parent=class4 | support=class4
+   曲线质量过滤: 仅保留 曲线质量标签=0，行数 295352->241442，趟次 126->103
+  ✅ 完成 | generated=4 | overspeed=1 | infeasible=0
+  class2对比: success | none
+      - class1: 超速跳过 | 最终生成曲线最高速度为 96.199545 km/h，超过 80.0 km/h，删除该等级
+      - class2: 生成成功 | peak=79.693900 km/h
+      - class3: 生成成功 | peak=71.816600 km/h
+      - class4: 生成成功 | peak=65.002400 km/h
+      - class5: 生成成功 | peak=59.131000 km/h
+
+========================================================================
+批量生成结束
+成功区间数: 26
+失败区间数: 0
+汇总文件: D:\energy_conservation\output\ato_generated_results_new_v4\batch_generate_summary.csv
+========================================================================
+
+# finished: 2026-06-16T16:16:43
+# return_code: 0
+# elapsed_seconds: 2071.5

@@ -1,0 +1,2 @@
+station_pair,v_peak_opt(m/s),t_arrival_opt(s),E_opt(Wh),params
+大洋江-泗港,14.89516606367317,93.58132012484015,,"L=972.0, V_UPPER=22.22, V_MID=12.5, A1=0.55, A2=0.8, A_DEC=-0.5, MASS=215.84, REACH_TOL=0.5, WINDOW=[83.0,101.0]"

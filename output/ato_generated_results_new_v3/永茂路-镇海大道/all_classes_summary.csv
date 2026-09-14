@@ -1,0 +1,6 @@
+﻿station_pair,class_name,status,reason,parent_ref,target_time_s,curve_csv,sim_time_s,peak_speed_kmh,total_dist_m
+永茂路-镇海大道,class1,overspeed,最终生成曲线最高速度为 86.198028 km/h，超过 80.0 km/h，删除该等级,class2,135.0,,,,
+永茂路-镇海大道,class2,generated,最终生成曲线后验检查通过，峰值 77.948907 km/h,class2,141.0,D:\energy_conservation\output\ato_generated_results_new_v3\永茂路-镇海大道\class2_generated_curve.csv,141.0,77.9489,2164.5957
+永茂路-镇海大道,class3,generated,最终生成曲线后验检查通过，峰值 71.107774 km/h,class3,148.0,D:\energy_conservation\output\ato_generated_results_new_v3\永茂路-镇海大道\class3_generated_curve.csv,148.0,71.1078,2164.3679
+永茂路-镇海大道,class4,generated,最终生成曲线后验检查通过，峰值 64.453131 km/h,class3,156.0,D:\energy_conservation\output\ato_generated_results_new_v3\永茂路-镇海大道\class4_generated_curve.csv,156.0,64.4531,2164.3679
+永茂路-镇海大道,class5,generated,最终生成曲线后验检查通过，峰值 59.294666 km/h,class3,164.0,D:\energy_conservation\output\ato_generated_results_new_v3\永茂路-镇海大道\class5_generated_curve.csv,164.05,59.2947,2164.3679

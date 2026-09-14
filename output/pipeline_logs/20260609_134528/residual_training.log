@@ -1,0 +1,66 @@
+# step: residual_training
+# command: C:\Users\bit11\AppData\Local\Programs\Python\Python311\python.exe D:\energy_conservation\scripts_new\00_main_pipeline\02_train_residual_new.py
+# ENERGY_TRIP_NO: 1
+# ENERGY_TRIP_INDEX: 0
+# ENERGY_TARGET_TIME: 706.7
+# ENERGY_RESULTS_DATA_DIR: D:\energy_conservation\data\data_processed_step2_v3_first5_curve_quality
+# ENERGY_ATO_DATA_DIR: D:\energy_conservation\data\data_processed_step2_v3_first5_curve_quality
+# ENERGY_LINE_SCOPE: 5
+# PYTHONIOENCODING: utf-8:replace
+# started: 2026-06-09T13:45:28
+
+⚡ 当前训练设备: cpu
+📁 残差训练数据目录: D:\energy_conservation\data\data_processed_step2_v3_first5_curve_quality
+🚦 残差训练区间范围: 5 (5 sections)
+
+🚀 [残差6特征] 开始训练: 布政-张家潭
+   ...正在计算物理基准 (Simulating)...
+   ⏳ 开始训练残差模型 (样本数: 230752)...
+▶️ 开始训练: 布政-张家潭 (样本数: 230752)
+      Epoch  10 | Train: 0.032567 | Val: 0.033821
+      ⏹️ 早停: Epoch 14, best epoch=9, best val loss=0.032240
+   ✅ 训练结束 (Best Val Loss: 0.03224, Best Epoch: 9)
+   📊 三纵轴对标图已保存: D:\energy_conservation\output\models\nn_results_residual_v2\布政-张家潭/triple_axis_fusion.png
+
+🚀 [残差6特征] 开始训练: 张家潭-同德路
+   ...正在计算物理基准 (Simulating)...
+   ⏳ 开始训练残差模型 (样本数: 298410)...
+▶️ 开始训练: 张家潭-同德路 (样本数: 298410)
+      Epoch  10 | Train: 0.012369 | Val: 0.014502
+      Epoch  20 | Train: 0.010818 | Val: 0.014353
+      Epoch  30 | Train: 0.010201 | Val: 0.012839
+      ⏹️ 早停: Epoch 30, best epoch=25, best val loss=0.011373
+   ✅ 训练结束 (Best Val Loss: 0.01137, Best Epoch: 25)
+   📊 三纵轴对标图已保存: D:\energy_conservation\output\models\nn_results_residual_v2\张家潭-同德路/triple_axis_fusion.png
+
+🚀 [残差6特征] 开始训练: 同德路-石碶
+   ...正在计算物理基准 (Simulating)...
+   ⏳ 开始训练残差模型 (样本数: 213757)...
+▶️ 开始训练: 同德路-石碶 (样本数: 213757)
+      Epoch  10 | Train: 0.025967 | Val: 0.034218
+      ⏹️ 早停: Epoch 10, best epoch=5, best val loss=0.024992
+   ✅ 训练结束 (Best Val Loss: 0.02499, Best Epoch: 5)
+   📊 三纵轴对标图已保存: D:\energy_conservation\output\models\nn_results_residual_v2\同德路-石碶/triple_axis_fusion.png
+
+🚀 [残差6特征] 开始训练: 石碶-雅渡
+   ...正在计算物理基准 (Simulating)...
+   ⏳ 开始训练残差模型 (样本数: 159542)...
+▶️ 开始训练: 石碶-雅渡 (样本数: 159542)
+      Epoch  10 | Train: 0.026448 | Val: 0.035272
+      Epoch  20 | Train: 0.022444 | Val: 0.029311
+      ⏹️ 早停: Epoch 21, best epoch=16, best val loss=0.026349
+   ✅ 训练结束 (Best Val Loss: 0.02635, Best Epoch: 16)
+   📊 三纵轴对标图已保存: D:\energy_conservation\output\models\nn_results_residual_v2\石碶-雅渡/triple_axis_fusion.png
+
+🚀 [残差6特征] 开始训练: 雅渡-庙堰
+   ...正在计算物理基准 (Simulating)...
+   ⏳ 开始训练残差模型 (样本数: 261125)...
+▶️ 开始训练: 雅渡-庙堰 (样本数: 261125)
+      Epoch  10 | Train: 0.021536 | Val: 0.052309
+      ⏹️ 早停: Epoch 12, best epoch=7, best val loss=0.025713
+   ✅ 训练结束 (Best Val Loss: 0.02571, Best Epoch: 7)
+   📊 三纵轴对标图已保存: D:\energy_conservation\output\models\nn_results_residual_v2\雅渡-庙堰/triple_axis_fusion.png
+
+# finished: 2026-06-09T18:47:32
+# return_code: 0
+# elapsed_seconds: 18124.0

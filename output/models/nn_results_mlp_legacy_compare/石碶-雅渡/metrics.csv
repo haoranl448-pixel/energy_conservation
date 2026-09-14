@@ -1,0 +1,14 @@
+﻿metric,value
+sample_count,203633.0
+train_count,162906.0
+test_count,40727.0
+feature_count,8.0
+best_epoch,80.0
+best_val_loss,0.16375939548015594
+test_mse_wh2,0.5716969069613719
+test_rmse_wh,0.7561064124588363
+test_mae_wh,0.3020567918028609
+test_bias_wh,0.01953633650326621
+test_mape_percent,38.279487956251266
+test_smape_percent,49.333800184422095
+test_r2,0.9957892752241997

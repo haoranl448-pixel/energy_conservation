@@ -1,0 +1,2 @@
+station_pair,v_peak_opt(m/s),t_arrival_opt(s),E_opt(Wh),T_fixed(s),S_fixed(m),v_init(m/s),A_POS,A_NEG,V_MAX_UPPER,window,note
+梅堰-永茂路,15.651887809739742,293.0,28717.810546875,103.87818181818182,1017.3046463636363,10.667,0.6,-0.55,18.0,"[284.0,345.0] step 0.5",fixed prefix then single-variable vmax tail (accelerate→cruise→brake to 0)

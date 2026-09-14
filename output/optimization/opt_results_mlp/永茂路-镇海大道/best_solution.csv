@@ -1,0 +1,2 @@
+station_pair,v_peak_opt(m/s),t_arrival_opt(s),E_opt(Wh),params
+永茂路-镇海大道,0.1,135.0,3150519249.9999995,"L=2164.0, V_UPPER=22.22, V_MID=12.5, A1=0.55, A2=0.8, A_DEC=-0.5, MASS=215.34, REACH_TOL=0.5, WINDOW=[135.0,164.0]"

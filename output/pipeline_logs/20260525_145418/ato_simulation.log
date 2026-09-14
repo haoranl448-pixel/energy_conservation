@@ -1,0 +1,16 @@
+# step: ato_simulation
+# command: C:\Users\bit11\AppData\Local\Programs\Python\Python311\python.exe D:\energy_conservation\scripts\simulate_ATO_v8.py
+# ENERGY_TRIP_NO: 1
+# ENERGY_TRIP_INDEX: 0
+# PYTHONIOENCODING: utf-8:replace
+# started: 2026-05-25T15:00:19
+
+Traceback (most recent call last):
+  File "D:\energy_conservation\scripts\simulate_ATO_v8.py", line 32, in <module>
+    from sklearn.metrics import r2_score # 确保在脚本顶部导
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'sklearn'
+
+# finished: 2026-05-25T15:00:21
+# return_code: 1
+# elapsed_seconds: 1.3

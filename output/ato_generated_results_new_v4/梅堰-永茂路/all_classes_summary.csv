@@ -1,0 +1,6 @@
+﻿station_pair,class_name,status,reason,curve_source,parent_ref,supporting_refs,real_sample_count,parent_real_sample_count,sample_reliability,dp_candidate_stage,target_time_s,curve_csv,sim_time_s,peak_speed_kmh,total_dist_m
+梅堰-永茂路,class1,overspeed,最终生成曲线最高速度为 144.788933 km/h，超过 80.0 km/h，删除该等级,extrapolated_adjacent,class2,class2,0,1,generated,allow_extrapolated,284.0,,,,
+梅堰-永茂路,class2,overspeed,最终生成曲线最高速度为 92.775995 km/h，超过 80.0 km/h，删除该等级,real,class2,class2,1,1,weak,real_only,298.0,,,,
+梅堰-永茂路,class3,generated,最终生成曲线后验检查通过，峰值 67.309361 km/h,real,class3,class3,20,20,strong,real_only,313.0,D:\energy_conservation\output\ato_generated_results_new_v4\梅堰-永茂路\class3_generated_curve.csv,313.0,67.3094,3677.2641
+梅堰-永茂路,class4,generated,最终生成曲线后验检查通过，峰值 57.972197 km/h,real,class4,class4,26,26,strong,real_only,329.0,D:\energy_conservation\output\ato_generated_results_new_v4\梅堰-永茂路\class4_generated_curve.csv,329.0,57.9722,3676.6306
+梅堰-永茂路,class5,generated,最终生成曲线后验检查通过，峰值 52.756852 km/h,extrapolated_adjacent,class4,class4,0,26,generated,allow_extrapolated,345.0,D:\energy_conservation\output\ato_generated_results_new_v4\梅堰-永茂路\class5_generated_curve.csv,345.05,52.7569,3676.6306

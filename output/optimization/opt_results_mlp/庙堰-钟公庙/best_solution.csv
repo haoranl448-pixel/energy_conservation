@@ -1,0 +1,2 @@
+station_pair,v_peak_opt(m/s),t_arrival_opt(s),E_opt(Wh),params
+庙堰-钟公庙,15.784061144315134,99.84501797104845,,"L=1103.0, V_UPPER=22.22, V_MID=12.5, A1=0.55, A2=0.8, A_DEC=-0.5, MASS=215.44, REACH_TOL=0.5, WINDOW=[89.0,106.0]"

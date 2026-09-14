@@ -1,0 +1,6 @@
+﻿station_pair,class_name,status,reason,curve_source,parent_ref,supporting_refs,real_sample_count,parent_real_sample_count,sample_reliability,dp_candidate_stage,target_time_s,curve_csv,sim_time_s,peak_speed_kmh,total_dist_m
+泗港-曹隘,class1,overspeed,最终生成曲线最高速度为 82.214245 km/h，超过 80.0 km/h，删除该等级,real,class1,class1,3,3,strong,real_only,122.0,,,,
+泗港-曹隘,class2,generated,最终生成曲线后验检查通过，峰值 78.311147 km/h,real,class2,class2,6,6,strong,real_only,128.0,D:\energy_conservation\output\ato_generated_results_new_v4\泗港-曹隘\class2_generated_curve.csv,128.05,78.3111,1799.8872
+泗港-曹隘,class3,overspeed,最终生成曲线最高速度为 80.591241 km/h，超过 80.0 km/h，删除该等级,real,class3,class3,18,18,strong,real_only,130.0,,,,
+泗港-曹隘,class4,generated,最终生成曲线后验检查通过，峰值 75.531602 km/h,real,class4,class4,82,82,strong,real_only,137.0,D:\energy_conservation\output\ato_generated_results_new_v4\泗港-曹隘\class4_generated_curve.csv,137.0,75.5316,1801.4785
+泗港-曹隘,class5,generated,最终生成曲线后验检查通过，峰值 66.482207 km/h,extrapolated_adjacent,class4,class4,0,82,generated,allow_extrapolated,143.0,D:\energy_conservation\output\ato_generated_results_new_v4\泗港-曹隘\class5_generated_curve.csv,143.0,66.4822,1800.2437

@@ -1,0 +1,6 @@
+﻿station_pair,class_name,status,reason,parent_ref,target_time_s,curve_csv,sim_time_s,peak_speed_kmh,total_dist_m
+南高教园区-下应路,class1,overspeed,最终生成曲线最高速度为 89.949043 km/h，超过 80.0 km/h，删除该等级,class2,105.0,,,,
+南高教园区-下应路,class2,generated,最终生成曲线后验检查通过，峰值 75.838921 km/h,class2,110.0,D:\energy_conservation\output\ato_generated_results_new_v3\南高教园区-下应路\class2_generated_curve.csv,110.0,75.8389,1475.0292
+南高教园区-下应路,class3,generated,最终生成曲线后验检查通过，峰值 69.370873 km/h,class3,114.0,D:\energy_conservation\output\ato_generated_results_new_v3\南高教园区-下应路\class3_generated_curve.csv,114.0,69.3709,1474.0475
+南高教园区-下应路,class4,generated,最终生成曲线后验检查通过，峰值 61.557021 km/h,class3,120.0,D:\energy_conservation\output\ato_generated_results_new_v3\南高教园区-下应路\class4_generated_curve.csv,120.0,61.557,1474.0475
+南高教园区-下应路,class5,generated,最终生成曲线后验检查通过，峰值 55.922721 km/h,class3,126.0,D:\energy_conservation\output\ato_generated_results_new_v3\南高教园区-下应路\class5_generated_curve.csv,126.0,55.9227,1474.9027

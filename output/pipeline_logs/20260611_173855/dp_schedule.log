@@ -1,0 +1,82 @@
+# step: dp_schedule
+# command: C:\Users\bit11\AppData\Local\Programs\Python\Python311\python.exe D:\energy_conservation\scripts_new\00_main_pipeline\08_ato_class_globall_v2.py
+# ENERGY_TRIP_NO: 2
+# ENERGY_TRIP_INDEX: 1
+# ENERGY_TARGET_TIME: 695.0
+# ENERGY_RESULTS_DATA_DIR: D:\energy_conservation\data\data_processed_step2_v3_first5_curve_quality
+# ENERGY_ATO_DATA_DIR: D:\energy_conservation\data\data_processed_step2_v3_first5_curve_quality
+# ENERGY_LINE_SCOPE: 5
+# PYTHONIOENCODING: utf-8:replace
+# started: 2026-06-11T17:38:56
+
+已删除旧 DP 输出: D:\energy_conservation\output\schedule\final_plan_report_v2\Final_Planning_Comparison.csv
+已删除旧 DP 输出: D:\energy_conservation\output\schedule\final_plan_report_v2\Final_Planning_Comparison_Energy_First.csv
+已删除旧 DP 输出: D:\energy_conservation\output\schedule\final_plan_report_v2\Optimized_Full_Line_Report.png
+已删除旧 DP 输出: D:\energy_conservation\output\schedule\final_plan_report_v2\Optimized_Full_Line_Report_Energy_First.png
+Trip: 2 (segment index 1)
+Target total time: 695.00s
+Line scope: 5 (5 sections)
+Menu file: D:\energy_conservation\output\analysis\ato_class_energy_menu2_new_v3.csv
+History file: D:\energy_conservation\full_line2_validation_results.csv
+Historical curve data dir: D:\energy_conservation\data\data_processed_step2_v3_first5_curve_quality
+Max run (at min dwell): 599.0s
+Nom run (at nominal):   575.0s
+Dwell budget to trade:   24s
+Dwell config (4 intervals):
+  布政-张家潭: nominal=30s, min=24s [elastic (24-30s)]
+  张家潭-同德路: nominal=30s, min=24s [elastic (24-30s)]
+  同德路-石碶: nominal=30s, min=24s [elastic (24-30s)]
+  石碶-雅渡: nominal=30s, min=24s [elastic (24-30s)]
+  雅渡-庙堰: nominal=30s, min=24s [elastic (24-30s)]
+
+DP stage: real_only | sources=['real'] | score=priority_first
+  [1/5] 布政-张家潭 -> 2 states
+  [2/5] 张家潭-同德路 -> 4 states
+  [3/5] 同德路-石碶 -> 8 states
+  [4/5] 石碶-雅渡 -> 17 states
+  [5/5] 雅渡-庙堰 -> 44 states
+
+Selected priority-first plan: real_only
+Feasible states: 31
+Best:  run=591.0s, energy=74402.1 Wh, extrapolated=0, interpolated=0
+Nominal-dwell best nearby: run=583.9s, energy=75935.7 Wh
+Dwell trade: +7.1s run time -> saves 1533.5 Wh (2.0%)
+
+Priority-first report: Run: 591.0s | Dwell: 104.0s | Total: 695.0s (target: 695.0s)
+Energy: 74402.1 Wh | Saving: 12.99%
+  Dwell after 布政-张家潭: 26.0s
+  Dwell after 张家潭-同德路: 26.0s
+  Dwell after 同德路-石碶: 26.0s
+  Dwell after 石碶-雅渡: 26.0s
+
+DP stage: energy_first | sources=['extrapolated_adjacent', 'interpolated', 'real'] | score=energy_first
+  [1/5] 布政-张家潭 -> 2 states
+  [2/5] 张家潭-同德路 -> 8 states
+  [3/5] 同德路-石碶 -> 16 states
+  [4/5] 石碶-雅渡 -> 33 states
+  [5/5] 雅渡-庙堰 -> 77 states
+
+Selected energy-first plan: energy_first
+Feasible states: 45
+Best:  run=584.0s, energy=73838.2 Wh, extrapolated=1, interpolated=0
+Nominal-dwell best nearby: run=584.0s, energy=73838.2 Wh
+Dwell trade: +0.0s run time -> saves 0.0 Wh (0.0%)
+
+Energy-first report: Run: 584.0s | Dwell: 111.2s | Total: 695.2s (target: 695.0s)
+Energy: 73838.2 Wh | Saving: 13.65%
+
+Plotting priority-first plan full-line comparison ...
+  History curve cache hit: 布政-张家潭 trip 2
+  History curve cache hit: 张家潭-同德路 trip 2
+  History curve cache hit: 同德路-石碶 trip 2
+  History curve cache hit: 石碶-雅渡 trip 2
+  History curve cache hit: 雅渡-庙堰 trip 2
+Saved: D:\energy_conservation\output\schedule\final_plan_report_v2\Optimized_Full_Line_Report.png
+
+Plotting energy-first plan full-line comparison ...
+Saved: D:\energy_conservation\output\schedule\final_plan_report_v2\Optimized_Full_Line_Report_Energy_First.png
+Done. Energy: 74.402 kWh, Time: 695.0s (strict = 695.0s)
+
+# finished: 2026-06-11T17:38:59
+# return_code: 0
+# elapsed_seconds: 3.2

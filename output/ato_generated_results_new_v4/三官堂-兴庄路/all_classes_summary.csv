@@ -1,0 +1,6 @@
+﻿station_pair,class_name,status,reason,curve_source,parent_ref,supporting_refs,real_sample_count,parent_real_sample_count,sample_reliability,dp_candidate_stage,target_time_s,sim_time_s,peak_speed_kmh,total_dist_m,curve_csv
+三官堂-兴庄路,class1,generated,最终生成曲线后验检查通过，峰值 76.060069 km/h,extrapolated_adjacent,class2,class2,0,46,generated,allow_extrapolated,94.0,94.05,76.0601,1081.0323,D:\energy_conservation\output\ato_generated_results_new_v4\三官堂-兴庄路\class1_generated_curve.csv
+三官堂-兴庄路,class2,generated,最终生成曲线后验检查通过，峰值 61.753284 km/h,real,class2,class2,46,46,strong,real_only,99.0,99.0,61.7533,1081.0323,D:\energy_conservation\output\ato_generated_results_new_v4\三官堂-兴庄路\class2_generated_curve.csv
+三官堂-兴庄路,class3,generated,最终生成曲线后验检查通过，峰值 53.728670 km/h,real,class3,class3,58,58,strong,real_only,104.0,104.05,53.7287,1081.3169,D:\energy_conservation\output\ato_generated_results_new_v4\三官堂-兴庄路\class3_generated_curve.csv
+三官堂-兴庄路,class4,generated,最终生成曲线后验检查通过，峰值 48.731229 km/h,extrapolated_adjacent,class3,class3,0,58,generated,allow_extrapolated,109.0,109.0,48.7312,1081.8204,D:\energy_conservation\output\ato_generated_results_new_v4\三官堂-兴庄路\class4_generated_curve.csv
+三官堂-兴庄路,class5,missing_source,no adjacent real template,missing,,,0,0,,not_allowed,114.0,,,,

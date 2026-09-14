@@ -1,0 +1,2 @@
+station_pair,v_peak_opt(m/s),t_arrival_opt(s),E_opt(Wh),params
+同德路-石碶,16.46543399603479,113.20173908172427,,"L=1351.0, V_UPPER=22.22, V_MID=12.5, A1=0.55, A2=0.8, A_DEC=-0.5, MASS=215.34, REACH_TOL=0.5, WINDOW=[99.0,120.0]"

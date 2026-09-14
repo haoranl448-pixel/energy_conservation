@@ -1,0 +1,6 @@
+﻿station_pair,class_name,status,reason,curve_source,parent_ref,supporting_refs,real_sample_count,parent_real_sample_count,sample_reliability,dp_candidate_stage,target_time_s,curve_csv,sim_time_s,peak_speed_kmh,total_dist_m
+海晏北路-民安东路,class1,overspeed,最终生成曲线最高速度为 128.109956 km/h，超过 80.0 km/h，删除该等级,extrapolated_adjacent,class2,class2,0,64,generated,allow_extrapolated,79.0,,,,
+海晏北路-民安东路,class2,overspeed,最终生成曲线最高速度为 84.111097 km/h，超过 80.0 km/h，删除该等级,real,class2,class2,64,64,strong,real_only,83.0,,,,
+海晏北路-民安东路,class3,generated,最终生成曲线后验检查通过，峰值 67.861750 km/h,real,class3,class3,41,41,strong,real_only,85.0,D:\energy_conservation\output\ato_generated_results_new_v4\海晏北路-民安东路\class3_generated_curve.csv,85.0,67.8617,879.8186
+海晏北路-民安东路,class4,generated,最终生成曲线后验检查通过，峰值 54.640393 km/h,extrapolated_adjacent,class3,class3,0,41,generated,allow_extrapolated,89.0,D:\energy_conservation\output\ato_generated_results_new_v4\海晏北路-民安东路\class4_generated_curve.csv,88.95,54.6404,879.7443
+海晏北路-民安东路,class5,missing_source,no adjacent real template,missing,,,0,0,,not_allowed,94.0,,,,

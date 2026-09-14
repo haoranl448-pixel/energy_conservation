@@ -1,0 +1,6 @@
+﻿station_pair,class_name,status,reason,parent_ref,target_time_s,curve_csv,sim_time_s,peak_speed_kmh,total_dist_m
+会展中心-院士路,class1,overspeed,最终生成曲线最高速度为 97.834376 km/h，超过 80.0 km/h，删除该等级,class2,107.0,,,,
+会展中心-院士路,class2,overspeed,最终生成曲线最高速度为 80.640153 km/h，超过 80.0 km/h，删除该等级,class2,112.0,,,,
+会展中心-院士路,class3,generated,最终生成曲线后验检查通过，峰值 75.060618 km/h,class3,115.0,D:\energy_conservation\output\ato_generated_results_new_v3\会展中心-院士路\class3_generated_curve.csv,114.95,75.0606,1578.0352
+会展中心-院士路,class4,generated,最终生成曲线后验检查通过，峰值 65.783093 km/h,class3,121.0,D:\energy_conservation\output\ato_generated_results_new_v3\会展中心-院士路\class4_generated_curve.csv,121.0,65.7831,1576.5772
+会展中心-院士路,class5,generated,最终生成曲线后验检查通过，峰值 59.552437 km/h,class3,127.0,D:\energy_conservation\output\ato_generated_results_new_v3\会展中心-院士路\class5_generated_curve.csv,126.95,59.5524,1576.5772

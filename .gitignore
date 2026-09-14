@@ -10,55 +10,19 @@ __pycache__/
 .idea/
 .vscode/
 
-# Large data files
-data/raw_data/
+# Superseded or duplicate data snapshots
 data/data_processed/
 data/data_processed_new/
 data/data_processed_new_v2/
-data/data_processed_step2_v3*/
-data/data_processed_with_class/
+data/data_processed_step2_v3_all_curve_quality/
+data/data_processed_step2_v3_first5/
+data/data_processed_step2_v3_first5_curve_quality/
+data/data_processed_step2_v3_first5_with_class/
 data/0308/
 data/*.7z
 
-# Output images (regeneratable)
-output/**/*.png
-output/**/*.jpg
-output/**/*.jpeg
-output/**/*.gif
-output/**/*.html
-
-# Large output (regeneratable)
-output/models/
-output/ato_phase_results*/
-output/ato_generated_results*/
-output/ato_v9_validation*/
-output/ato_v9_validation_results*/
-output/energy_es_curves/
-output/energy_es_curves_trip10/
-output/figure/
-output/figures/
-output/comparison_*/
-output/trip*/
-output/final_optimized_report/
-output/optimization/
-output/analysis/vst_*/
-output/analysis/service_*/
-output/analysis/track_*/
-output/analysis/load_analysis/
-output/analysis/mass_*/
-output/analysis/*.zip
-output/analysis/*.7z
-output/analysis/*.png
-output/validation_all_trips/
-output/pipeline_logs/
+# Rebuildable runtime cache only; project results are versioned
 output/cache/
-
-# Local OpenTrack communication logs (derived route maps are kept)
-output/opentrack_otd_logs*/
-output/opentrack_otd_listener_*.log
-
-# Large pointwise replay tables; section summaries remain versioned
-output/analysis/trip_real_vs_simu_physics/**/*_points.csv
 
 # Local exported/reference artifacts
 ppt/*.png
@@ -70,13 +34,6 @@ ppt/*.json
 python-3.11.9-amd64.exe
 nn.svg
 v_t_plot.png
-
-# Class reference data (large CSVs)
-class1/
-class2/
-class3/
-class4/
-class5/
 
 # Legacy / backup
 backup/

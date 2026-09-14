@@ -1,0 +1,2 @@
+station_pair,v_peak_opt(m/s),t_arrival_opt(s),E_opt(Wh),params
+雅渡-庙堰,17.691897630392173,140.14118167748762,,"L=1889.0, V_UPPER=22.22, V_MID=12.5, A1=0.55, A2=0.8, A_DEC=-0.5, MASS=215.44, REACH_TOL=0.5, WINDOW=[123.0,146.0]"

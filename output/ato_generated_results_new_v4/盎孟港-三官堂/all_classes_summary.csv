@@ -1,0 +1,6 @@
+﻿station_pair,class_name,status,reason,curve_source,parent_ref,supporting_refs,real_sample_count,parent_real_sample_count,sample_reliability,dp_candidate_stage,target_time_s,curve_csv,sim_time_s,peak_speed_kmh,total_dist_m
+盎孟港-三官堂,class1,overspeed,最终生成曲线最高速度为 86.221774 km/h，超过 80.0 km/h，删除该等级,extrapolated_adjacent,class2,class2,0,52,generated,allow_extrapolated,126.0,,,,
+盎孟港-三官堂,class2,generated,最终生成曲线后验检查通过，峰值 76.317048 km/h,real,class2,class2,52,52,strong,real_only,132.0,D:\energy_conservation\output\ato_generated_results_new_v4\盎孟港-三官堂\class2_generated_curve.csv,132.0,76.317,1878.8388
+盎孟港-三官堂,class3,generated,最终生成曲线后验检查通过，峰值 68.939944 km/h,real,class3,class3,52,52,strong,real_only,139.0,D:\energy_conservation\output\ato_generated_results_new_v4\盎孟港-三官堂\class3_generated_curve.csv,138.95,68.9399,1906.3402
+盎孟港-三官堂,class4,generated,最终生成曲线后验检查通过，峰值 63.656310 km/h,extrapolated_adjacent,class3,class3,0,52,generated,allow_extrapolated,146.0,D:\energy_conservation\output\ato_generated_results_new_v4\盎孟港-三官堂\class4_generated_curve.csv,146.0,63.6563,1906.3402
+盎孟港-三官堂,class5,missing_source,no adjacent real template,missing,,,0,0,,not_allowed,153.0,,,,

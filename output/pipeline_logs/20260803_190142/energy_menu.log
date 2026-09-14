@@ -1,0 +1,30 @@
+# step: energy_menu
+# command: C:\Users\bit11\AppData\Local\Programs\Python\Python311\python.exe D:\energy_conservation\scripts_new\00_main_pipeline\06_ato_generated_results_energy.py
+# ENERGY_TRIP_NO: 68
+# ENERGY_TRIP_INDEX: 67
+# ENERGY_TARGET_TIME: script default
+# ENERGY_RESULTS_DATA_DIR: D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality_traceability
+# ENERGY_ATO_DATA_DIR: D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality_traceability
+# ENERGY_LINE_SCOPE: full
+# ENERGY_TRACEABILITY_MANIFEST: D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality_traceability\trip_traceability_manifest_v1.csv
+# PYTHONIOENCODING: utf-8:replace
+# started: 2026-08-03T19:01:42
+
+按测试数据目录筛选能耗菜单区间: 26 个
+按 line scope 筛选后能耗菜单区间: 26 个
+趟次选择方式: 全局运行链追溯
+全局趟次ID:   UP068_20240716_100021_R3710
+追溯表:       D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality_traceability\trip_traceability_manifest_v1.csv
+映射区间数:   23
+Traceback (most recent call last):
+  File "D:\energy_conservation\scripts_new\00_main_pipeline\06_ato_generated_results_energy.py", line 451, in <module>
+    main()
+  File "D:\energy_conservation\scripts_new\00_main_pipeline\06_ato_generated_results_energy.py", line 387, in main
+    TRIP_TRACEABILITY.require_sections(station_folders)
+  File "D:\energy_conservation\scripts_new\00_main_pipeline\trip_traceability.py", line 55, in require_sections
+    raise ValueError(
+ValueError: 全局趟次 UP068_20240716_100021_R3710 缺少 3 个目标区间: 梅堰-永茂路, 永茂路-镇海大道, 镇海大道-骆驼桥
+
+# finished: 2026-08-03T19:02:01
+# return_code: 1
+# elapsed_seconds: 19.3

@@ -1,0 +1,6 @@
+﻿station_pair,class_name,status,reason,parent_ref,target_time_s,curve_csv,sim_time_s,peak_speed_kmh,total_dist_m
+鄞州区政府-钱湖南路,class1,overspeed,最终生成曲线最高速度为 84.463861 km/h，超过 80.0 km/h，删除该等级,class2,122.0,,,,
+鄞州区政府-钱湖南路,class2,generated,最终生成曲线后验检查通过，峰值 75.265424 km/h,class2,128.0,D:\energy_conservation\output\ato_generated_results_new_v3\鄞州区政府-钱湖南路\class2_generated_curve.csv,128.0,75.2654,1840.4254
+鄞州区政府-钱湖南路,class3,generated,最终生成曲线后验检查通过，峰值 70.364191 km/h,class3,132.0,D:\energy_conservation\output\ato_generated_results_new_v3\鄞州区政府-钱湖南路\class3_generated_curve.csv,132.0,70.3642,1839.6652
+鄞州区政府-钱湖南路,class4,generated,最终生成曲线后验检查通过，峰值 63.346546 km/h,class3,139.0,D:\energy_conservation\output\ato_generated_results_new_v3\鄞州区政府-钱湖南路\class4_generated_curve.csv,139.0,63.3465,1839.6652
+鄞州区政府-钱湖南路,class5,generated,最终生成曲线后验检查通过，峰值 58.193319 km/h,class3,146.0,D:\energy_conservation\output\ato_generated_results_new_v3\鄞州区政府-钱湖南路\class5_generated_curve.csv,146.0,58.1933,1839.6652

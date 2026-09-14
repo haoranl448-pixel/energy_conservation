@@ -1,0 +1,56 @@
+# step: energy_menu
+# command: C:\Users\bit11\AppData\Local\Programs\Python\Python311\python.exe D:\energy_conservation\scripts_new\00_main_pipeline\06_ato_generated_results_energy.py
+# ENERGY_TRIP_NO: 2
+# ENERGY_TRIP_INDEX: 1
+# ENERGY_TARGET_TIME: 711.95
+# ENERGY_RESULTS_DATA_DIR: D:\energy_conservation\data\data_processed_step2_v3_first5_curve_quality
+# ENERGY_ATO_DATA_DIR: D:\energy_conservation\data\data_processed_step2_v3_first5_curve_quality
+# ENERGY_LINE_SCOPE: 5
+# PYTHONIOENCODING: utf-8:replace
+# started: 2026-06-11T16:42:15
+
+按测试数据目录筛选能耗菜单区间: 5 个
+按 line scope 筛选后能耗菜单区间: 5 个
+   读取重量: 布政-张家潭 trip 2
+   读取重量: 张家潭-同德路 trip 2
+   读取重量: 同德路-石碶 trip 2
+   读取重量: 石碶-雅渡 trip 2
+   读取重量: 雅渡-庙堰 trip 2
+已生成区间参数表: D:\energy_conservation\data\static\section_params_trip2.csv | 更新 MASS: 5 | 跳过非本次区间: 21 | 沿用旧值: 0 | 保留模板值: 21
+🚀 开始批量评估 5 个区间的 ATO 轨迹能耗：第 2 趟车...
+地图/历史数据目录: D:\energy_conservation\data\data_processed_step2_v3_first5_curve_quality
+   加载残差模型: 布政-张家潭
+   读取坡度曲率: 布政-张家潭
+   ✅ 布政-张家潭 | class3 | 115.0s -> 总:12964.4Wh (物理:12916.8Wh + 残差:47.6Wh)
+   ✅ 布政-张家潭 | class4 | 121.0s -> 总:13936.9Wh (物理:14137.8Wh + 残差:-200.8Wh)
+   ✅ 布政-张家潭 | class5 | 127.05s -> 总:12506.2Wh (物理:13237.8Wh + 残差:-731.6Wh)
+   加载残差模型: 张家潭-同德路
+   读取坡度曲率: 张家潭-同德路
+   ✅ 张家潭-同德路 | class1 | 141.0s -> 总:16834.3Wh (物理:18583.7Wh + 残差:-1749.3Wh)
+   ✅ 张家潭-同德路 | class2 | 148.0s -> 总:17398.3Wh (物理:18113.4Wh + 残差:-715.1Wh)
+   ✅ 张家潭-同德路 | class3 | 151.0s -> 总:17521.2Wh (物理:17179.7Wh + 残差:341.5Wh)
+   ✅ 张家潭-同德路 | class4 | 158.95s -> 总:16212.9Wh (物理:15812.1Wh + 残差:400.8Wh)
+   加载残差模型: 同德路-石碶
+   读取坡度曲率: 同德路-石碶
+   ✅ 同德路-石碶 | class3 | 108.95s -> 总:13357.4Wh (物理:13129.5Wh + 残差:227.9Wh)
+   ✅ 同德路-石碶 | class4 | 114.0s -> 总:13379.6Wh (物理:13573.0Wh + 残差:-193.4Wh)
+   ✅ 同德路-石碶 | class5 | 120.0s -> 总:11947.8Wh (物理:12180.5Wh + 残差:-232.7Wh)
+   加载残差模型: 石碶-雅渡
+   读取坡度曲率: 石碶-雅渡
+   ✅ 石碶-雅渡 | class2 | 80.0s -> 总:10813.9Wh (物理:10580.1Wh + 残差:233.8Wh)
+   ✅ 石碶-雅渡 | class3 | 82.0s -> 总:11973.9Wh (物理:12448.8Wh + 残差:-474.9Wh)
+   ✅ 石碶-雅渡 | class4 | 85.95s -> 总:11281.3Wh (物理:10230.0Wh + 残差:1051.2Wh)
+   ✅ 石碶-雅渡 | class5 | 90.0s -> 总:8573.4Wh (物理:7650.1Wh + 残差:923.3Wh)
+   加载残差模型: 雅渡-庙堰
+   读取坡度曲率: 雅渡-庙堰
+   ✅ 雅渡-庙堰 | class2 | 129.0s -> 总:22166.7Wh (物理:21366.7Wh + 残差:800.0Wh)
+   ✅ 雅渡-庙堰 | class3 | 131.95s -> 总:21401.7Wh (物理:20285.5Wh + 残差:1116.3Wh)
+   ✅ 雅渡-庙堰 | class4 | 139.0s -> 总:19868.2Wh (物理:18896.4Wh + 残差:971.8Wh)
+   ✅ 雅渡-庙堰 | class5 | 146.0s -> 总:17628.3Wh (物理:17263.6Wh + 残差:364.6Wh)
+
+✨ 评估完成！能耗菜单已生成：D:\energy_conservation\output\analysis\ato_class_energy_menu2_new_v3.csv
+👉 现在你可以运行 DP 调度算法来选择最优 Class 组合了。
+
+# finished: 2026-06-11T16:55:41
+# return_code: 0
+# elapsed_seconds: 805.5

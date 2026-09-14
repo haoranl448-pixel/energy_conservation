@@ -1,0 +1,104 @@
+# step: ato_template
+# command: C:\Users\bit11\AppData\Local\Programs\Python\Python311\python.exe D:\energy_conservation\scripts_new\00_main_pipeline\04_train_ATO_v8.py
+# ENERGY_TRIP_NO: 1
+# ENERGY_TRIP_INDEX: 0
+# ENERGY_TARGET_TIME: script default
+# ENERGY_RESULTS_DATA_DIR: D:\energy_conservation\data\data_processed_step2_v3_first5_curve_quality
+# ENERGY_ATO_DATA_DIR: D:\energy_conservation\data\data_processed_step2_v3_first5_curve_quality
+# ENERGY_LINE_SCOPE: 5
+# PYTHONIOENCODING: utf-8:replace
+# started: 2026-06-03T15:18:56
+
+D:\energy_conservation\scripts_new\00_main_pipeline\04_train_ATO_v8.py:642: UserWarning: Glyph 24067 (\N{CJK UNIFIED IDEOGRAPH-5E03}) missing from font(s) DejaVu Sans.
+  plt.savefig(output_dir / f"{cls_name}_reference_vt.png", dpi=150)
+D:\energy_conservation\scripts_new\00_main_pipeline\04_train_ATO_v8.py:642: UserWarning: Glyph 25919 (\N{CJK UNIFIED IDEOGRAPH-653F}) missing from font(s) DejaVu Sans.
+  plt.savefig(output_dir / f"{cls_name}_reference_vt.png", dpi=150)
+D:\energy_conservation\scripts_new\00_main_pipeline\04_train_ATO_v8.py:642: UserWarning: Glyph 24352 (\N{CJK UNIFIED IDEOGRAPH-5F20}) missing from font(s) DejaVu Sans.
+  plt.savefig(output_dir / f"{cls_name}_reference_vt.png", dpi=150)
+D:\energy_conservation\scripts_new\00_main_pipeline\04_train_ATO_v8.py:642: UserWarning: Glyph 23478 (\N{CJK UNIFIED IDEOGRAPH-5BB6}) missing from font(s) DejaVu Sans.
+  plt.savefig(output_dir / f"{cls_name}_reference_vt.png", dpi=150)
+D:\energy_conservation\scripts_new\00_main_pipeline\04_train_ATO_v8.py:642: UserWarning: Glyph 28525 (\N{CJK UNIFIED IDEOGRAPH-6F6D}) missing from font(s) DejaVu Sans.
+  plt.savefig(output_dir / f"{cls_name}_reference_vt.png", dpi=150)
+D:\energy_conservation\scripts_new\00_main_pipeline\04_train_ATO_v8.py:642: UserWarning: Glyph 24352 (\N{CJK UNIFIED IDEOGRAPH-5F20}) missing from font(s) DejaVu Sans.
+  plt.savefig(output_dir / f"{cls_name}_reference_vt.png", dpi=150)
+D:\energy_conservation\scripts_new\00_main_pipeline\04_train_ATO_v8.py:642: UserWarning: Glyph 23478 (\N{CJK UNIFIED IDEOGRAPH-5BB6}) missing from font(s) DejaVu Sans.
+  plt.savefig(output_dir / f"{cls_name}_reference_vt.png", dpi=150)
+D:\energy_conservation\scripts_new\00_main_pipeline\04_train_ATO_v8.py:642: UserWarning: Glyph 28525 (\N{CJK UNIFIED IDEOGRAPH-6F6D}) missing from font(s) DejaVu Sans.
+  plt.savefig(output_dir / f"{cls_name}_reference_vt.png", dpi=150)
+D:\energy_conservation\scripts_new\00_main_pipeline\04_train_ATO_v8.py:642: UserWarning: Glyph 21516 (\N{CJK UNIFIED IDEOGRAPH-540C}) missing from font(s) DejaVu Sans.
+  plt.savefig(output_dir / f"{cls_name}_reference_vt.png", dpi=150)
+D:\energy_conservation\scripts_new\00_main_pipeline\04_train_ATO_v8.py:642: UserWarning: Glyph 24503 (\N{CJK UNIFIED IDEOGRAPH-5FB7}) missing from font(s) DejaVu Sans.
+  plt.savefig(output_dir / f"{cls_name}_reference_vt.png", dpi=150)
+D:\energy_conservation\scripts_new\00_main_pipeline\04_train_ATO_v8.py:642: UserWarning: Glyph 36335 (\N{CJK UNIFIED IDEOGRAPH-8DEF}) missing from font(s) DejaVu Sans.
+  plt.savefig(output_dir / f"{cls_name}_reference_vt.png", dpi=150)
+D:\energy_conservation\scripts_new\00_main_pipeline\04_train_ATO_v8.py:642: UserWarning: Glyph 21516 (\N{CJK UNIFIED IDEOGRAPH-540C}) missing from font(s) DejaVu Sans.
+  plt.savefig(output_dir / f"{cls_name}_reference_vt.png", dpi=150)
+D:\energy_conservation\scripts_new\00_main_pipeline\04_train_ATO_v8.py:642: UserWarning: Glyph 24503 (\N{CJK UNIFIED IDEOGRAPH-5FB7}) missing from font(s) DejaVu Sans.
+  plt.savefig(output_dir / f"{cls_name}_reference_vt.png", dpi=150)
+D:\energy_conservation\scripts_new\00_main_pipeline\04_train_ATO_v8.py:642: UserWarning: Glyph 36335 (\N{CJK UNIFIED IDEOGRAPH-8DEF}) missing from font(s) DejaVu Sans.
+  plt.savefig(output_dir / f"{cls_name}_reference_vt.png", dpi=150)
+D:\energy_conservation\scripts_new\00_main_pipeline\04_train_ATO_v8.py:642: UserWarning: Glyph 30707 (\N{CJK UNIFIED IDEOGRAPH-77F3}) missing from font(s) DejaVu Sans.
+  plt.savefig(output_dir / f"{cls_name}_reference_vt.png", dpi=150)
+D:\energy_conservation\scripts_new\00_main_pipeline\04_train_ATO_v8.py:642: UserWarning: Glyph 30902 (\N{CJK UNIFIED IDEOGRAPH-78B6}) missing from font(s) DejaVu Sans.
+  plt.savefig(output_dir / f"{cls_name}_reference_vt.png", dpi=150)
+D:\energy_conservation\scripts_new\00_main_pipeline\04_train_ATO_v8.py:642: UserWarning: Glyph 30707 (\N{CJK UNIFIED IDEOGRAPH-77F3}) missing from font(s) DejaVu Sans.
+  plt.savefig(output_dir / f"{cls_name}_reference_vt.png", dpi=150)
+D:\energy_conservation\scripts_new\00_main_pipeline\04_train_ATO_v8.py:642: UserWarning: Glyph 30902 (\N{CJK UNIFIED IDEOGRAPH-78B6}) missing from font(s) DejaVu Sans.
+  plt.savefig(output_dir / f"{cls_name}_reference_vt.png", dpi=150)
+D:\energy_conservation\scripts_new\00_main_pipeline\04_train_ATO_v8.py:642: UserWarning: Glyph 38597 (\N{CJK UNIFIED IDEOGRAPH-96C5}) missing from font(s) DejaVu Sans.
+  plt.savefig(output_dir / f"{cls_name}_reference_vt.png", dpi=150)
+D:\energy_conservation\scripts_new\00_main_pipeline\04_train_ATO_v8.py:642: UserWarning: Glyph 28193 (\N{CJK UNIFIED IDEOGRAPH-6E21}) missing from font(s) DejaVu Sans.
+  plt.savefig(output_dir / f"{cls_name}_reference_vt.png", dpi=150)
+D:\energy_conservation\scripts_new\00_main_pipeline\04_train_ATO_v8.py:642: UserWarning: Glyph 38597 (\N{CJK UNIFIED IDEOGRAPH-96C5}) missing from font(s) DejaVu Sans.
+  plt.savefig(output_dir / f"{cls_name}_reference_vt.png", dpi=150)
+D:\energy_conservation\scripts_new\00_main_pipeline\04_train_ATO_v8.py:642: UserWarning: Glyph 28193 (\N{CJK UNIFIED IDEOGRAPH-6E21}) missing from font(s) DejaVu Sans.
+  plt.savefig(output_dir / f"{cls_name}_reference_vt.png", dpi=150)
+D:\energy_conservation\scripts_new\00_main_pipeline\04_train_ATO_v8.py:642: UserWarning: Glyph 24217 (\N{CJK UNIFIED IDEOGRAPH-5E99}) missing from font(s) DejaVu Sans.
+  plt.savefig(output_dir / f"{cls_name}_reference_vt.png", dpi=150)
+D:\energy_conservation\scripts_new\00_main_pipeline\04_train_ATO_v8.py:642: UserWarning: Glyph 22576 (\N{CJK UNIFIED IDEOGRAPH-5830}) missing from font(s) DejaVu Sans.
+  plt.savefig(output_dir / f"{cls_name}_reference_vt.png", dpi=150)
+已清理 ATO 模板输出目录: D:\energy_conservation\output\ato_phase_results_v3
+按测试数据目录筛选区间: 5 个，跳过标准时间表中未提供数据的 21 个区间。
+========================================================================
+批量训练 class3 三相位模板
+时间表: D:\energy_conservation\output\analysis\class_tables_strict\standard_class_times.csv
+数据目录: D:\energy_conservation\data\data_processed_step2_v3_first5_curve_quality
+输出目录: D:\energy_conservation\output\ato_phase_results_v3
+待处理区间数: 5
+========================================================================
+
+[1/5] 开始训练区间: 布政-张家潭
+   曲线质量过滤: 仅保留 曲线质量标签=0，行数 79517->65622，趟次 34->28
+   📊 区间 布政-张家潭 发现等级: ['class3', 'class4']
+  ✅ 成功 | 提取等级: ['class3', 'class4']
+
+[2/5] 开始训练区间: 张家潭-同德路
+   曲线质量过滤: 仅保留 曲线质量标签=0，行数 102936->87722，趟次 34->29
+   📊 区间 张家潭-同德路 发现等级: ['class2', 'class3']
+  ✅ 成功 | 提取等级: ['class2', 'class3']
+
+[3/5] 开始训练区间: 同德路-石碶
+   曲线质量过滤: 仅保留 曲线质量标签=0，行数 73941->61172，趟次 34->28
+   📊 区间 同德路-石碶 发现等级: ['class2', 'class3', 'class4']
+  ✅ 成功 | 提取等级: ['class2', 'class3', 'class4']
+
+[4/5] 开始训练区间: 石碶-雅渡
+   曲线质量过滤: 仅保留 曲线质量标签=0，行数 55265->47207，趟次 34->29
+   📊 区间 石碶-雅渡 发现等级: ['class2', 'class3', 'class4']
+  ✅ 成功 | 提取等级: ['class2', 'class3', 'class4']
+
+[5/5] 开始训练区间: 雅渡-庙堰
+   曲线质量过滤: 仅保留 曲线质量标签=0，行数 90055->76951，趟次 34->29
+   📊 区间 雅渡-庙堰 发现等级: ['class2', 'class3', 'class4']
+  ✅ 成功 | 提取等级: ['class2', 'class3', 'class4']
+
+========================================================================
+批量训练结束
+成功区间数: 5
+失败区间数: 0
+汇总文件: D:\energy_conservation\output\ato_phase_results_v3\batch_train_summary.csv
+========================================================================
+
+# finished: 2026-06-03T15:21:42
+# return_code: 0
+# elapsed_seconds: 166.2

@@ -1,0 +1,6 @@
+﻿station_pair,class_name,status,reason,curve_source,parent_ref,supporting_refs,real_sample_count,parent_real_sample_count,sample_reliability,dp_candidate_stage,target_time_s,curve_csv,sim_time_s,peak_speed_kmh,total_dist_m
+同德路-石碶,class1,overspeed,最终生成曲线最高速度为 112.222987 km/h，超过 80.0 km/h，删除该等级,extrapolated_adjacent,class2,class2,0,39,generated,allow_extrapolated,99.0,,,,
+同德路-石碶,class2,overspeed,最终生成曲线最高速度为 81.135800 km/h，超过 80.0 km/h，删除该等级,real,class2,class2,39,39,strong,real_only,104.0,,,,
+同德路-石碶,class3,generated,最终生成曲线后验检查通过，峰值 69.883215 km/h,real,class3,class3,60,60,strong,real_only,109.0,D:\energy_conservation\output\ato_generated_results_new_v4\同德路-石碶\class3_generated_curve.csv,108.95,69.8832,1331.2168
+同德路-石碶,class4,generated,最终生成曲线后验检查通过，峰值 64.398145 km/h,real,class4,class4,9,9,strong,real_only,114.0,D:\energy_conservation\output\ato_generated_results_new_v4\同德路-石碶\class4_generated_curve.csv,114.0,64.3981,1352.9787
+同德路-石碶,class5,generated,最终生成曲线后验检查通过，峰值 56.643783 km/h,extrapolated_adjacent,class4,class4,0,9,generated,allow_extrapolated,120.0,D:\energy_conservation\output\ato_generated_results_new_v4\同德路-石碶\class5_generated_curve.csv,120.0,56.6438,1351.8785

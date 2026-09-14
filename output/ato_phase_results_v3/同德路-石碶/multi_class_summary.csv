@@ -1,0 +1,4 @@
+class,curve_source,parent_ref,supporting_refs,real_sample_count,sample_reliability,template_source,template_run_id,template_distance_to_median_rmse_mps,center_time_median_s,time_s,samples,peak_v_kmh
+class2,real,class2,class2,39,strong,medoid_real_run,07/0370316|70316|5014|UP,0.130194,105.4,105.4,39,77.47
+class3,real,class3,class3,60,strong,medoid_real_run,07/0270210|70210|5014|UP,0.248121,110.28,110.28,60,67.86
+class4,real,class4,class4,9,strong,medoid_real_run,07/1071058|71058|5012|UP,0.066043,111.7,111.7,9,66.57

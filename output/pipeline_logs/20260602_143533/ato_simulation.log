@@ -1,0 +1,105 @@
+# step: ato_simulation
+# command: C:\Users\bit11\AppData\Local\Programs\Python\Python311\python.exe D:\energy_conservation\scripts_new\00_main_pipeline\05_simulate_ATO_v8.py
+# ENERGY_TRIP_NO: 1
+# ENERGY_TRIP_INDEX: 0
+# ENERGY_TARGET_TIME: script default
+# ENERGY_RESULTS_DATA_DIR: D:\energy_conservation\data\data_processed_step2_v3_first5_curve_quality
+# ENERGY_ATO_DATA_DIR: D:\energy_conservation\data\data_processed_step2_v3_first5_curve_quality
+# ENERGY_LINE_SCOPE: 5
+# PYTHONIOENCODING: utf-8:replace
+# started: 2026-06-02T14:37:33
+
+按测试数据目录筛选区间: 5 个，跳过标准时间表中未提供数据的 21 个区间。
+========================================================================
+批量生成 class1-class5 速度曲线
+时间表: D:\energy_conservation\output\analysis\class_tables_strict\standard_class_times.csv
+数据目录: D:\energy_conservation\data\data_processed_step2_v3_first5_curve_quality
+模板目录: D:\energy_conservation\output\ato_phase_results_v3
+输出目录: D:\energy_conservation\output\ato_generated_results_new_v4
+硬限速: 80.0 km/h
+待处理区间数: 5
+========================================================================
+
+[1/5] 开始生成区间: 布政-张家潭
+   ⚠️ 布政-张家潭 class1: 没有相邻真实等级模板，跳过
+   ⚓ class2 | source=extrapolated_adjacent | parent=class3 | support=class3
+   ⚓ class3 | source=real | parent=class3 | support=class3
+   ⚓ class4 | source=real | parent=class4 | support=class4
+   ⚓ class5 | source=extrapolated_adjacent | parent=class4 | support=class4
+   曲线质量过滤: 仅保留 曲线质量标签=0，行数 79517->65622，趟次 34->28
+  ✅ 完成 | generated=4 | overspeed=0 | infeasible=0
+  class2对比: no_real_runs | 未找到真实样本
+      - class1: 跳过 | no adjacent real template
+      - class2: 生成成功 | peak=73.542100 km/h
+      - class3: 生成成功 | peak=67.783100 km/h
+      - class4: 生成成功 | peak=62.657400 km/h
+      - class5: 生成成功 | peak=56.439700 km/h
+
+[2/5] 开始生成区间: 张家潭-同德路
+   ⚓ class1 | source=extrapolated_adjacent | parent=class2 | support=class2
+   🎯 class2 使用真实等级模板 (Time Diff: 0.25s)
+   🎯 class3 使用真实等级模板 (Time Diff: 0.55s)
+   ⚓ class4 | source=extrapolated_adjacent | parent=class3 | support=class3
+   ⚠️ 张家潭-同德路 class5: 没有相邻真实等级模板，跳过
+   曲线质量过滤: 仅保留 曲线质量标签=0，行数 102936->87722，趟次 34->29
+  ✅ 完成 | generated=4 | overspeed=0 | infeasible=0
+  class2对比: success | none
+      - class1: 生成成功 | peak=75.912300 km/h
+      - class2: 生成成功 | peak=68.261700 km/h
+      - class3: 生成成功 | peak=64.913100 km/h
+      - class4: 生成成功 | peak=60.322300 km/h
+      - class5: 跳过 | no adjacent real template
+
+[3/5] 开始生成区间: 同德路-石碶
+   ⚓ class1 | source=extrapolated_adjacent | parent=class2 | support=class2
+   ⚓ class2 | source=real | parent=class2 | support=class2
+   ⚓ class3 | source=real | parent=class3 | support=class3
+   ⚓ class4 | source=real | parent=class4 | support=class4
+   ⚓ class5 | source=extrapolated_adjacent | parent=class4 | support=class4
+  ✅ 完成 | generated=3 | overspeed=2 | infeasible=0
+  class2对比: skipped | 未找到样本
+      - class1: 超速跳过 | 最终生成曲线最高速度为 143.569000 km/h，超过 80.0 km/h，删除该等级
+      - class2: 超速跳过 | 最终生成曲线最高速度为 87.948976 km/h，超过 80.0 km/h，删除该等级
+      - class3: 生成成功 | peak=69.727600 km/h
+      - class4: 生成成功 | peak=64.204500 km/h
+      - class5: 生成成功 | peak=56.668200 km/h
+
+[4/5] 开始生成区间: 石碶-雅渡
+   ⚓ class1 | source=extrapolated_adjacent | parent=class2 | support=class2
+   ⚓ class2 | source=real | parent=class2 | support=class2
+   ⚓ class3 | source=real | parent=class3 | support=class3
+   ⚓ class4 | source=real | parent=class4 | support=class4
+   ⚓ class5 | source=extrapolated_adjacent | parent=class4 | support=class4
+   曲线质量过滤: 仅保留 曲线质量标签=0，行数 55265->47207，趟次 34->29
+  ✅ 完成 | generated=4 | overspeed=1 | infeasible=0
+  class2对比: success | none
+      - class1: 超速跳过 | 最终生成曲线最高速度为 126.066005 km/h，超过 80.0 km/h，删除该等级
+      - class2: 生成成功 | peak=65.763000 km/h
+      - class3: 生成成功 | peak=76.601700 km/h
+      - class4: 生成成功 | peak=60.332200 km/h
+      - class5: 生成成功 | peak=50.594200 km/h
+
+[5/5] 开始生成区间: 雅渡-庙堰
+   ⚓ class1 | source=extrapolated_adjacent | parent=class2 | support=class2
+   ⚓ class2 | source=real | parent=class2 | support=class2
+   🎯 class3 使用真实等级模板 (Time Diff: 0.25s)
+   ⚓ class4 | source=real | parent=class4 | support=class4
+   ⚓ class5 | source=extrapolated_adjacent | parent=class4 | support=class4
+  ✅ 完成 | generated=3 | overspeed=2 | infeasible=0
+  class2对比: skipped | 未找到样本
+      - class1: 超速跳过 | 最终生成曲线最高速度为 94.668275 km/h，超过 80.0 km/h，删除该等级
+      - class2: 超速跳过 | 最终生成曲线最高速度为 80.220515 km/h，超过 80.0 km/h，删除该等级
+      - class3: 生成成功 | peak=75.945100 km/h
+      - class4: 生成成功 | peak=68.981400 km/h
+      - class5: 生成成功 | peak=62.400400 km/h
+
+========================================================================
+批量生成结束
+成功区间数: 5
+失败区间数: 0
+汇总文件: D:\energy_conservation\output\ato_generated_results_new_v4\batch_generate_summary.csv
+========================================================================
+
+# finished: 2026-06-02T14:39:04
+# return_code: 0
+# elapsed_seconds: 90.5

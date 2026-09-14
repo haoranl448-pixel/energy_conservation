@@ -1,0 +1,6 @@
+﻿station_pair,class_name,status,reason,curve_source,parent_ref,supporting_refs,real_sample_count,parent_real_sample_count,sample_reliability,dp_candidate_stage,target_time_s,curve_csv,sim_time_s,peak_speed_kmh,total_dist_m
+曹隘-柳隘,class1,overspeed,最终生成曲线最高速度为 144.538413 km/h，超过 80.0 km/h，删除该等级,extrapolated_adjacent,class2,class2,0,68,generated,allow_extrapolated,101.0,,,,
+曹隘-柳隘,class2,generated,最终生成曲线后验检查通过，峰值 79.801916 km/h,real,class2,class2,68,68,strong,real_only,106.0,D:\energy_conservation\output\ato_generated_results_new_v4\曹隘-柳隘\class2_generated_curve.csv,106.05,79.8019,1326.1876
+曹隘-柳隘,class3,generated,最终生成曲线后验检查通过，峰值 73.308584 km/h,real,class3,class3,38,38,strong,real_only,108.0,D:\energy_conservation\output\ato_generated_results_new_v4\曹隘-柳隘\class3_generated_curve.csv,108.0,73.3086,1309.1281
+曹隘-柳隘,class4,generated,最终生成曲线后验检查通过，峰值 61.632991 km/h,real,class4,class4,1,1,weak,real_only,113.0,D:\energy_conservation\output\ato_generated_results_new_v4\曹隘-柳隘\class4_generated_curve.csv,112.95,61.633,1308.6801
+曹隘-柳隘,class5,generated,最终生成曲线后验检查通过，峰值 54.639785 km/h,extrapolated_adjacent,class4,class4,0,1,generated,allow_extrapolated,119.0,D:\energy_conservation\output\ato_generated_results_new_v4\曹隘-柳隘\class5_generated_curve.csv,119.0,54.6398,1308.9453

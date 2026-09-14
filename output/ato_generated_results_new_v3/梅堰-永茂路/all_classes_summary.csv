@@ -1,0 +1,6 @@
+﻿station_pair,class_name,status,reason,parent_ref,target_time_s,curve_csv,sim_time_s,peak_speed_kmh,total_dist_m
+梅堰-永茂路,class1,overspeed,最终生成曲线最高速度为 130.178028 km/h，超过 80.0 km/h，删除该等级,class2,284.0,,,,
+梅堰-永茂路,class2,overspeed,最终生成曲线最高速度为 85.564803 km/h，超过 80.0 km/h，删除该等级,class2,298.0,,,,
+梅堰-永茂路,class3,generated,最终生成曲线后验检查通过，峰值 66.555873 km/h,class3,313.0,D:\energy_conservation\output\ato_generated_results_new_v3\梅堰-永茂路\class3_generated_curve.csv,313.0,66.5559,3733.6219
+梅堰-永茂路,class4,generated,最终生成曲线后验检查通过，峰值 57.462247 km/h,class3,329.0,D:\energy_conservation\output\ato_generated_results_new_v3\梅堰-永茂路\class4_generated_curve.csv,329.0,57.4622,3735.0132
+梅堰-永茂路,class5,generated,最终生成曲线后验检查通过，峰值 52.280698 km/h,class3,345.0,D:\energy_conservation\output\ato_generated_results_new_v3\梅堰-永茂路\class5_generated_curve.csv,345.0,52.2807,3733.6219

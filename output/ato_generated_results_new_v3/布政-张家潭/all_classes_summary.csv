@@ -1,0 +1,6 @@
+﻿station_pair,class_name,status,reason,parent_ref,target_time_s,curve_csv,sim_time_s,peak_speed_kmh,total_dist_m
+布政-张家潭,class1,overspeed,最终生成曲线最高速度为 81.057747 km/h，超过 80.0 km/h，删除该等级,class3,107.0,,,,
+布政-张家潭,class2,generated,最终生成曲线后验检查通过，峰值 69.231950 km/h,class3,112.0,D:\energy_conservation\output\ato_generated_results_new_v3\布政-张家潭\class2_generated_curve.csv,112.0,69.232,1450.9846
+布政-张家潭,class3,generated,原生数据高保真镜像,class3,115.0,D:\energy_conservation\output\ato_generated_results_new_v3\布政-张家潭\class3_generated_curve.csv,114.55,66.2219,1456.2548
+布政-张家潭,class4,generated,最终生成曲线后验检查通过，峰值 58.998652 km/h,class3,121.0,D:\energy_conservation\output\ato_generated_results_new_v3\布政-张家潭\class4_generated_curve.csv,120.95,58.9987,1450.9846
+布政-张家潭,class5,generated,最终生成曲线后验检查通过，峰值 53.910609 km/h,class3,127.0,D:\energy_conservation\output\ato_generated_results_new_v3\布政-张家潭\class5_generated_curve.csv,127.05,53.9106,1450.9846
