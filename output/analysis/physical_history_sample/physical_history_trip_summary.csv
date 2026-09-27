@@ -1,0 +1,2 @@
+﻿section,segment,rows,duration_s,distance_m,measured_electric_energy_wh,physical_mechanical_energy_wh,mechanical_minus_electric_wh,mechanical_minus_electric_pct,cumulative_curve_r2,quality_label,run_id,date_service,figure
+布政-张家潭,20,2318,115.85,1428.109,13232.206,13130.467,-101.739,-0.769,0.980569,0,1077,07/0370320,D:\energy_conservation\output\analysis\physical_history_sample\布政-张家潭\seg_020_07_0370320.png

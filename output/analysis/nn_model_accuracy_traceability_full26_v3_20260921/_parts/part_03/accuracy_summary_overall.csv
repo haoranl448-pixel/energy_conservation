@@ -1,0 +1,2 @@
+﻿scope,trip_count,measured_energy_total_kwh,predicted_energy_total_kwh,weighted_total_error_pct,mean_signed_error_pct,mean_absolute_error_pct,median_absolute_error_pct,p90_absolute_error_pct,mean_absolute_error_kwh,mean_cumulative_r2,median_cumulative_r2,within_5pct_ratio,within_10pct_ratio
+all_sections,716.000000,9939.357400,9626.141228,-3.151272,-2.294408,3.553673,1.919500,12.132000,0.585195,0.989177,0.997734,0.821229,0.849162

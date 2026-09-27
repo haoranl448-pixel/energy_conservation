@@ -1,0 +1,4 @@
+﻿quality_label,trip_count,measured_energy_total_kwh,predicted_energy_total_kwh,weighted_total_error_pct,mean_signed_error_pct,mean_absolute_error_pct,median_absolute_error_pct,p90_absolute_error_pct,mean_absolute_error_kwh,mean_cumulative_r2,median_cumulative_r2,within_5pct_ratio,within_10pct_ratio
+0,741.000000,12768.355839,12200.472067,-4.447587,-3.934734,5.627906,4.722000,14.702000,1.022496,0.973986,0.990714,0.543860,0.854251
+1,137.000000,2251.441240,2171.872629,-3.534119,-3.005839,5.154876,4.149000,13.643200,0.891336,0.974967,0.991725,0.591241,0.861314
+6,2.000000,32.749233,31.474377,-3.892781,-3.890000,3.890000,3.890000,4.294800,0.637428,0.994530,0.994530,1.000000,1.000000

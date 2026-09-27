@@ -249,3 +249,105 @@ class TrainTheoreticalEnergyModel:
             self.current_dist += v_ms * self.dt
             
         return np.array(energy_results_wh)
+
+    def run_batch_simulation_fast(
+        self,
+        time_seq,
+        vel_seq,
+        mass_total_ton,
+        *,
+        section_name=None,
+        start_dist_m=None,
+        car_masses_ton=None,
+    ):
+        """Vectorized equivalent of :meth:`run_batch_simulation`.
+
+        The original implementation evaluates 120 train-body slices inside
+        every sample.  This version keeps the same equations and state update
+        order, but evaluates each slice across the full trip with NumPy.
+        """
+        del time_seq  # The Simulink-compatible model uses the fixed self.dt.
+        velocity = np.asarray(vel_seq, dtype=float)
+        if velocity.ndim != 1:
+            raise ValueError("vel_seq must be one-dimensional")
+        if len(velocity) == 0:
+            return np.array([], dtype=float)
+
+        if car_masses_ton is None:
+            loads = np.full(self.num_cars, float(mass_total_ton) / self.num_cars, dtype=float)
+        else:
+            loads = np.asarray(car_masses_ton, dtype=float)
+            if loads.shape != (self.num_cars,):
+                raise ValueError(f"car_masses_ton must contain exactly {self.num_cars} values")
+            if not np.all(np.isfinite(loads)) or np.any(loads < 0):
+                raise ValueError("car_masses_ton must contain finite non-negative values")
+            provided_total = float(mass_total_ton)
+            if not math.isclose(float(np.sum(loads)), provided_total, rel_tol=1e-4, abs_tol=1e-3):
+                raise ValueError(
+                    f"car_masses_ton sums to {np.sum(loads):.6g} t, "
+                    f"but mass_total_ton is {provided_total:.6g} t"
+                )
+
+        mass_ends = loads[0] + loads[5]
+        mass_mids = np.sum(loads[1:5])
+        mass_total = np.sum(loads)
+        start_distance = self.resolve_start_distance(section_name, start_dist_m)
+        positions = start_distance + np.r_[0.0, np.cumsum(velocity[:-1] * self.dt)]
+
+        raw_acceleration = np.diff(np.r_[0.0, velocity]) / self.dt
+        filtered_acceleration = np.empty_like(raw_acceleration)
+        last_raw = 0.0
+        last_filtered = 0.0
+        for index, raw_value in enumerate(raw_acceleration):
+            filtered_value = (
+                self.filt_b0 * raw_value
+                + self.filt_b1 * last_raw
+                - self.filt_a1 * last_filtered
+            )
+            filtered_acceleration[index] = filtered_value
+            last_raw = raw_value
+            last_filtered = filtered_value
+
+        velocity_kmh = velocity * 3.6
+        start_force = np.where(
+            (velocity > self.eps) & (velocity < 0.05),
+            mass_total * 49.0,
+            0.0,
+        )
+        davis_force = (
+            mass_mids * (self.P_b * np.abs(velocity_kmh) + self.P_a)
+            + mass_ends * (self.P_d * np.abs(velocity_kmh) + self.P_c)
+            + (self.P_f * 5.0 + self.P_e) * velocity_kmh**2
+        ) * 9.8
+
+        gradient_force = np.zeros_like(velocity)
+        curve_force = np.zeros_like(velocity)
+        slice_count = 20
+        slice_length = self.car_length / float(slice_count)
+        for car_index, car_mass in enumerate(loads):
+            car_offset = car_index * self.car_length
+            for slice_index in range(slice_count):
+                slice_positions = positions - car_offset - slice_index * slice_length
+                gradients = np.interp(slice_positions, self.real_grad_locs, self.real_grad_vals)
+                gradient_force += (
+                    car_mass * np.sin(np.arctan(gradients / 1000.0)) / float(slice_count)
+                ) * self.g * 1000.0
+
+                radii = np.interp(slice_positions, self.real_curve_locs, self.real_curve_vals)
+                active_curve = (radii > 0.0) & (radii < 2000.0)
+                curve_force[active_curve] += (
+                    600.0 * self.g * car_mass / radii[active_curve] / float(slice_count)
+                )
+
+        moving = velocity > 0.0
+        gradient_force[~moving] = 0.0
+        curve_force[~moving] = 0.0
+
+        effective_mass = (mass_ends * self.gain_trailer + mass_mids * self.gain_motor) * 1000.0
+        inertia_force = effective_mass * filtered_acceleration
+        total_force = np.maximum(
+            inertia_force + start_force + davis_force + gradient_force + curve_force,
+            0.0,
+        )
+        power_kw = total_force * velocity / 1000.0
+        return power_kw * self.dt / 3600.0 * 1000.0

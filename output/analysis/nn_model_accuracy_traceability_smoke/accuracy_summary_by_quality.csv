@@ -1,0 +1,2 @@
+﻿quality_label,trip_count,measured_energy_total_kwh,predicted_energy_total_kwh,weighted_total_error_pct,mean_signed_error_pct,mean_absolute_error_pct,median_absolute_error_pct,p90_absolute_error_pct,mean_absolute_error_kwh,mean_cumulative_r2,median_cumulative_r2,within_5pct_ratio,within_10pct_ratio
+0,1.000000,13.232206,13.023769,-1.575225,-1.575000,1.575000,1.575000,1.575000,0.208437,0.998944,0.998944,1.000000,1.000000

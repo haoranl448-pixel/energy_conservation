@@ -1,0 +1,123 @@
+数据目录: D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality_traceability
+模型目录: D:\energy_conservation\output\models\nn_results_residual_v2
+输出目录: D:\energy_conservation\output\analysis\nn_model_accuracy_traceability_full26_figures\_parts\part_02
+绘图区间数: 7
+推理设备: cpu
+
+[1/7] 处理区间: 张家潭-同德路
+  待绘制趟次: 125
+    已完成 10/125
+    已完成 20/125
+    已完成 30/125
+    已完成 40/125
+    已完成 50/125
+    已完成 60/125
+    已完成 70/125
+    已完成 80/125
+    已完成 90/125
+    已完成 100/125
+    已完成 110/125
+    已完成 120/125
+    已完成 125/125
+
+[2/7] 处理区间: 庙堰-钟公庙
+  待绘制趟次: 125
+    已完成 10/125
+    已完成 20/125
+    已完成 30/125
+    已完成 40/125
+    已完成 50/125
+    已完成 60/125
+    已完成 70/125
+    已完成 80/125
+    已完成 90/125
+    已完成 100/125
+    已完成 110/125
+    已完成 120/125
+    已完成 125/125
+
+[3/7] 处理区间: 南高教园区-下应路
+  待绘制趟次: 125
+    已完成 10/125
+    已完成 20/125
+    已完成 30/125
+    已完成 40/125
+    已完成 50/125
+    已完成 60/125
+    已完成 70/125
+    已完成 80/125
+    已完成 90/125
+    已完成 100/125
+    已完成 110/125
+    已完成 120/125
+    已完成 125/125
+
+[4/7] 处理区间: 曹隘-柳隘
+  待绘制趟次: 127
+    已完成 10/127
+    已完成 20/127
+    已完成 30/127
+    已完成 40/127
+    已完成 50/127
+    已完成 60/127
+    已完成 70/127
+    已完成 80/127
+    已完成 90/127
+    已完成 100/127
+    已完成 110/127
+    已完成 120/127
+    已完成 127/127
+
+[5/7] 处理区间: 会展中心-院士路
+  待绘制趟次: 126
+    已完成 10/126
+    已完成 20/126
+    已完成 30/126
+    已完成 40/126
+    已完成 50/126
+    已完成 60/126
+    已完成 70/126
+    已完成 80/126
+    已完成 90/126
+    已完成 100/126
+    已完成 110/126
+    已完成 120/126
+    已完成 126/126
+
+[6/7] 处理区间: 兴庄路-兴海南路
+  待绘制趟次: 126
+    已完成 10/126
+    已完成 20/126
+    已完成 30/126
+    已完成 40/126
+    已完成 50/126
+    已完成 60/126
+    已完成 70/126
+    已完成 80/126
+    已完成 90/126
+    已完成 100/126
+    已完成 110/126
+    已完成 120/126
+    已完成 126/126
+
+[7/7] 处理区间: 镇海大道-骆驼桥
+  待绘制趟次: 126
+    已完成 10/126
+    已完成 20/126
+    已完成 30/126
+    已完成 40/126
+    已完成 50/126
+    已完成 60/126
+    已完成 70/126
+    已完成 80/126
+    已完成 90/126
+    已完成 100/126
+    已完成 110/126
+    已完成 120/126
+    已完成 126/126
+分区间汇总: D:\energy_conservation\output\analysis\nn_model_accuracy_traceability_full26_figures\_parts\part_02\accuracy_summary_by_section.csv
+总体汇总: D:\energy_conservation\output\analysis\nn_model_accuracy_traceability_full26_figures\_parts\part_02\accuracy_summary_overall.csv
+质量标签汇总: D:\energy_conservation\output\analysis\nn_model_accuracy_traceability_full26_figures\_parts\part_02\accuracy_summary_by_quality.csv
+
+完成绘图: 880 趟
+汇总文件: D:\energy_conservation\output\analysis\nn_model_accuracy_traceability_full26_figures\_parts\part_02\triple_axis_plot_summary.csv

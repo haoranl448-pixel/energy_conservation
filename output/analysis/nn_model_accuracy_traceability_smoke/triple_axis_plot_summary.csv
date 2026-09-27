@@ -1,0 +1,2 @@
+﻿section,segment,rows,duration_s,distance_m,real_energy_wh,fusion_energy_wh,fusion_error_pct,fusion_abs_error_wh,fusion_abs_error_pct,cumulative_energy_r2,step_energy_mae_wh,step_energy_rmse_wh,run_class,quality_label,service_no,date_service,run_id,absolute_start,absolute_end,figure
+布政-张家潭,20,2318,115.85,1428.109,13232.206,13023.769,-1.575,208.437,1.575,0.998944,0.393971,0.696211,3,0,70320,07/0370320,1077,2024-07-03 17:29:46,2024-07-03 17:31:42,

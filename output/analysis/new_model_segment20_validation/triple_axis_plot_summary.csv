@@ -1,0 +1,2 @@
+﻿section,segment,rows,duration_s,distance_m,real_energy_wh,fusion_energy_wh,fusion_error_pct,cumulative_energy_r2,step_energy_mae_wh,step_energy_rmse_wh,run_class,quality_label,service_no,date_service,figure
+布政-张家潭,20,2228,111.35,1450.888,16052.043,16322.745,1.686,0.998561,0.47699,0.884072,,,51004.0,07/1251004,D:\energy_conservation\output\analysis\new_model_segment20_validation\布政-张家潭\seg_020_07_1251004.png

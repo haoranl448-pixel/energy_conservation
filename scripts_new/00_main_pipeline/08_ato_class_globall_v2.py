@@ -1168,6 +1168,17 @@ def run_optimization():
                 t_hist_acc += dwell_hist
 
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(18, 10))
+        historical_total = T_TOTAL_TARGET
+        historical_dwell = historical_total_dwell
+        fig.suptitle(
+            f"{title_prefix} | total {solution_totals['total_time']:.1f}s = "
+            f"run {solution_totals['run']:.1f}s + dwell {solution_totals['dwell']:.1f}s\n"
+            f"historical total {historical_total:.1f}s | historical dwell {historical_dwell:.1f}s | "
+            f"saving {solution_totals['saving_rate']:.2f}%",
+            fontsize=14,
+            fontweight="bold",
+            y=0.995,
+        )
 
         ax1.plot(plot_data['hist_t'], plot_data['hist_v'], color='gray', alpha=0.4,
                  linewidth=1.0, label='historical')
@@ -1175,10 +1186,7 @@ def run_optimization():
                  label=title_prefix)
         for start, end in dwell_zones:
             ax1.axvspan(start, end, color='gray', alpha=0.05)
-        ax1.set_title(
-            f"{title_prefix} v-t | total={solution_totals['total_time']:.1f}s "
-            f"(target={T_TOTAL_TARGET}s) | saving={solution_totals['saving_rate']:.2f}%"
-        )
+        ax1.set_title(f"{title_prefix} v-t | target={T_TOTAL_TARGET:.1f}s")
         ax1.set_ylabel("Velocity (km/h)")
         ax1.legend()
         ax1.grid(True, linestyle='--', alpha=0.3)
@@ -1193,7 +1201,7 @@ def run_optimization():
         ax2.legend()
         ax2.grid(True, linestyle='--', alpha=0.3)
 
-        plt.tight_layout()
+        plt.tight_layout(rect=(0, 0, 1, 0.94))
         fig.savefig(output_path, dpi=300)
         plt.close()
         print(f"Saved: {output_path}")

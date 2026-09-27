@@ -1,0 +1,10 @@
+{
+  "direction": "UP",
+  "section_count": 26,
+  "manifest_section_records": 3174,
+  "line_origin_trip_count": 125,
+  "minimum_section_trip_count": 70,
+  "maximum_section_trip_count": 127,
+  "mass_record_count": 3158,
+  "mass_candidate_count": 183
+}

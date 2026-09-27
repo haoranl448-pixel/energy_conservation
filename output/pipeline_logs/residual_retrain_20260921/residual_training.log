@@ -1,0 +1,260 @@
+# step: residual_training
+# command: C:\Users\bit11\AppData\Local\Programs\Python\Python311\python.exe D:\energy_conservation\scripts_new\00_main_pipeline\02_train_residual_new.py
+# ENERGY_TRIP_NO: 1
+# ENERGY_TRIP_INDEX: 0
+# ENERGY_TARGET_TIME: script default
+# ENERGY_RESULTS_DATA_DIR: D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality_traceability
+# ENERGY_ATO_DATA_DIR: D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality_traceability
+# ENERGY_LINE_SCOPE: full
+# ENERGY_TRACEABILITY_MANIFEST: D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality_traceability\trip_traceability_manifest_v1.csv
+# PYTHONIOENCODING: utf-8:replace
+# started: 2026-09-21T15:44:43
+
+当前训练设备: cpu
+残差训练数据目录: D:\energy_conservation\data\data_processed_step2_v3_all_curve_quality_traceability
+残差模型输出目录: D:\energy_conservation\output\models\nn_results_residual_v3_traceability_20260921
+残差训练区间范围: full (26 sections)
+
+[残差6特征] 开始训练: 布政-张家潭
+   ...正在计算物理基准 (Simulating)...
+   开始训练残差模型 (样本数: 230752)...
+开始训练: 布政-张家潭 (样本数: 230752)
+      Epoch  10 | Train: 0.032696 | Val: 0.036813
+      早停: Epoch 12, best epoch=7, best val loss=0.032407
+   训练结束 (Best Val Loss: 0.03241, Best Epoch: 7)
+   三纵轴对标图已保存: D:\energy_conservation\output\models\nn_results_residual_v3_traceability_20260921\布政-张家潭/triple_axis_fusion.png
+
+[残差6特征] 开始训练: 张家潭-同德路
+   ...正在计算物理基准 (Simulating)...
+   开始训练残差模型 (样本数: 298410)...
+开始训练: 张家潭-同德路 (样本数: 298410)
+      Epoch  10 | Train: 0.038023 | Val: 0.036486
+      早停: Epoch 13, best epoch=8, best val loss=0.036090
+   训练结束 (Best Val Loss: 0.03609, Best Epoch: 8)
+   三纵轴对标图已保存: D:\energy_conservation\output\models\nn_results_residual_v3_traceability_20260921\张家潭-同德路/triple_axis_fusion.png
+
+[残差6特征] 开始训练: 同德路-石碶
+   ...正在计算物理基准 (Simulating)...
+   开始训练残差模型 (样本数: 213757)...
+开始训练: 同德路-石碶 (样本数: 213757)
+      Epoch  10 | Train: 0.037161 | Val: 0.036320
+      早停: Epoch 14, best epoch=9, best val loss=0.033179
+   训练结束 (Best Val Loss: 0.03318, Best Epoch: 9)
+   三纵轴对标图已保存: D:\energy_conservation\output\models\nn_results_residual_v3_traceability_20260921\同德路-石碶/triple_axis_fusion.png
+
+[残差6特征] 开始训练: 石碶-雅渡
+   ...正在计算物理基准 (Simulating)...
+   开始训练残差模型 (样本数: 159542)...
+开始训练: 石碶-雅渡 (样本数: 159542)
+      Epoch  10 | Train: 0.023017 | Val: 0.028831
+      早停: Epoch 13, best epoch=8, best val loss=0.025526
+   训练结束 (Best Val Loss: 0.02553, Best Epoch: 8)
+   三纵轴对标图已保存: D:\energy_conservation\output\models\nn_results_residual_v3_traceability_20260921\石碶-雅渡/triple_axis_fusion.png
+
+[残差6特征] 开始训练: 雅渡-庙堰
+   ...正在计算物理基准 (Simulating)...
+   开始训练残差模型 (样本数: 261125)...
+开始训练: 雅渡-庙堰 (样本数: 261125)
+      Epoch  10 | Train: 0.041109 | Val: 0.048123
+      早停: Epoch 19, best epoch=14, best val loss=0.040672
+   训练结束 (Best Val Loss: 0.04067, Best Epoch: 14)
+   三纵轴对标图已保存: D:\energy_conservation\output\models\nn_results_residual_v3_traceability_20260921\雅渡-庙堰/triple_axis_fusion.png
+
+[残差6特征] 开始训练: 庙堰-钟公庙
+   ...正在计算物理基准 (Simulating)...
+   开始训练残差模型 (样本数: 187704)...
+开始训练: 庙堰-钟公庙 (样本数: 187704)
+      Epoch  10 | Train: 0.030736 | Val: 0.028475
+      Epoch  20 | Train: 0.025620 | Val: 0.030224
+      早停: Epoch 21, best epoch=16, best val loss=0.026264
+   训练结束 (Best Val Loss: 0.02626, Best Epoch: 16)
+   三纵轴对标图已保存: D:\energy_conservation\output\models\nn_results_residual_v3_traceability_20260921\庙堰-钟公庙/triple_axis_fusion.png
+
+[残差6特征] 开始训练: 钟公庙-鄞州区政府
+   ...正在计算物理基准 (Simulating)...
+   开始训练残差模型 (样本数: 177247)...
+开始训练: 钟公庙-鄞州区政府 (样本数: 177247)
+      Epoch  10 | Train: 0.023611 | Val: 0.029860
+      早停: Epoch 17, best epoch=12, best val loss=0.023989
+   训练结束 (Best Val Loss: 0.02399, Best Epoch: 12)
+   三纵轴对标图已保存: D:\energy_conservation\output\models\nn_results_residual_v3_traceability_20260921\钟公庙-鄞州区政府/triple_axis_fusion.png
+
+[残差6特征] 开始训练: 鄞州区政府-钱湖南路
+   ...正在计算物理基准 (Simulating)...
+   开始训练残差模型 (样本数: 257276)...
+开始训练: 鄞州区政府-钱湖南路 (样本数: 257276)
+      Epoch  10 | Train: 0.033616 | Val: 0.039092
+      早停: Epoch 12, best epoch=7, best val loss=0.033977
+   训练结束 (Best Val Loss: 0.03398, Best Epoch: 7)
+   三纵轴对标图已保存: D:\energy_conservation\output\models\nn_results_residual_v3_traceability_20260921\鄞州区政府-钱湖南路/triple_axis_fusion.png
+
+[残差6特征] 开始训练: 钱湖南路-南高教园区
+   ...正在计算物理基准 (Simulating)...
+   开始训练残差模型 (样本数: 195183)...
+开始训练: 钱湖南路-南高教园区 (样本数: 195183)
+      Epoch  10 | Train: 0.026867 | Val: 0.027603
+      早停: Epoch 15, best epoch=10, best val loss=0.027603
+   训练结束 (Best Val Loss: 0.02760, Best Epoch: 10)
+   三纵轴对标图已保存: D:\energy_conservation\output\models\nn_results_residual_v3_traceability_20260921\钱湖南路-南高教园区/triple_axis_fusion.png
+
+[残差6特征] 开始训练: 南高教园区-下应路
+   ...正在计算物理基准 (Simulating)...
+   开始训练残差模型 (样本数: 223035)...
+开始训练: 南高教园区-下应路 (样本数: 223035)
+      Epoch  10 | Train: 0.033718 | Val: 0.039344
+      早停: Epoch 14, best epoch=9, best val loss=0.032565
+   训练结束 (Best Val Loss: 0.03256, Best Epoch: 9)
+   三纵轴对标图已保存: D:\energy_conservation\output\models\nn_results_residual_v3_traceability_20260921\南高教园区-下应路/triple_axis_fusion.png
+
+[残差6特征] 开始训练: 下应路-大洋江
+   ...正在计算物理基准 (Simulating)...
+   开始训练残差模型 (样本数: 205613)...
+开始训练: 下应路-大洋江 (样本数: 205613)
+      Epoch  10 | Train: 0.029940 | Val: 0.027210
+      早停: Epoch 19, best epoch=14, best val loss=0.026117
+   训练结束 (Best Val Loss: 0.02612, Best Epoch: 14)
+   三纵轴对标图已保存: D:\energy_conservation\output\models\nn_results_residual_v3_traceability_20260921\下应路-大洋江/triple_axis_fusion.png
+
+[残差6特征] 开始训练: 大洋江-泗港
+   ...正在计算物理基准 (Simulating)...
+   开始训练残差模型 (样本数: 179270)...
+开始训练: 大洋江-泗港 (样本数: 179270)
+      Epoch  10 | Train: 0.022382 | Val: 0.024903
+      早停: Epoch 14, best epoch=9, best val loss=0.022772
+   训练结束 (Best Val Loss: 0.02277, Best Epoch: 9)
+   三纵轴对标图已保存: D:\energy_conservation\output\models\nn_results_residual_v3_traceability_20260921\大洋江-泗港/triple_axis_fusion.png
+
+[残差6特征] 开始训练: 泗港-曹隘
+   ...正在计算物理基准 (Simulating)...
+   开始训练残差模型 (样本数: 266623)...
+开始训练: 泗港-曹隘 (样本数: 266623)
+      Epoch  10 | Train: 0.019583 | Val: 0.019631
+      早停: Epoch 12, best epoch=7, best val loss=0.019386
+   训练结束 (Best Val Loss: 0.01939, Best Epoch: 7)
+   三纵轴对标图已保存: D:\energy_conservation\output\models\nn_results_residual_v3_traceability_20260921\泗港-曹隘/triple_axis_fusion.png
+
+[残差6特征] 开始训练: 曹隘-柳隘
+   ...正在计算物理基准 (Simulating)...
+   开始训练残差模型 (样本数: 213169)...
+开始训练: 曹隘-柳隘 (样本数: 213169)
+      Epoch  10 | Train: 0.009876 | Val: 0.013554
+      早停: Epoch 14, best epoch=9, best val loss=0.009759
+   训练结束 (Best Val Loss: 0.00976, Best Epoch: 9)
+   三纵轴对标图已保存: D:\energy_conservation\output\models\nn_results_residual_v3_traceability_20260921\曹隘-柳隘/triple_axis_fusion.png
+
+[残差6特征] 开始训练: 柳隘-海晏北路
+   ...正在计算物理基准 (Simulating)...
+   开始训练残差模型 (样本数: 177686)...
+开始训练: 柳隘-海晏北路 (样本数: 177686)
+      Epoch  10 | Train: 0.022495 | Val: 0.031844
+      Epoch  20 | Train: 0.019405 | Val: 0.026682
+      早停: Epoch 22, best epoch=17, best val loss=0.026611
+   训练结束 (Best Val Loss: 0.02661, Best Epoch: 17)
+   三纵轴对标图已保存: D:\energy_conservation\output\models\nn_results_residual_v3_traceability_20260921\柳隘-海晏北路/triple_axis_fusion.png
+
+[残差6特征] 开始训练: 海晏北路-民安东路
+   ...正在计算物理基准 (Simulating)...
+   开始训练残差模型 (样本数: 167109)...
+开始训练: 海晏北路-民安东路 (样本数: 167109)
+      Epoch  10 | Train: 0.028615 | Val: 0.037641
+      Epoch  20 | Train: 0.024382 | Val: 0.038825
+      早停: Epoch 21, best epoch=16, best val loss=0.034876
+   训练结束 (Best Val Loss: 0.03488, Best Epoch: 16)
+   三纵轴对标图已保存: D:\energy_conservation\output\models\nn_results_residual_v3_traceability_20260921\海晏北路-民安东路/triple_axis_fusion.png
+
+[残差6特征] 开始训练: 民安东路-会展中心
+   ...正在计算物理基准 (Simulating)...
+   开始训练残差模型 (样本数: 150962)...
+开始训练: 民安东路-会展中心 (样本数: 150962)
+      Epoch  10 | Train: 0.023878 | Val: 0.032747
+      Epoch  20 | Train: 0.021372 | Val: 0.030857
+      早停: Epoch 22, best epoch=17, best val loss=0.027806
+   训练结束 (Best Val Loss: 0.02781, Best Epoch: 17)
+   三纵轴对标图已保存: D:\energy_conservation\output\models\nn_results_residual_v3_traceability_20260921\民安东路-会展中心/triple_axis_fusion.png
+
+[残差6特征] 开始训练: 会展中心-院士路
+   ...正在计算物理基准 (Simulating)...
+   开始训练残差模型 (样本数: 227504)...
+开始训练: 会展中心-院士路 (样本数: 227504)
+      Epoch  10 | Train: 0.022758 | Val: 0.033052
+      Epoch  20 | Train: 0.020451 | Val: 0.030871
+      早停: Epoch 26, best epoch=21, best val loss=0.029307
+   训练结束 (Best Val Loss: 0.02931, Best Epoch: 21)
+   三纵轴对标图已保存: D:\energy_conservation\output\models\nn_results_residual_v3_traceability_20260921\会展中心-院士路/triple_axis_fusion.png
+
+[残差6特征] 开始训练: 院士路-盎孟港
+   ...正在计算物理基准 (Simulating)...
+   开始训练残差模型 (样本数: 178036)...
+开始训练: 院士路-盎孟港 (样本数: 178036)
+      Epoch  10 | Train: 0.027364 | Val: 0.044606
+      早停: Epoch 14, best epoch=9, best val loss=0.040793
+   训练结束 (Best Val Loss: 0.04079, Best Epoch: 9)
+   三纵轴对标图已保存: D:\energy_conservation\output\models\nn_results_residual_v3_traceability_20260921\院士路-盎孟港/triple_axis_fusion.png
+
+[残差6特征] 开始训练: 盎孟港-三官堂
+   ...正在计算物理基准 (Simulating)...
+   开始训练残差模型 (样本数: 267211)...
+开始训练: 盎孟港-三官堂 (样本数: 267211)
+      Epoch  10 | Train: 0.032986 | Val: 0.033618
+      早停: Epoch 13, best epoch=8, best val loss=0.028996
+   训练结束 (Best Val Loss: 0.02900, Best Epoch: 8)
+   三纵轴对标图已保存: D:\energy_conservation\output\models\nn_results_residual_v3_traceability_20260921\盎孟港-三官堂/triple_axis_fusion.png
+
+[残差6特征] 开始训练: 三官堂-兴庄路
+   ...正在计算物理基准 (Simulating)...
+   开始训练残差模型 (样本数: 199885)...
+开始训练: 三官堂-兴庄路 (样本数: 199885)
+      Epoch  10 | Train: 0.023075 | Val: 0.027024
+      Epoch  20 | Train: 0.020516 | Val: 0.025819
+      早停: Epoch 26, best epoch=21, best val loss=0.022490
+   训练结束 (Best Val Loss: 0.02249, Best Epoch: 21)
+   三纵轴对标图已保存: D:\energy_conservation\output\models\nn_results_residual_v3_traceability_20260921\三官堂-兴庄路/triple_axis_fusion.png
+
+[残差6特征] 开始训练: 兴庄路-兴海南路
+   ...正在计算物理基准 (Simulating)...
+   开始训练残差模型 (样本数: 177961)...
+开始训练: 兴庄路-兴海南路 (样本数: 177961)
+      Epoch  10 | Train: 0.026053 | Val: 0.033920
+      早停: Epoch 14, best epoch=9, best val loss=0.028418
+   训练结束 (Best Val Loss: 0.02842, Best Epoch: 9)
+   三纵轴对标图已保存: D:\energy_conservation\output\models\nn_results_residual_v3_traceability_20260921\兴庄路-兴海南路/triple_axis_fusion.png
+
+[残差6特征] 开始训练: 兴海南路-梅堰
+   ...正在计算物理基准 (Simulating)...
+   开始训练残差模型 (样本数: 112287)...
+开始训练: 兴海南路-梅堰 (样本数: 112287)
+      Epoch  10 | Train: 0.020892 | Val: 0.031624
+      早停: Epoch 16, best epoch=11, best val loss=0.027137
+   训练结束 (Best Val Loss: 0.02714, Best Epoch: 11)
+   三纵轴对标图已保存: D:\energy_conservation\output\models\nn_results_residual_v3_traceability_20260921\兴海南路-梅堰/triple_axis_fusion.png
+
+[残差6特征] 开始训练: 梅堰-永茂路
+   ...正在计算物理基准 (Simulating)...
+   开始训练残差模型 (样本数: 362699)...
+开始训练: 梅堰-永茂路 (样本数: 362699)
+      Epoch  10 | Train: 0.026541 | Val: 0.022638
+      早停: Epoch 14, best epoch=9, best val loss=0.021513
+   训练结束 (Best Val Loss: 0.02151, Best Epoch: 9)
+   三纵轴对标图已保存: D:\energy_conservation\output\models\nn_results_residual_v3_traceability_20260921\梅堰-永茂路/triple_axis_fusion.png
+
+[残差6特征] 开始训练: 永茂路-镇海大道
+   ...正在计算物理基准 (Simulating)...
+   开始训练残差模型 (样本数: 281914)...
+开始训练: 永茂路-镇海大道 (样本数: 281914)
+      Epoch  10 | Train: 0.025399 | Val: 0.030001
+      早停: Epoch 19, best epoch=14, best val loss=0.024986
+   训练结束 (Best Val Loss: 0.02499, Best Epoch: 14)
+   三纵轴对标图已保存: D:\energy_conservation\output\models\nn_results_residual_v3_traceability_20260921\永茂路-镇海大道/triple_axis_fusion.png
+
+[残差6特征] 开始训练: 镇海大道-骆驼桥
+   ...正在计算物理基准 (Simulating)...
+   开始训练残差模型 (样本数: 231137)...
+开始训练: 镇海大道-骆驼桥 (样本数: 231137)
+      Epoch  10 | Train: 0.023786 | Val: 0.029091
+      早停: Epoch 19, best epoch=14, best val loss=0.028733
+   训练结束 (Best Val Loss: 0.02873, Best Epoch: 14)
+   三纵轴对标图已保存: D:\energy_conservation\output\models\nn_results_residual_v3_traceability_20260921\镇海大道-骆驼桥/triple_axis_fusion.png
+
+# finished: 2026-09-22T07:38:42
+# return_code: 0
+# elapsed_seconds: 57239.6

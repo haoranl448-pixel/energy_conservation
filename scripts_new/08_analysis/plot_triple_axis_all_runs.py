@@ -86,6 +86,9 @@ OPTIONAL_LABEL_COLUMNS = [
     "日期+服务号",
     "运行等级",
     "曲线质量标签",
+    "来源run_id",
+    "绝对起始时间",
+    "绝对结束时间",
 ]
 
 READ_COLUMNS = REQUIRED_COLUMNS + OPTIONAL_LABEL_COLUMNS
@@ -167,6 +170,11 @@ def parse_args() -> argparse.Namespace:
         help="Optional debug limit for each section. Default draws all trips.",
     )
     parser.add_argument(
+        "--segment-ids",
+        nargs="+",
+        help="Only draw the specified segment IDs, for example: --segment-ids 20 21.",
+    )
+    parser.add_argument(
         "--format",
         choices=["jpg", "png"],
         default="jpg",
@@ -177,6 +185,17 @@ def parse_args() -> argparse.Namespace:
         type=int,
         default=300,
         help="Figure DPI.",
+    )
+    parser.add_argument(
+        "--summary-only",
+        action="store_true",
+        help="Run inference and write accuracy tables without creating one figure per segment.",
+    )
+    parser.add_argument(
+        "--excel-engine",
+        choices=["auto", "calamine", "openpyxl"],
+        default="auto",
+        help="Excel reader. auto prefers calamine when installed.",
     )
     parser.add_argument(
         "--clean-output",
@@ -278,12 +297,20 @@ def load_model(section: str, model_root: Path, device: torch.device):
     return model, scaler_x, scaler_y
 
 
-def read_section_data(section: str, data_dir: Path) -> pd.DataFrame | None:
+def read_section_data(section: str, data_dir: Path, excel_engine: str = "auto") -> pd.DataFrame | None:
     files = sorted(glob.glob(str(data_dir / f"results_{section}*.xlsx")))
     if not files:
         return None
     wanted = set(READ_COLUMNS)
-    frames = [pd.read_excel(path, usecols=lambda col: col in wanted) for path in files]
+    engine = excel_engine
+    if engine == "auto":
+        try:
+            import python_calamine  # noqa: F401
+
+            engine = "calamine"
+        except ImportError:
+            engine = "openpyxl"
+    frames = [pd.read_excel(path, usecols=lambda col: col in wanted, engine=engine) for path in files]
     return pd.concat(frames, ignore_index=True)
 
 
@@ -354,7 +381,7 @@ def predict_fusion_energy(
     mass = arrays["mass"]
     mass_value = float(arrays["mass_value"])
 
-    e_phy_step = sim_model.run_batch_simulation(t, v, mass_value)
+    e_phy_step = sim_model.run_batch_simulation_fast(t, v, mass_value)
     e_phy_step = np.asarray(e_phy_step, dtype=float)
     L = min(len(t), len(e_phy_step), len(v), len(a), len(gradient), len(curvature), len(mass))
     e_phy_step = e_phy_step[:L]
@@ -394,13 +421,27 @@ def anchor_origin(x: np.ndarray, y: np.ndarray) -> tuple[np.ndarray, np.ndarray]
     return np.r_[0.0, x], np.r_[0.0, y]
 
 
+def r_squared(actual: np.ndarray, predicted: np.ndarray) -> float | None:
+    actual = np.asarray(actual, dtype=float)
+    predicted = np.asarray(predicted, dtype=float)
+    valid = np.isfinite(actual) & np.isfinite(predicted)
+    actual = actual[valid]
+    predicted = predicted[valid]
+    if len(actual) < 2:
+        return None
+    denominator = float(np.sum((actual - np.mean(actual)) ** 2))
+    if denominator <= 1e-12:
+        return None
+    return 1.0 - float(np.sum((actual - predicted) ** 2)) / denominator
+
+
 def plot_trip(
     section: str,
     segment_id: object,
     trip: pd.DataFrame,
     arrays: dict[str, np.ndarray | float],
     e_fusion_step: np.ndarray,
-    out_path: Path,
+    out_path: Path | None,
     dpi: int,
 ) -> dict[str, object]:
     t = arrays["time"]
@@ -415,6 +456,10 @@ def plot_trip(
 
     e_real_cum = np.cumsum(np.maximum(np.asarray(e_real_step[:L], dtype=float), 0.0))
     e_fusion_cum = np.cumsum(np.maximum(np.asarray(e_fusion_step[:L], dtype=float), 0.0))
+    cumulative_r2 = r_squared(e_real_cum, e_fusion_cum)
+    step_error = np.asarray(e_fusion_step[:L], dtype=float) - np.asarray(e_real_step[:L], dtype=float)
+    step_mae_wh = float(np.mean(np.abs(step_error))) if len(step_error) else 0.0
+    step_rmse_wh = float(np.sqrt(np.mean(step_error**2))) if len(step_error) else 0.0
     real_total = float(e_real_cum[-1]) if len(e_real_cum) else 0.0
     fusion_total = float(e_fusion_cum[-1]) if len(e_fusion_cum) else 0.0
     fusion_error_pct = None
@@ -422,70 +467,82 @@ def plot_trip(
         fusion_error_pct = (fusion_total - real_total) / real_total * 100.0
     error_text = "N/A" if fusion_error_pct is None else f"{fusion_error_pct:+.2f}%"
 
-    t_v, v_plot = anchor_origin(t, v_kmh)
-    t_s, s_plot = anchor_origin(t, s)
-    t_er, e_real_plot = anchor_origin(t, e_real_cum)
-    t_ef, e_fusion_plot = anchor_origin(t, e_fusion_cum)
-
-    fig, ax1 = plt.subplots(figsize=(13, 7))
-    plt.subplots_adjust(right=0.84)
-
-    color_v = "tab:blue"
-    ax1.set_xlabel("时间 Time (s)", fontsize=11)
-    ax1.set_ylabel("速度 Velocity (km/h)", color=color_v, fontsize=11)
-    lns1 = ax1.plot(t_v, v_plot, color=color_v, linewidth=1.6, label="速度 (v)")
-    ax1.tick_params(axis="y", labelcolor=color_v)
-    ax1.grid(True, alpha=0.22)
-    ax1.set_xlim(left=0)
-    ax1.set_ylim(bottom=min(0, float(np.nanmin(v_plot)) if len(v_plot) else 0))
-
-    ax2 = ax1.twinx()
-    color_e = "tab:red"
-    ax2.set_ylabel("累计能耗 Energy (Wh)", color=color_e, fontsize=11)
-    lns2_1 = ax2.plot(t_er, e_real_plot, color="black", linewidth=2.0, label="真实能耗 (E_real)")
-    lns2_2 = ax2.plot(t_ef, e_fusion_plot, color=color_e, linestyle="--", linewidth=2.0, label="修正能耗 (E_fusion)")
-    ax2.tick_params(axis="y", labelcolor=color_e)
-    ax2.set_ylim(bottom=0)
-
-    ax3 = ax1.twinx()
-    ax3.spines["right"].set_position(("outward", 62))
-    color_s = "tab:green"
-    ax3.set_ylabel("累计位移 Distance (m)", color=color_s, fontsize=11)
-    lns3 = ax3.plot(t_s, s_plot, color=color_s, linewidth=1.6, label="累计位移 (s)")
-    ax3.tick_params(axis="y", labelcolor=color_s)
-    ax3.set_ylim(bottom=0)
-
     service = trip["服务号"].iloc[0] if "服务号" in trip.columns and len(trip) else ""
     date_service = trip["日期+服务号"].iloc[0] if "日期+服务号" in trip.columns and len(trip) else ""
     run_class = trip["运行等级"].iloc[0] if "运行等级" in trip.columns and len(trip) else ""
     quality = trip["曲线质量标签"].iloc[0] if "曲线质量标签" in trip.columns and len(trip) else ""
+    r2_text = "N/A" if cumulative_r2 is None else f"{cumulative_r2:.4f}"
+    if out_path is not None:
+        t_v, v_plot = anchor_origin(t, v_kmh)
+        t_s, s_plot = anchor_origin(t, s)
+        t_er, e_real_plot = anchor_origin(t, e_real_cum)
+        t_ef, e_fusion_plot = anchor_origin(t, e_fusion_cum)
 
-    lns = lns1 + lns2_1 + lns2_2 + lns3
-    labs = [line.get_label() for line in lns]
-    ax1.legend(lns, labs, loc="upper left", fontsize=9)
+        fig, ax1 = plt.subplots(figsize=(13, 7))
+        plt.subplots_adjust(right=0.84)
 
-    subtitle_items = [f"segment {segment_id}"]
-    if date_service != "":
-        subtitle_items.append(f"日期+服务号 {date_service}")
-    elif service != "":
-        subtitle_items.append(f"服务号 {service}")
-    if run_class != "":
-        subtitle_items.append(f"class{run_class}")
-    if quality != "":
-        subtitle_items.append(f"质量标签 {quality}")
-    subtitle_items.append(f"能耗误差 {error_text}")
+        color_v = "tab:blue"
+        ax1.set_xlabel("时间 Time (s)", fontsize=11)
+        ax1.set_ylabel("速度 Velocity (km/h)", color=color_v, fontsize=11)
+        lns1 = ax1.plot(t_v, v_plot, color=color_v, linewidth=1.6, label="速度 (v)")
+        ax1.tick_params(axis="y", labelcolor=color_v)
+        ax1.grid(True, alpha=0.22)
+        ax1.set_xlim(left=0)
+        ax1.set_ylim(bottom=min(0, float(np.nanmin(v_plot)) if len(v_plot) else 0))
 
-    plt.title(
-        f"{section} 区间运行综合对标图\n"
-        f"[速度 v | 位移 s | 融合能耗 E]  {' | '.join(map(str, subtitle_items))}",
-        fontsize=13,
-    )
-    plt.tight_layout()
-    save_kwargs = {"dpi": dpi, "bbox_inches": "tight", "facecolor": "white"}
-    if out_path.suffix.lower() in {".jpg", ".jpeg"}:
-        save_kwargs["pil_kwargs"] = {"quality": 95, "subsampling": 0}
-    fig.savefig(out_path, **save_kwargs)
-    plt.close(fig)
+        ax2 = ax1.twinx()
+        color_e = "tab:red"
+        ax2.set_ylabel("累计牵引电能 Energy (Wh)", color=color_e, fontsize=11)
+        lns2_1 = ax2.plot(t_er, e_real_plot, color="black", linewidth=2.0, label="实测牵引电能 (E_measured)")
+        lns2_2 = ax2.plot(
+            t_ef,
+            e_fusion_plot,
+            color=color_e,
+            linestyle="--",
+            linewidth=2.0,
+            label="神经网络模型预测能耗 (E_pred)",
+        )
+        ax2.tick_params(axis="y", labelcolor=color_e)
+        ax2.set_ylim(bottom=0)
+
+        ax3 = ax1.twinx()
+        ax3.spines["right"].set_position(("outward", 62))
+        color_s = "tab:green"
+        ax3.set_ylabel("累计位移 Distance (m)", color=color_s, fontsize=11)
+        lns3 = ax3.plot(t_s, s_plot, color=color_s, linewidth=1.6, label="累计位移 (s)")
+        ax3.tick_params(axis="y", labelcolor=color_s)
+        ax3.set_ylim(bottom=0)
+
+        lns = lns1 + lns2_1 + lns2_2 + lns3
+        labs = [line.get_label() for line in lns]
+        ax1.legend(lns, labs, loc="upper left", fontsize=9)
+
+        subtitle_items = []
+        if date_service != "":
+            subtitle_items.append(f"日期+服务号 {date_service}")
+        elif service != "":
+            subtitle_items.append(f"服务号 {service}")
+        if run_class != "":
+            subtitle_items.append(f"class{run_class}")
+        if quality != "":
+            subtitle_items.append(f"质量标签 {quality}")
+        subtitle_items.append(f"能耗误差 {error_text}")
+
+        plt.title(
+            f"神经网络模型区间牵引电能对标图 - {section} (Segment {segment_id})\n"
+            f"累计能耗 $R^2$ = {r2_text}  |  {' | '.join(map(str, subtitle_items))}",
+            fontsize=13,
+        )
+        plt.tight_layout()
+        save_kwargs = {"dpi": dpi, "bbox_inches": "tight", "facecolor": "white"}
+        if out_path.suffix.lower() in {".jpg", ".jpeg"}:
+            save_kwargs["pil_kwargs"] = {"quality": 95, "subsampling": 0}
+        fig.savefig(out_path, **save_kwargs)
+        plt.close(fig)
+
+    run_id = trip["来源run_id"].iloc[0] if "来源run_id" in trip.columns and len(trip) else ""
+    absolute_start = trip["绝对起始时间"].iloc[0] if "绝对起始时间" in trip.columns and len(trip) else ""
+    absolute_end = trip["绝对结束时间"].iloc[0] if "绝对结束时间" in trip.columns and len(trip) else ""
 
     return {
         "section": section,
@@ -496,11 +553,19 @@ def plot_trip(
         "real_energy_wh": round(real_total, 3),
         "fusion_energy_wh": round(fusion_total, 3),
         "fusion_error_pct": "" if fusion_error_pct is None else round(float(fusion_error_pct), 3),
+        "fusion_abs_error_wh": round(abs(fusion_total - real_total), 3),
+        "fusion_abs_error_pct": "" if fusion_error_pct is None else round(abs(float(fusion_error_pct)), 3),
+        "cumulative_energy_r2": "" if cumulative_r2 is None else round(float(cumulative_r2), 6),
+        "step_energy_mae_wh": round(step_mae_wh, 6),
+        "step_energy_rmse_wh": round(step_rmse_wh, 6),
         "run_class": run_class,
         "quality_label": quality,
         "service_no": service,
         "date_service": date_service,
-        "figure": str(out_path),
+        "run_id": run_id,
+        "absolute_start": absolute_start,
+        "absolute_end": absolute_end,
+        "figure": "" if out_path is None else str(out_path),
     }
 
 
@@ -542,7 +607,7 @@ def main() -> int:
 
     for section_idx, section in enumerate(sections, start=1):
         print(f"\n[{section_idx}/{len(sections)}] 处理区间: {section}")
-        df = read_section_data(section, data_dir)
+        df = read_section_data(section, data_dir, args.excel_engine)
         if df is None or df.empty:
             msg = "未找到结果文件"
             print(f"  跳过: {msg}")
@@ -560,9 +625,24 @@ def main() -> int:
             continue
 
         section_out = output_dir / safe_name(section, "section")
-        section_out.mkdir(parents=True, exist_ok=True)
+        if not args.summary_only:
+            section_out.mkdir(parents=True, exist_ok=True)
 
         segment_ids = list(pd.Series(df["segment"]).dropna().unique())
+        if args.segment_ids:
+            wanted_segments = {str(value).strip() for value in args.segment_ids}
+
+            def segment_selected(value: object) -> bool:
+                text = str(value).strip()
+                if text in wanted_segments:
+                    return True
+                try:
+                    numeric_text = str(int(float(value))) if float(value).is_integer() else str(float(value))
+                except (TypeError, ValueError):
+                    return False
+                return numeric_text in wanted_segments
+
+            segment_ids = [value for value in segment_ids if segment_selected(value)]
         if args.max_runs_per_section is not None:
             segment_ids = segment_ids[: args.max_runs_per_section]
 
@@ -580,7 +660,7 @@ def main() -> int:
                 elif service != "":
                     label_parts.append(safe_name(service))
                 fig_name = "_".join(label_parts) + f".{args.format}"
-                out_path = section_out / fig_name
+                out_path = None if args.summary_only else section_out / fig_name
                 rows.append(plot_trip(section, segment_id, trip, arrays, e_fusion_step, out_path, args.dpi))
             except Exception as exc:
                 skipped.append({"section": section, "segment": segment_id, "reason": str(exc)})
@@ -600,10 +680,18 @@ def main() -> int:
             "real_energy_wh",
             "fusion_energy_wh",
             "fusion_error_pct",
+            "fusion_abs_error_wh",
+            "fusion_abs_error_pct",
+            "cumulative_energy_r2",
+            "step_energy_mae_wh",
+            "step_energy_rmse_wh",
             "run_class",
             "quality_label",
             "service_no",
             "date_service",
+            "run_id",
+            "absolute_start",
+            "absolute_end",
             "figure",
         ]
         writer = csv.DictWriter(f, fieldnames=fieldnames)
@@ -619,7 +707,66 @@ def main() -> int:
             writer.writerows(skipped)
         print(f"\n跳过记录: {skipped_path}")
 
-    print(f"\n完成绘图: {len(rows)} 张")
+    if rows:
+        details = pd.DataFrame(rows)
+        numeric_cols = [
+            "real_energy_wh",
+            "fusion_energy_wh",
+            "fusion_error_pct",
+            "fusion_abs_error_wh",
+            "fusion_abs_error_pct",
+            "cumulative_energy_r2",
+            "step_energy_mae_wh",
+            "step_energy_rmse_wh",
+        ]
+        for col in numeric_cols:
+            details[col] = pd.to_numeric(details[col], errors="coerce")
+
+        def aggregate(group: pd.DataFrame) -> pd.Series:
+            actual = float(group["real_energy_wh"].sum())
+            predicted = float(group["fusion_energy_wh"].sum())
+            weighted_error_pct = (predicted - actual) / actual * 100.0 if abs(actual) > 1e-9 else np.nan
+            abs_pct = group["fusion_abs_error_pct"].dropna()
+            return pd.Series(
+                {
+                    "trip_count": len(group),
+                    "measured_energy_total_kwh": actual / 1000.0,
+                    "predicted_energy_total_kwh": predicted / 1000.0,
+                    "weighted_total_error_pct": weighted_error_pct,
+                    "mean_signed_error_pct": group["fusion_error_pct"].mean(),
+                    "mean_absolute_error_pct": abs_pct.mean(),
+                    "median_absolute_error_pct": abs_pct.median(),
+                    "p90_absolute_error_pct": abs_pct.quantile(0.9),
+                    "mean_absolute_error_kwh": group["fusion_abs_error_wh"].mean() / 1000.0,
+                    "mean_cumulative_r2": group["cumulative_energy_r2"].mean(),
+                    "median_cumulative_r2": group["cumulative_energy_r2"].median(),
+                    "within_5pct_ratio": (abs_pct <= 5.0).mean(),
+                    "within_10pct_ratio": (abs_pct <= 10.0).mean(),
+                }
+            )
+
+        section_summary = details.groupby("section", sort=False, dropna=False).apply(aggregate).reset_index()
+        section_summary_path = output_dir / "accuracy_summary_by_section.csv"
+        section_summary.to_csv(section_summary_path, index=False, encoding="utf-8-sig", float_format="%.6f")
+
+        overall_summary = aggregate(details).to_frame().T
+        overall_summary.insert(0, "scope", "all_sections")
+        overall_summary_path = output_dir / "accuracy_summary_overall.csv"
+        overall_summary.to_csv(overall_summary_path, index=False, encoding="utf-8-sig", float_format="%.6f")
+
+        quality_summary_path = output_dir / "accuracy_summary_by_quality.csv"
+        details.assign(quality_label=details["quality_label"].fillna("missing")).groupby(
+            "quality_label", sort=True, dropna=False
+        ).apply(aggregate).reset_index().to_csv(
+            quality_summary_path, index=False, encoding="utf-8-sig", float_format="%.6f"
+        )
+
+        print(f"分区间汇总: {section_summary_path}")
+        print(f"总体汇总: {overall_summary_path}")
+        print(f"质量标签汇总: {quality_summary_path}")
+
+    action = "完成验证" if args.summary_only else "完成绘图"
+    print(f"\n{action}: {len(rows)} 趟")
     print(f"汇总文件: {summary_path}")
     return 0
 

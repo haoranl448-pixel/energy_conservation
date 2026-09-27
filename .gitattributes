@@ -13,6 +13,8 @@ output/**/*.jpeg filter=lfs diff=lfs merge=lfs -text
 output/**/*.gif filter=lfs diff=lfs merge=lfs -text
 output/**/*.zip filter=lfs diff=lfs merge=lfs -text
 output/**/*.7z filter=lfs diff=lfs merge=lfs -text
+docs/**/*.pptx filter=lfs diff=lfs merge=lfs -text
+docs/**/*.docx filter=lfs diff=lfs merge=lfs -text
 models/**/*.slx filter=lfs diff=lfs merge=lfs -text
 models/**/*.mat filter=lfs diff=lfs merge=lfs -text
 models/**/*.pth filter=lfs diff=lfs merge=lfs -text

@@ -12,7 +12,7 @@ import sys
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(current_dir)
 
-DATA_DIR = os.path.join(project_root, "data", "data_processed")
+DATA_DIR = os.path.join(project_root, "data", "data_processed_step2_v3_all_curve_quality_traceability")
 OUTPUT_DIR = os.path.join(project_root, "output", "analysis", "weight_analysis")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
